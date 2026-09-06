@@ -1,18 +1,24 @@
 import { Platform, Collectible } from '../types';
 import { Camera2D } from '../engine/camera';
+import { CHAPTER_THEMES, ChapterTheme } from '../data/chapterThemes';
 
 /**
  * Ramayana Environment & Parallax Renderer
- * 5 Parallax Layers:
- * Layer 1: Sky & Celestial Sun
- * Layer 2: Distant Himalayan / Dandakaranya Mountains
- * Layer 3: Ancient Forest Canopies
- * Layer 4: Foreground Ancient Indian Architecture & Torches & Cave
- * Layer 5: Gameplay Ground, River, Stone Platforms, Bridges, Flowers, and Sacred Orbs
+ * 5 Parallax Layers with Dynamic Chapter Themes:
+ * Layer 1: Sky & Celestial Body (Sun, Moon, Lightning, Nebula)
+ * Layer 2: Distant Mountains & Silhouette (Spires, Forest, Crags, Citadel)
+ * Layer 3: Ancient Mid-ground Forest / Ruins Canopies
+ * Layer 4: Architectural Landmarks (Palaces, Hermit huts, Banyans, Fortresses)
+ * Layer 5: Gameplay Ground, River/Ocean, Themed Platforms, Bridges, Foliage
  */
 
 export class EnvironmentRenderer {
   private time: number = 0;
+  public theme: ChapterTheme = CHAPTER_THEMES[1];
+
+  public setChapter(chapterId: number) {
+    this.theme = CHAPTER_THEMES[chapterId] || CHAPTER_THEMES[1];
+  }
 
   public update(dt: number) {
     this.time += dt;
@@ -26,34 +32,24 @@ export class EnvironmentRenderer {
   ) {
     const width = camera.viewportWidth;
     const height = camera.viewportHeight;
+    const t = this.theme;
 
     // ==========================================
-    // LAYER 1: SKY & CELESTIAL SUN (0.0x - 0.05x parallax)
+    // LAYER 1: DYNAMIC SKY & CELESTIAL PHENOMENA (0.0x - 0.05x parallax)
     // ==========================================
     const skyGrad = ctx.createLinearGradient(0, 0, 0, height);
-    // Warm mythological dusk/dawn celestial atmosphere
-    skyGrad.addColorStop(0, '#1e1b4b'); // Deep twilight indigo
-    skyGrad.addColorStop(0.35, '#431407'); // Mythological bronze
-    skyGrad.addColorStop(0.7, '#7c2d12'); // Warm amber terracotta
-    skyGrad.addColorStop(1, '#ca8a04'); // Golden dawn horizon
+    skyGrad.addColorStop(0, t.skyColors[0]);
+    skyGrad.addColorStop(0.35, t.skyColors[1]);
+    skyGrad.addColorStop(0.7, t.skyColors[2]);
+    skyGrad.addColorStop(1, t.skyColors[3]);
     ctx.fillStyle = skyGrad;
     ctx.fillRect(0, 0, width, height);
 
-    // Radiant Surya / Sacred Sun
-    const sunX = width * 0.72 - camera.x * 0.02;
-    const sunY = height * 0.28 - camera.y * 0.02;
-    const sunGrad = ctx.createRadialGradient(sunX, sunY, 10, sunX, sunY, 180);
-    sunGrad.addColorStop(0, 'rgba(254, 240, 138, 0.95)');
-    sunGrad.addColorStop(0.2, 'rgba(251, 191, 36, 0.6)');
-    sunGrad.addColorStop(0.6, 'rgba(245, 158, 11, 0.18)');
-    sunGrad.addColorStop(1, 'rgba(217, 119, 6, 0)');
-    ctx.fillStyle = sunGrad;
-    ctx.beginPath();
-    ctx.arc(sunX, sunY, 180, 0, Math.PI * 2);
-    ctx.fill();
+    // Render Celestial Body based on chapter theme
+    this.renderCelestialBody(ctx, camera, width, height);
 
     // Drifting Celestial Clouds
-    ctx.fillStyle = 'rgba(254, 215, 170, 0.18)';
+    ctx.fillStyle = t.cloudsColor;
     const cloudOffset = (this.time * 12) % (width + 600);
     this.drawCloud(ctx, (width * 0.2 + cloudOffset) % (width + 400) - 200, height * 0.18, 140, 45);
     this.drawCloud(ctx, (width * 0.65 + cloudOffset * 0.7) % (width + 400) - 200, height * 0.26, 180, 55);
@@ -67,7 +63,7 @@ export class EnvironmentRenderer {
     ctx.restore();
 
     // ==========================================
-    // LAYER 3: ANCIENT DENSE FOREST CANOPIES (0.35x parallax)
+    // LAYER 3: MID-GROUND CANOPIES & CLIFFS (0.35x parallax)
     // ==========================================
     ctx.save();
     ctx.translate(-camera.x * 0.35, -camera.y * 0.18);
@@ -88,13 +84,13 @@ export class EnvironmentRenderer {
     ctx.save();
     ctx.translate(-camera.x, -camera.y);
 
-    // Render Cave Entrance in background of world
+    // Render Cave or Citadel Entrance in background of world
     this.renderCaveEntrance(ctx, 3500, 500);
 
     // Render Ancient Mandir / Temple Structure
     this.renderTempleStructure(ctx, 1600, 320);
 
-    // Render Sacred River with water reflections
+    // Render Sacred River or Southern Ocean
     this.renderRiver(ctx, 2250, 780, 700, 160);
 
     // Render Platforms
@@ -114,6 +110,93 @@ export class EnvironmentRenderer {
     ctx.restore();
   }
 
+  private renderCelestialBody(
+    ctx: CanvasRenderingContext2D,
+    camera: Camera2D,
+    width: number,
+    height: number
+  ) {
+    const t = this.theme;
+    const sunX = width * 0.72 - camera.x * 0.02;
+    const sunY = height * 0.28 - camera.y * 0.02;
+
+    switch (t.celestialType) {
+      case 'blood_moon': {
+        // Eerie glowing red moon
+        const grad = ctx.createRadialGradient(sunX, sunY, 10, sunX, sunY, 140);
+        grad.addColorStop(0, 'rgba(239, 68, 68, 0.95)');
+        grad.addColorStop(0.3, 'rgba(185, 28, 28, 0.6)');
+        grad.addColorStop(0.7, 'rgba(127, 29, 29, 0.2)');
+        grad.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(sunX, sunY, 140, 0, Math.PI * 2);
+        ctx.fill();
+        break;
+      }
+      case 'storm_lightning': {
+        // Storm lightning flash
+        const flash = Math.sin(this.time * 4) > 0.88;
+        if (flash) {
+          ctx.fillStyle = 'rgba(254, 215, 170, 0.35)';
+          ctx.fillRect(0, 0, width, height);
+          ctx.strokeStyle = '#fed7aa';
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.moveTo(sunX, 0);
+          ctx.lineTo(sunX - 25, sunY * 0.5);
+          ctx.lineTo(sunX + 15, sunY * 0.8);
+          ctx.lineTo(sunX - 10, sunY * 1.3);
+          ctx.stroke();
+        }
+        break;
+      }
+      case 'lanka_moon': {
+        // Golden Full Moon over Lanka
+        const grad = ctx.createRadialGradient(sunX, sunY, 10, sunX, sunY, 150);
+        grad.addColorStop(0, 'rgba(250, 204, 21, 0.95)');
+        grad.addColorStop(0.3, 'rgba(234, 179, 8, 0.5)');
+        grad.addColorStop(0.8, 'rgba(202, 138, 4, 0.15)');
+        grad.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(sunX, sunY, 150, 0, Math.PI * 2);
+        ctx.fill();
+        break;
+      }
+      case 'celestial_aurora': {
+        // Cosmic Aurora for Final Battle
+        const auraPulse = Math.sin(this.time * 2) * 20;
+        const grad = ctx.createRadialGradient(sunX, sunY, 20, sunX, sunY, 220 + auraPulse);
+        grad.addColorStop(0, 'rgba(253, 224, 71, 0.95)');
+        grad.addColorStop(0.25, 'rgba(244, 63, 94, 0.5)');
+        grad.addColorStop(0.6, 'rgba(168, 85, 247, 0.3)');
+        grad.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(sunX, sunY, 220 + auraPulse, 0, Math.PI * 2);
+        ctx.fill();
+        break;
+      }
+      case 'golden_sun':
+      case 'desert_sun':
+      case 'ocean_haze':
+      default: {
+        // Radiant Surya
+        const sunGrad = ctx.createRadialGradient(sunX, sunY, 10, sunX, sunY, 180);
+        sunGrad.addColorStop(0, 'rgba(254, 240, 138, 0.95)');
+        sunGrad.addColorStop(0.2, 'rgba(251, 191, 36, 0.6)');
+        sunGrad.addColorStop(0.6, 'rgba(245, 158, 11, 0.18)');
+        sunGrad.addColorStop(1, 'rgba(217, 119, 6, 0)');
+        ctx.fillStyle = sunGrad;
+        ctx.beginPath();
+        ctx.arc(sunX, sunY, 180, 0, Math.PI * 2);
+        ctx.fill();
+        break;
+      }
+    }
+  }
+
   private drawCloud(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number) {
     ctx.beginPath();
     ctx.ellipse(x, y, w * 0.5, h * 0.5, 0, 0, Math.PI * 2);
@@ -123,7 +206,8 @@ export class EnvironmentRenderer {
   }
 
   private renderMountains(ctx: CanvasRenderingContext2D, worldW: number, viewH: number) {
-    ctx.fillStyle = '#2e1065'; // Majestic twilight purple mountain ridges
+    const t = this.theme;
+    ctx.fillStyle = t.mountainFarColor;
     ctx.beginPath();
     ctx.moveTo(-100, viewH);
 
@@ -138,14 +222,30 @@ export class EnvironmentRenderer {
     ctx.closePath();
     ctx.fill();
 
-    // Snow caps & mist glow
-    ctx.strokeStyle = 'rgba(245, 158, 11, 0.25)';
-    ctx.lineWidth = 4;
+    // Near mountain layer
+    ctx.fillStyle = t.mountainNearColor;
+    ctx.beginPath();
+    ctx.moveTo(-100, viewH);
+    const step2 = 220;
+    const baseH2 = viewH * 0.58;
+    for (let x = -100; x <= worldW + 200; x += step2) {
+      const peakH2 = baseH2 - ((x * 19) % 140) - 50;
+      ctx.lineTo(x + step2 * 0.5, peakH2);
+      ctx.lineTo(x + step2, baseH2);
+    }
+    ctx.lineTo(worldW + 200, viewH);
+    ctx.closePath();
+    ctx.fill();
+
+    // Horizon accent line
+    ctx.strokeStyle = t.structureAccentColor;
+    ctx.lineWidth = 2.5;
     ctx.stroke();
   }
 
   private renderMidForest(ctx: CanvasRenderingContext2D, worldW: number, viewH: number) {
-    ctx.fillStyle = '#14532d'; // Ancient Sal forest greens
+    const t = this.theme;
+    ctx.fillStyle = t.canopyColors[0];
     ctx.beginPath();
     ctx.moveTo(-100, viewH);
 
@@ -164,14 +264,12 @@ export class EnvironmentRenderer {
   }
 
   private renderMidStructures(ctx: CanvasRenderingContext2D, worldW: number, viewH: number) {
-    // Distant carved stone pillars & ruin silhouettes
-    ctx.fillStyle = '#1e293b';
+    const t = this.theme;
+    ctx.fillStyle = t.canopyColors[1];
     for (let x = 300; x <= worldW; x += 650) {
-      // Ancient stone pillar
+      // Ancient stone pillar / tower silhouette
       ctx.fillRect(x, viewH * 0.62, 28, 180);
-      // Pillar capital
       ctx.fillRect(x - 6, viewH * 0.62 - 8, 40, 10);
-      // Archway
       ctx.beginPath();
       ctx.arc(x + 14, viewH * 0.62 + 20, 16, Math.PI, 0);
       ctx.fill();
@@ -179,47 +277,46 @@ export class EnvironmentRenderer {
   }
 
   private renderCaveEntrance(ctx: CanvasRenderingContext2D, x: number, y: number) {
-    // Ancient mythological mountain cave (Sugriva / Kishkindha cave aesthetic)
-    ctx.fillStyle = '#1c1917';
+    const t = this.theme;
+    ctx.fillStyle = t.groundColor;
     ctx.beginPath();
     ctx.ellipse(x, y + 80, 110, 140, 0, 0, Math.PI * 2);
     ctx.fill();
 
     // Stone rim around cave
-    ctx.strokeStyle = '#44403c';
-    ctx.lineWidth = 14;
+    ctx.strokeStyle = t.platformEdgeColor;
+    ctx.lineWidth = 10;
     ctx.stroke();
 
-    // Dark mysterious interior
-    ctx.fillStyle = '#0c0a09';
+    // Dark interior
+    ctx.fillStyle = '#050505';
     ctx.beginPath();
     ctx.ellipse(x, y + 80, 85, 115, 0, 0, Math.PI * 2);
     ctx.fill();
   }
 
   private renderTempleStructure(ctx: CanvasRenderingContext2D, x: number, y: number) {
-    // Ancient Indian Nagara/Dravida Temple Shikhara
+    const t = this.theme;
     ctx.save();
     ctx.translate(x, y);
 
     // Temple Base plinth
-    ctx.fillStyle = '#78350f';
+    ctx.fillStyle = t.platformColor;
     ctx.fillRect(-90, 260, 180, 30);
-    ctx.strokeStyle = '#f59e0b';
+    ctx.strokeStyle = t.structureAccentColor;
     ctx.lineWidth = 2;
     ctx.strokeRect(-90, 260, 180, 30);
 
     // Mandapa pillars
-    ctx.fillStyle = '#92400e';
+    ctx.fillStyle = t.groundColor;
     [-70, -30, 30, 70].forEach((px) => {
       ctx.fillRect(px - 6, 120, 12, 140);
-      // Carved capital
-      ctx.fillStyle = '#b45309';
+      ctx.fillStyle = t.structureAccentColor;
       ctx.fillRect(px - 10, 110, 20, 10);
     });
 
     // Central Shikhara Tower
-    ctx.fillStyle = '#451a03';
+    ctx.fillStyle = t.platformColor;
     ctx.beginPath();
     ctx.moveTo(-60, 110);
     ctx.lineTo(60, 110);
@@ -228,16 +325,17 @@ export class EnvironmentRenderer {
     ctx.lineTo(-35, 10);
     ctx.closePath();
     ctx.fill();
-    ctx.strokeStyle = '#d97706';
+    ctx.strokeStyle = t.structureAccentColor;
     ctx.lineWidth = 3;
     ctx.stroke();
 
-    // Golden Kalash pinnacle on temple spire
-    ctx.fillStyle = '#f59e0b';
+    // Golden Kalash pinnacle
+    ctx.fillStyle = t.structureAccentColor;
     ctx.beginPath();
     ctx.arc(0, -48, 8, 0, Math.PI * 2);
     ctx.fill();
-    // Sacred Trident/Dhwaja flag
+
+    // Sacred Dhwaja flag
     ctx.strokeStyle = '#ea580c';
     ctx.lineWidth = 2;
     ctx.beginPath();
@@ -257,16 +355,15 @@ export class EnvironmentRenderer {
   }
 
   private renderRiver(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number) {
-    // Sacred Godavari / Sarayu River
+    const t = this.theme;
     const riverGrad = ctx.createLinearGradient(x, y, x, y + h);
-    riverGrad.addColorStop(0, '#0284c7');
-    riverGrad.addColorStop(0.5, '#0369a1');
-    riverGrad.addColorStop(1, '#075985');
+    riverGrad.addColorStop(0, t.waterColor);
+    riverGrad.addColorStop(0.7, '#075985');
     ctx.fillStyle = riverGrad;
     ctx.fillRect(x, y, w, h);
 
     // Water ripple reflections
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
+    ctx.strokeStyle = t.waterReflectColor;
     ctx.lineWidth = 1.8;
     for (let i = 0; i < 6; i++) {
       const rwX = x + ((this.time * 40 + i * 110) % w);
@@ -277,44 +374,37 @@ export class EnvironmentRenderer {
       ctx.stroke();
     }
 
-    // Sacred floating Lotus Flowers in the river
+    // Sacred floating Lotus Flowers
     for (let l = 0; l < 4; l++) {
       const lotX = x + 80 + l * 150 + Math.sin(this.time + l) * 10;
       const lotY = y + 40 + (l % 2) * 35;
-      // Lotus pad
       ctx.fillStyle = '#15803d';
       ctx.beginPath();
       ctx.ellipse(lotX, lotY, 14, 6, 0, 0, Math.PI * 2);
       ctx.fill();
-      // Lotus petals
       ctx.fillStyle = '#f43f5e';
       ctx.beginPath();
       ctx.ellipse(lotX, lotY - 4, 7, 10, 0, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = '#fbcfe8';
-      ctx.beginPath();
-      ctx.ellipse(lotX, lotY - 4, 4, 6, 0, 0, Math.PI * 2);
       ctx.fill();
     }
   }
 
   private renderPlatform(ctx: CanvasRenderingContext2D, plat: Platform) {
     const { x, y, width, height, type } = plat;
+    const t = this.theme;
 
     if (type === 'wood_bridge') {
-      // Ancient wooden rope bridge across river/chasm
-      ctx.fillStyle = '#78350f';
+      // Wood bridge
+      ctx.fillStyle = t.platformColor;
       const plankW = 16;
       const gap = 4;
       for (let px = x; px < x + width; px += plankW + gap) {
         ctx.fillRect(px, y, plankW, height);
-        // Wood grain line
-        ctx.strokeStyle = '#451a03';
+        ctx.strokeStyle = '#1c1917';
         ctx.lineWidth = 1;
         ctx.strokeRect(px, y, plankW, height);
       }
-      // Rope bindings
-      ctx.strokeStyle = '#d97706';
+      ctx.strokeStyle = t.structureAccentColor;
       ctx.lineWidth = 3;
       ctx.beginPath();
       ctx.moveTo(x, y + 2);
@@ -324,257 +414,110 @@ export class EnvironmentRenderer {
     }
 
     if (type === 'stone' || type === 'floating_ledge') {
-      // Ancient carved stone platform
-      ctx.fillStyle = '#334155'; // Slate stone
+      // Themed stone platform
+      ctx.fillStyle = t.platformColor;
       ctx.fillRect(x, y, width, height);
-
-      // Ornate stone rim
-      ctx.fillStyle = '#475569';
+      ctx.fillStyle = t.groundColor;
       ctx.fillRect(x, y, width, 6);
-
-      // Stone brick seams
-      ctx.strokeStyle = '#1e293b';
+      ctx.strokeStyle = t.platformEdgeColor;
       ctx.lineWidth = 1.5;
-      const brickW = 40;
-      for (let bx = x; bx < x + width; bx += brickW) {
-        ctx.beginPath();
-        ctx.moveTo(bx, y);
-        ctx.lineTo(bx, y + height);
-        ctx.stroke();
-      }
-
-      // Golden Sanskrit-inspired decorative border
-      ctx.strokeStyle = '#d97706';
-      ctx.lineWidth = 1;
       ctx.strokeRect(x, y, width, height);
       return;
     }
 
-    // Default: Ground tiles (Grass top + Dirt/stone sublayer)
-    // 1. Dirt sublayer
-    ctx.fillStyle = '#451a03'; // Rich soil
+    // Ground platform with themed grass/rock sublayer
+    ctx.fillStyle = t.groundColor;
     ctx.fillRect(x, y, width, height);
 
-    // 2. Stone pebbles embedded in dirt
-    ctx.fillStyle = '#78350f';
-    for (let px = x + 15; px < x + width - 15; px += 45) {
-      ctx.beginPath();
-      ctx.ellipse(px, y + 22, 6, 4, 0, 0, Math.PI * 2);
-      ctx.fill();
-    }
-
-    // 3. Lush grass rim on top
-    ctx.fillStyle = '#15803d'; // Forest grass
+    // Platform top grass / terrain rim
+    ctx.fillStyle = t.groundGrassColor;
     ctx.fillRect(x, y, width, 14);
 
-    // 4. Grass blades
-    ctx.fillStyle = '#22c55e';
-    for (let gx = x; gx < x + width; gx += 10) {
-      ctx.beginPath();
-      ctx.moveTo(gx, y);
-      ctx.lineTo(gx + 3, y - 6);
-      ctx.lineTo(gx + 6, y);
-      ctx.fill();
-    }
+    // Accent line
+    ctx.fillStyle = t.platformEdgeColor;
+    ctx.fillRect(x, y + 12, width, 2);
   }
 
   private renderVegetationAndRocks(ctx: CanvasRenderingContext2D) {
-    // Ancient Banyan & Flowering Ashoka Trees
+    const t = this.theme;
     const treePositions = [200, 650, 1200, 2050, 3100];
     treePositions.forEach((tx) => {
-      // Tree Trunk
-      ctx.fillStyle = '#713f12';
+      ctx.fillStyle = t.platformColor;
       ctx.fillRect(tx, 480, 36, 220);
-      // Bark texture
-      ctx.strokeStyle = '#451a03';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(tx + 12, 500);
-      ctx.lineTo(tx + 16, 680);
-      ctx.stroke();
-
-      // Lush Canopy
-      ctx.fillStyle = '#14532d';
+      ctx.fillStyle = t.canopyColors[0];
       ctx.beginPath();
       ctx.arc(tx + 18, 460, 65, 0, Math.PI * 2);
       ctx.fill();
-      ctx.fillStyle = '#166534';
+      ctx.fillStyle = t.canopyColors[1];
       ctx.beginPath();
       ctx.arc(tx - 15, 470, 48, 0, Math.PI * 2);
       ctx.arc(tx + 45, 470, 48, 0, Math.PI * 2);
       ctx.fill();
-
-      // Red Ashoka blossoms
-      ctx.fillStyle = '#f43f5e';
-      for (let b = 0; b < 6; b++) {
-        const bx = tx - 30 + (b * 18);
-        const by = 430 + ((b * 13) % 45);
-        ctx.beginPath();
-        ctx.arc(bx, by, 3.5, 0, Math.PI * 2);
-        ctx.fill();
-      }
     });
 
-    // Forest Bushes & Wild Flowers
     const bushPositions = [120, 420, 850, 1450, 1850, 2950, 3350];
     bushPositions.forEach((bx) => {
-      ctx.fillStyle = '#15803d';
+      ctx.fillStyle = t.groundGrassColor;
       ctx.beginPath();
       ctx.ellipse(bx, 690, 24, 14, 0, 0, Math.PI * 2);
       ctx.fill();
-      // Tiny yellow & white blossoms
-      ctx.fillStyle = '#fef08a';
-      ctx.beginPath();
-      ctx.arc(bx - 6, 684, 2.5, 0, Math.PI * 2);
-      ctx.arc(bx + 8, 686, 2.5, 0, Math.PI * 2);
-      ctx.fill();
-    });
-
-    // Mythological Forest Rocks
-    const rockPositions = [320, 950, 1750, 2750];
-    rockPositions.forEach((rx) => {
-      ctx.fillStyle = '#64748b';
-      ctx.beginPath();
-      ctx.ellipse(rx, 694, 22, 14, 0, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.strokeStyle = '#475569';
-      ctx.lineWidth = 1.5;
-      ctx.stroke();
     });
   }
 
   private renderTorches(ctx: CanvasRenderingContext2D) {
-    // Ancient stone brazier torches with animated fire
     const torchPositions = [
       { x: 450, y: 640 },
       { x: 1050, y: 460 },
-      { x: 1520, y: 440 },
-      { x: 1780, y: 440 },
-      { x: 2850, y: 480 },
-      { x: 3420, y: 640 },
+      { x: 1500, y: 510 },
+      { x: 2200, y: 630 },
+      { x: 3150, y: 500 },
+      { x: 3750, y: 520 },
     ];
 
     torchPositions.forEach((t) => {
-      // Stone post
-      ctx.fillStyle = '#334155';
-      ctx.fillRect(t.x - 4, t.y, 8, 55);
-      // Brazier cup
-      ctx.fillStyle = '#d97706';
-      ctx.beginPath();
-      ctx.moveTo(t.x - 12, t.y);
-      ctx.lineTo(t.x + 12, t.y);
-      ctx.lineTo(t.x + 6, t.y + 12);
-      ctx.lineTo(t.x - 6, t.y + 12);
-      ctx.closePath();
-      ctx.fill();
+      ctx.fillStyle = '#44403c';
+      ctx.fillRect(t.x - 4, t.y, 8, 32);
+      ctx.fillStyle = '#292524';
+      ctx.fillRect(t.x - 10, t.y - 6, 20, 8);
 
-      // Animated Sacred Flame (Yajna / Deepa fire)
       const flicker = Math.sin(this.time * 12 + t.x) * 3;
-      const flameH = 22 + Math.cos(this.time * 15 + t.y) * 4;
-
-      // Outer golden glow
-      const fGrad = ctx.createRadialGradient(t.x, t.y - 6, 2, t.x, t.y - 6, 28);
-      fGrad.addColorStop(0, 'rgba(254, 240, 138, 0.95)');
-      fGrad.addColorStop(0.35, 'rgba(245, 158, 11, 0.7)');
-      fGrad.addColorStop(0.7, 'rgba(220, 38, 38, 0.35)');
-      fGrad.addColorStop(1, 'rgba(220, 38, 38, 0)');
-      ctx.fillStyle = fGrad;
+      const fireGrad = ctx.createRadialGradient(t.x, t.y - 12, 2, t.x, t.y - 12, 16);
+      fireGrad.addColorStop(0, '#fef08a');
+      fireGrad.addColorStop(0.4, '#f59e0b');
+      fireGrad.addColorStop(0.8, '#dc2626');
+      fireGrad.addColorStop(1, 'rgba(220, 38, 38, 0)');
+      ctx.fillStyle = fireGrad;
       ctx.beginPath();
-      ctx.arc(t.x, t.y - 6, 28, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Flame core
-      ctx.fillStyle = '#ef4444';
-      ctx.beginPath();
-      ctx.moveTo(t.x - 6, t.y);
-      ctx.quadraticCurveTo(t.x + flicker, t.y - flameH, t.x, t.y - flameH);
-      ctx.quadraticCurveTo(t.x + flicker + 3, t.y - flameH * 0.5, t.x + 6, t.y);
-      ctx.closePath();
-      ctx.fill();
-
-      ctx.fillStyle = '#fef08a';
-      ctx.beginPath();
-      ctx.moveTo(t.x - 3, t.y);
-      ctx.lineTo(t.x, t.y - flameH * 0.65);
-      ctx.lineTo(t.x + 3, t.y);
-      ctx.closePath();
+      ctx.arc(t.x, t.y - 12 + flicker, 16, 0, Math.PI * 2);
       ctx.fill();
     });
   }
 
   private renderCollectibles(ctx: CanvasRenderingContext2D, collectibles: Collectible[]) {
-    for (const item of collectibles) {
-      if (item.collected) continue;
+    for (const c of collectibles) {
+      if (c.collected) continue;
+      const bob = Math.sin(this.time * 4 + c.bobOffset) * 6;
+      const cx = c.x;
+      const cy = c.y + bob;
 
-      const bobY = item.y + Math.sin(this.time * 3 + item.bobOffset) * 6;
+      // Glow aura
+      const aura = ctx.createRadialGradient(cx, cy, 2, cx, cy, 20);
+      aura.addColorStop(0, 'rgba(251, 191, 36, 0.9)');
+      aura.addColorStop(0.5, 'rgba(245, 158, 11, 0.4)');
+      aura.addColorStop(1, 'rgba(245, 158, 11, 0)');
+      ctx.fillStyle = aura;
+      ctx.beginPath();
+      ctx.arc(cx, cy, 20, 0, Math.PI * 2);
+      ctx.fill();
 
-      ctx.save();
-      ctx.translate(item.x, bobY);
-
-      if (item.type === 'sacred_kalash') {
-        // Golden Sacred Kalash (Vessel with sacred water & coconut)
-        // Radiant Glow
-        const kGrad = ctx.createRadialGradient(0, 0, 2, 0, 0, 22);
-        kGrad.addColorStop(0, 'rgba(254, 240, 138, 0.9)');
-        kGrad.addColorStop(0.5, 'rgba(245, 158, 11, 0.4)');
-        kGrad.addColorStop(1, 'rgba(245, 158, 11, 0)');
-        ctx.fillStyle = kGrad;
-        ctx.beginPath();
-        ctx.arc(0, 0, 22, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Pot
-        ctx.fillStyle = '#f59e0b';
-        ctx.beginPath();
-        ctx.arc(0, 4, 10, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.fillStyle = '#d97706';
-        ctx.fillRect(-6, -6, 12, 6);
-        // Coconut & Mango leaves
-        ctx.fillStyle = '#15803d';
-        ctx.beginPath();
-        ctx.moveTo(-7, -5);
-        ctx.lineTo(-12, -12);
-        ctx.lineTo(0, -6);
-        ctx.lineTo(12, -12);
-        ctx.lineTo(7, -5);
-        ctx.fill();
-      } else if (item.type === 'lotus_flower') {
-        // Divine Sacred Lotus
-        const lGrad = ctx.createRadialGradient(0, 0, 2, 0, 0, 20);
-        lGrad.addColorStop(0, 'rgba(251, 113, 133, 0.9)');
-        lGrad.addColorStop(0.6, 'rgba(244, 63, 94, 0.3)');
-        lGrad.addColorStop(1, 'rgba(244, 63, 94, 0)');
-        ctx.fillStyle = lGrad;
-        ctx.beginPath();
-        ctx.arc(0, 0, 20, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.fillStyle = '#f43f5e';
-        for (let p = 0; p < 6; p++) {
-          const pAngle = (p * Math.PI) / 3;
-          ctx.beginPath();
-          ctx.ellipse(Math.cos(pAngle) * 5, Math.sin(pAngle) * 5, 4, 7, pAngle, 0, Math.PI * 2);
-          ctx.fill();
-        }
-        ctx.fillStyle = '#fef08a';
-        ctx.beginPath();
-        ctx.arc(0, 0, 3, 0, Math.PI * 2);
-        ctx.fill();
-      } else {
-        // Divine Energy Orb
-        const oGrad = ctx.createRadialGradient(0, 0, 1, 0, 0, 16);
-        oGrad.addColorStop(0, '#ffffff');
-        oGrad.addColorStop(0.3, '#fde047');
-        oGrad.addColorStop(0.7, '#f59e0b');
-        oGrad.addColorStop(1, 'rgba(245, 158, 11, 0)');
-        ctx.fillStyle = oGrad;
-        ctx.beginPath();
-        ctx.arc(0, 0, 16, 0, Math.PI * 2);
-        ctx.fill();
-      }
-
-      ctx.restore();
+      // Golden orb
+      ctx.fillStyle = '#fef08a';
+      ctx.beginPath();
+      ctx.arc(cx, cy, 7, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#d97706';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
     }
   }
 }

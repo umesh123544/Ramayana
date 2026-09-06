@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <radialGradient id="bgGrad" cx="50%" cy="50%" r="50%" fx="30%" fy="30%">
+      <stop offset="0%" stop-color="#78350f" />
+      <stop offset="50%" stop-color="#451a03" />
+      <stop offset="100%" stop-color="#0c0a09" />
+    </radialGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a" />
+      <stop offset="50%" stop-color="#f59e0b" />
+      <stop offset="100%" stop-color="#b45309" />
+    </linearGradient>
+    <linearGradient id="flameGrad" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#ef4444" />
+      <stop offset="60%" stop-color="#f97316" />
+      <stop offset="100%" stop-color="#fef08a" />
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="10" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Background with Gold Border -->
+  <rect width="512" height="512" rx="110" fill="url(#bgGrad)" />
+  <rect width="500" height="500" x="6" y="6" rx="104" fill="none" stroke="url(#goldGrad)" stroke-width="8" opacity="0.85" />
+
+  <!-- Sacred Surya Rays Aura -->
+  <g transform="translate(256, 256)" opacity="0.25">
+    <circle r="180" fill="none" stroke="#f59e0b" stroke-width="2" stroke-dasharray="10 8" />
+    <circle r="150" fill="none" stroke="#fbbf24" stroke-width="1.5" stroke-dasharray="6 6" />
+  </g>
+
+  <!-- Golden Divine Bow (Kodanda) -->
+  <g filter="url(#glow)">
+    <!-- Bow Curve Backing -->
+    <path d="M 160 110 C 230 150, 270 230, 270 256 C 270 282, 230 362, 160 402" fill="none" stroke="#78350f" stroke-width="28" stroke-linecap="round" />
+    <!-- Bow Body Highlight -->
+    <path d="M 160 110 C 230 150, 270 230, 270 256 C 270 282, 230 362, 160 402" fill="none" stroke="url(#goldGrad)" stroke-width="18" stroke-linecap="round" />
+    
+    <!-- Bow Tips Engravings -->
+    <circle cx="160" cy="110" r="14" fill="#fbbf24" stroke="#78350f" stroke-width="4" />
+    <circle cx="160" cy="402" r="14" fill="#fbbf24" stroke="#78350f" stroke-width="4" />
+
+    <!-- Bowstring (Pratyancha) -->
+    <line x1="160" y1="110" x2="195" y2="256" stroke="#fef08a" stroke-width="4" stroke-linecap="round" />
+    <line x1="195" y1="256" x2="160" y2="402" stroke="#fef08a" stroke-width="4" stroke-linecap="round" />
+  </g>
+
+  <!-- Flaming Brahmastra Arrow -->
+  <g filter="url(#glow)">
+    <!-- Arrow Shaft -->
+    <line x1="150" y1="256" x2="380" y2="256" stroke="url(#goldGrad)" stroke-width="10" stroke-linecap="round" />
+    
+    <!-- Arrow Flame Aura -->
+    <path d="M 370 256 L 330 236 Q 345 256, 330 276 Z" fill="url(#flameGrad)" />
+
+    <!-- Arrow Golden Arrowhead -->
+    <polygon points="410,256 345,230 360,256 345,282" fill="url(#goldGrad)" stroke="#fef08a" stroke-width="3" />
+    
+    <!-- Arrow Fletching (Feathers) -->
+    <polygon points="175,256 140,234 150,256" fill="#f59e0b" />
+    <polygon points="175,256 140,278 150,256" fill="#f59e0b" />
+  </g>
+
+  <!-- Sacred Lotus Center Emblem -->
+  <circle cx="256" cy="256" r="16" fill="#ef4444" stroke="#fef08a" stroke-width="3" filter="url(#glow)" />
+</svg>

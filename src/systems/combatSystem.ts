@@ -7,6 +7,7 @@ import {
   HeroState,
   Enemy,
 } from '../types';
+import { BossState } from './bossSystem';
 import { checkAABB, isPointInBox } from '../engine/physics';
 import { soundManager } from '../audio/soundManager';
 import { adminConfig } from './adminConfig';
@@ -36,34 +37,50 @@ export class CombatSystem {
     ];
   }
 
-  public shootHeroArrow(hero: HeroState, isCharged: boolean) {
-    const dir = hero.facing === 'right' ? 1 : -1;
-    const speed = isCharged ? 750 : 550;
+  public shootHeroArrow(hero: HeroState, isCharged: boolean, aimDir?: { x: number; y: number }) {
+    let dirX = hero.facing === 'right' ? 1 : -1;
+    let dirY = 0;
+
+    if (aimDir) {
+      const len = Math.hypot(aimDir.x, aimDir.y);
+      if (len > 0.05) {
+        dirX = aimDir.x / len;
+        dirY = aimDir.y / len;
+        if (Math.abs(dirX) > 0.2) {
+          hero.facing = dirX > 0 ? 'right' : 'left';
+        }
+      }
+    }
+
+    const speed = isCharged ? 780 : 580;
     const heroCfg = adminConfig.get().hero;
     const dmg = isCharged ? (heroCfg.chargedArrowDamage || 50) : (heroCfg.arrowDamage || 25);
+
+    const spawnX = hero.x + hero.width * 0.5 + dirX * 24;
+    const spawnY = hero.y + hero.height * 0.42 + dirY * 20;
 
     this.projectiles.push({
       id: `h-arrow-${Date.now()}-${Math.random()}`,
       owner: 'hero',
-      x: hero.x + (dir === 1 ? hero.width + 5 : -15),
-      y: hero.y + hero.height * 0.42,
-      vx: dir * speed,
-      vy: 0,
+      x: spawnX,
+      y: spawnY,
+      vx: dirX * speed,
+      vy: dirY * speed,
       damage: dmg,
       isCharged,
       type: 'arrow',
       radius: isCharged ? 9 : 6,
       life: 2.8,
-      facing: hero.facing,
+      facing: dirX >= 0 ? 'right' : 'left',
     });
 
     // Arrow launch particles
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < 5; i++) {
       this.particles.push({
-        x: hero.x + (dir === 1 ? hero.width : 0),
-        y: hero.y + hero.height * 0.42,
-        vx: -dir * Math.random() * 80,
-        vy: (Math.random() - 0.5) * 60,
+        x: spawnX,
+        y: spawnY,
+        vx: -dirX * Math.random() * 60 + (Math.random() - 0.5) * 30,
+        vy: -dirY * Math.random() * 60 + (Math.random() - 0.5) * 30,
         color: isCharged ? '#fbbf24' : '#f8fafc',
         size: isCharged ? 4 : 2.5,
         alpha: 0.9,
@@ -85,7 +102,9 @@ export class CombatSystem {
     platforms: Platform[],
     onHeroDamaged: (dmg: number, knockbackDir: number) => void,
     onEnemyDamaged: (enemyId: string, dmg: number, knockbackDir: number) => void,
-    onHeroCollectEnergy: (value: number) => void
+    onHeroCollectEnergy: (value: number) => void,
+    boss?: BossState,
+    onBossDamaged?: (dmg: number, knockbackDir: number, isCharged?: boolean) => void
   ) {
     // 1. Update Projectiles
     for (let i = this.projectiles.length - 1; i >= 0; i--) {
@@ -125,29 +144,50 @@ export class CombatSystem {
         continue;
       }
 
-      // Hero Arrow hitting Enemy
+      // Hero Arrow hitting Enemy or Boss
       if (p.owner === 'hero') {
-        let hitEnemy = false;
-        for (const e of enemies) {
-          if (e.isDead) continue;
+        let hitTarget = false;
+
+        // Check Boss Collision
+        if (boss && !boss.isDead) {
           if (
             checkAABB(
               { x: p.x - p.radius, y: p.y - p.radius, width: p.radius * 2, height: p.radius * 2 },
-              { x: e.x, y: e.y, width: e.width, height: e.height }
+              { x: boss.x, y: boss.y, width: boss.width, height: boss.height }
             )
           ) {
-            hitEnemy = true;
+            hitTarget = true;
             soundManager.play('arrowHit');
             const kDir = p.vx > 0 ? 1 : -1;
-            onEnemyDamaged(e.id, p.damage, kDir);
-
-            // Spawn damage number
-            this.addFloatingText(`-${p.damage}`, e.x + e.width * 0.5, e.y - 10, p.isCharged ? '#fbbf24' : '#ffffff');
-            this.spawnImpactSparks(p.x, p.y, p.isCharged ? '#f59e0b' : '#dc2626', 10);
-            break;
+            if (onBossDamaged) onBossDamaged(p.damage, kDir, p.isCharged);
+            this.addFloatingText(`-${p.damage}`, boss.x + boss.width * 0.5, boss.y - 10, p.isCharged ? '#fbbf24' : '#ffffff');
+            this.spawnImpactSparks(p.x, p.y, p.isCharged ? '#f59e0b' : '#dc2626', 12);
           }
         }
-        if (hitEnemy) {
+
+        if (!hitTarget) {
+          for (const e of enemies) {
+            if (e.isDead) continue;
+            if (
+              checkAABB(
+                { x: p.x - p.radius, y: p.y - p.radius, width: p.radius * 2, height: p.radius * 2 },
+                { x: e.x, y: e.y, width: e.width, height: e.height }
+              )
+            ) {
+              hitTarget = true;
+              soundManager.play('arrowHit');
+              const kDir = p.vx > 0 ? 1 : -1;
+              onEnemyDamaged(e.id, p.damage, kDir);
+
+              // Spawn damage number
+              this.addFloatingText(`-${p.damage}`, e.x + e.width * 0.5, e.y - 10, p.isCharged ? '#fbbf24' : '#ffffff');
+              this.spawnImpactSparks(p.x, p.y, p.isCharged ? '#f59e0b' : '#dc2626', 10);
+              break;
+            }
+          }
+        }
+
+        if (hitTarget) {
           this.projectiles.splice(i, 1);
           continue;
         }

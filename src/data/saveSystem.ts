@@ -15,9 +15,40 @@ import {
 
 const SAVE_KEY_PREFIX = 'ramayan_epic_save_';
 const ACTIVE_SAVE_KEY = 'ramayan_active_save_slot';
+const MAX_UNLOCKED_CHAPTER_KEY = 'ramayan_max_unlocked_chapter';
 
 class SaveSystem {
   public activeSlot: string = 'autosave';
+
+  public getMaxUnlockedChapter(): number {
+    try {
+      const raw = localStorage.getItem(MAX_UNLOCKED_CHAPTER_KEY);
+      if (raw) {
+        const val = parseInt(raw, 10);
+        if (!isNaN(val) && val >= 1 && val <= 10) {
+          return val;
+        }
+      }
+    } catch {
+      // ignore
+    }
+    return 1; // Default: Only Chapter 1 is unlocked initially!
+  }
+
+  public setMaxUnlockedChapter(maxChapter: number): void {
+    try {
+      const current = this.getMaxUnlockedChapter();
+      const clamped = Math.min(10, Math.max(current, maxChapter));
+      localStorage.setItem(MAX_UNLOCKED_CHAPTER_KEY, String(clamped));
+    } catch {
+      // ignore
+    }
+  }
+
+  public isChapterUnlocked(chapterId: number): boolean {
+    if (chapterId <= 1) return true;
+    return chapterId <= this.getMaxUnlockedChapter();
+  }
 
   public createNewGame(difficulty: Difficulty = 'NORMAL', slotId: string = 'slot_1'): GameSaveData {
     const newSave: GameSaveData = {
@@ -156,6 +187,29 @@ class SaveSystem {
       }
     }
 
+    this.saveGame(save);
+    return save;
+  }
+
+  // Unlock next chapter directly upon boss defeat
+  public unlockNextChapter(completedChapterId: number): GameSaveData {
+    this.setMaxUnlockedChapter(completedChapterId + 1);
+    let save = this.getLatestSave();
+    if (!save) {
+      save = this.createNewGame('NORMAL', 'autosave');
+    }
+    this.setMaxUnlockedChapter(completedChapterId + 1);
+    const currentCh = save.chapters.find((c) => c.id === completedChapterId);
+    if (currentCh) {
+      currentCh.completedLevels = currentCh.totalLevels;
+    }
+    const nextCh = save.chapters.find((c) => c.id === completedChapterId + 1);
+    if (nextCh) {
+      nextCh.isUnlocked = true;
+      if (save.levels[nextCh.id] && save.levels[nextCh.id].length > 0) {
+        save.levels[nextCh.id][0].isUnlocked = true;
+      }
+    }
     this.saveGame(save);
     return save;
   }

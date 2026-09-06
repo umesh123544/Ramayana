@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { adminConfig, DifficultyLevel } from '../systems/adminConfig';
 import { soundManager } from '../audio/soundManager';
+import { Chapter } from '../data/gameData';
 import {
   Shield,
   Zap,
@@ -13,6 +14,7 @@ import {
   Award,
   Sun,
   Crown,
+  BookOpen,
 } from 'lucide-react';
 
 interface DifficultyOption {
@@ -150,11 +152,13 @@ const DIFFICULTY_OPTIONS: DifficultyOption[] = [
 interface DifficultySelectorProps {
   onBack: () => void;
   onConfirmStart: (selectedDiff: DifficultyLevel) => void;
+  selectedChapter?: Chapter;
 }
 
 export const DifficultySelector: React.FC<DifficultySelectorProps> = ({
   onBack,
   onConfirmStart,
+  selectedChapter,
 }) => {
   const currentConfig = adminConfig.get();
   const [selected, setSelected] = useState<DifficultyLevel>(
@@ -205,10 +209,17 @@ export const DifficultySelector: React.FC<DifficultySelectorProps> = ({
         </button>
 
         <div className="flex flex-col items-center text-center">
-          <div className="flex items-center gap-2 text-amber-400 text-xs sm:text-sm font-bold tracking-widest uppercase">
-            <Sun className="w-4 h-4 animate-spin-slow text-amber-400" />
-            <span>Trial of Dharma • परीक्षा चयन</span>
-          </div>
+          {selectedChapter ? (
+            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/40 text-amber-300 text-xs font-mono mb-1">
+              <BookOpen className="w-3.5 h-3.5 text-amber-400" />
+              <span>Chapter {selectedChapter.id}: {selectedChapter.title} ({selectedChapter.hindiTitle})</span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 text-amber-400 text-xs sm:text-sm font-bold tracking-widest uppercase">
+              <Sun className="w-4 h-4 animate-spin-slow text-amber-400" />
+              <span>Trial of Dharma • परीक्षा चयन</span>
+            </div>
+          )}
           <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-amber-200 tracking-wider font-['Cinzel'] mt-0.5">
             CHOOSE YOUR DIFFICULTY
           </h1>
@@ -343,7 +354,7 @@ export const DifficultySelector: React.FC<DifficultySelectorProps> = ({
               onClick={handleStartGame}
               className="w-full md:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-amber-500 via-amber-600 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-neutral-950 font-extrabold tracking-wider uppercase text-sm font-['Cinzel'] shadow-lg shadow-amber-500/30 hover:shadow-amber-500/50 transition-all cursor-pointer flex items-center justify-center gap-2 active:scale-95"
             >
-              <span>BEGIN YOUR JOURNEY</span>
+              <span>{selectedChapter ? `BEGIN CHAPTER ${selectedChapter.id}` : 'BEGIN YOUR JOURNEY'}</span>
               <Sparkles className="w-4 h-4 text-neutral-950 fill-neutral-950" />
             </button>
           </div>

@@ -1,16 +1,16 @@
-import React, { useRef, useEffect, useState, useCallback } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { Camera2D } from '../engine/camera';
 import { EnvironmentRenderer } from '../render/environmentRenderer';
 import { CharacterController, PlayerInput } from '../systems/characterController';
 import { EnemySystem } from '../systems/enemySystem';
 import { CombatSystem } from '../systems/combatSystem';
 import { SupportingCharacterSystem } from '../systems/supportingCharacters';
-import { VillainSystem } from '../systems/villainSystem';
+import { BossSystem } from '../systems/bossSystem';
+import { renderBoss } from '../render/bossRenderer';
 import { INITIAL_PLATFORMS } from '../data/platforms';
 import {
   renderUmesh,
   renderPurneema,
-  renderRaone,
   renderEnemy,
 } from '../render/sprites';
 import { HeroState } from '../types';
@@ -19,45 +19,53 @@ interface GameCanvasProps {
   onHeroStateChange: (hero: HeroState) => void;
   onShowDivineBlessing: (message?: string) => void;
   onGameOver: () => void;
+  onChapterVictory: (chapterId: number) => void;
   canInteractPurneema: (can: boolean) => void;
   onOpenDialogue: (text: string) => void;
   externalInputRef: React.MutableRefObject<Partial<PlayerInput>>;
   gameKey: number; // Trigger re-init on restart
+  chapterId?: number;
 }
 
 export const GameCanvas: React.FC<GameCanvasProps> = ({
   onHeroStateChange,
   onShowDivineBlessing,
   onGameOver,
+  onChapterVictory,
   canInteractPurneema,
   onOpenDialogue,
   externalInputRef,
   gameKey,
+  chapterId = 1,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Keyboard input state
+  // Keyboard & Mouse input state
   const keysRef = useRef<{ [code: string]: boolean }>({});
   const isMouseDownRef = useRef<boolean>(false);
+  const mousePosRef = useRef<{ x: number; y: number } | null>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     const container = containerRef.current;
     if (!canvas || !container) return;
 
-    // Initialize Subsystems
+    // Initialize Subsystems with current chapter
     const camera = new Camera2D(canvas.width, canvas.height);
     const envRenderer = new EnvironmentRenderer();
+    envRenderer.setChapter(chapterId);
+
     const characterController = new CharacterController(250, 600);
-    const enemySystem = new EnemySystem();
+    const enemySystem = new EnemySystem(chapterId);
     const combatSystem = new CombatSystem();
-    const supportSystem = new SupportingCharacterSystem(1650, 580);
-    const villainSystem = new VillainSystem(3800, 540);
+    const supportSystem = new SupportingCharacterSystem(chapterId, 1650, 580);
+    const bossSystem = new BossSystem(chapterId, 3750, 560);
     const platforms = INITIAL_PLATFORMS;
 
     let animFrameId: number;
     let lastTime = performance.now();
+    let divineAuraTickTimer = 0;
 
     // Resize observer
     const handleResize = () => {
@@ -82,14 +90,16 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
 
       // Talk to Purneema with 'KeyE'
       if (e.code === 'KeyE' && supportSystem.isNearHero) {
-        supportSystem.interact(() => {
-          characterController.collectDivineEnergy(35);
-          combatSystem.spawnDivineBlessingBurst(supportSystem.purneema.x, supportSystem.purneema.y - 40);
-          onShowDivineBlessing('SACRED LOTUS BLESSING');
-        });
-        if (supportSystem.activeDialogue) {
-          onOpenDialogue(supportSystem.activeDialogue);
-        }
+        supportSystem.interact(
+          () => {
+            characterController.collectDivineEnergy(35);
+            combatSystem.spawnDivineBlessingBurst(supportSystem.purneema.x, supportSystem.purneema.y - 40);
+            onShowDivineBlessing('SACRED LOTUS BLESSING');
+          },
+          (dialogueText) => {
+            onOpenDialogue(dialogueText);
+          }
+        );
       }
 
       // Space / Arrows shouldn't scroll browser window
@@ -106,6 +116,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       if (e.button === 0) {
         // Left Click -> Attack charge
         isMouseDownRef.current = true;
+        mousePosRef.current = { x: e.clientX, y: e.clientY };
       } else if (e.button === 2) {
         // Right Click -> Divine Power
         e.preventDefault();
@@ -121,14 +132,19 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       }
     };
 
+    const onMouseMove = (e: MouseEvent) => {
+      mousePosRef.current = { x: e.clientX, y: e.clientY };
+    };
+
     const onContextMenu = (e: MouseEvent) => {
-      e.preventDefault(); // Prevent default browser context menu on right click
+      e.preventDefault();
     };
 
     window.addEventListener('keydown', onKeyDown);
     window.addEventListener('keyup', onKeyUp);
     canvas.addEventListener('mousedown', onMouseDown);
     window.addEventListener('mouseup', onMouseUp);
+    window.addEventListener('mousemove', onMouseMove);
     canvas.addEventListener('contextmenu', onContextMenu);
 
     // ==========================================
@@ -144,6 +160,8 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       // Merge keyboard & virtual inputs
       const isLeft = !!(keys['KeyA'] || keys['ArrowLeft'] || ext.left);
       const isRight = !!(keys['KeyD'] || keys['ArrowRight'] || ext.right);
+      const isUp = !!(keys['KeyW'] || keys['ArrowUp'] || ext.up);
+      const isDown = !!(keys['KeyS'] || keys['ArrowDown'] || ext.down);
       const isRun = !!(keys['ShiftLeft'] || keys['ShiftRight'] || ext.run);
       const isJump = !!(keys['Space'] || keys['KeyW'] || keys['ArrowUp'] || ext.jump);
       const isDivine = !!(keys['KeyK'] || keys['KeyX'] || keys['KeyC'] || keys['MouseRight'] || ext.divinePower);
@@ -157,15 +175,44 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       if (ext.divinePower) ext.divinePower = false;
       if (ext.attackRelease) ext.attackRelease = false;
 
+      // Multi-Directional Aiming Calculation (Up, Down, Left, Right, Diagonals, 360°)
+      let calculatedAimDir = ext.aimDir;
+
+      if (!calculatedAimDir) {
+        if (isUp || isDown) {
+          const dx: number = isRight ? 1 : isLeft ? -1 : 0;
+          const dy: number = isUp ? -1 : isDown ? 1 : 0;
+          const finalDx = dx === 0 && dy === 0 ? (characterController.hero.facing === 'right' ? 1 : -1) : dx;
+          calculatedAimDir = {
+            x: finalDx,
+            y: dy,
+          };
+        } else if (isMouseDownRef.current && mousePosRef.current && canvas) {
+          const canvasRect = canvas.getBoundingClientRect();
+          const screenMouseX = (mousePosRef.current.x - canvasRect.left) * (canvas.width / (canvasRect.width || 1));
+          const screenMouseY = (mousePosRef.current.y - canvasRect.top) * (canvas.height / (canvasRect.height || 1));
+          const heroScreenX = characterController.hero.x + characterController.hero.width * 0.5 - camera.x;
+          const heroScreenY = characterController.hero.y + characterController.hero.height * 0.42 - camera.y;
+          const mdx = screenMouseX - heroScreenX;
+          const mdy = screenMouseY - heroScreenY;
+          if (Math.hypot(mdx, mdy) > 15) {
+            calculatedAimDir = { x: mdx, y: mdy };
+          }
+        }
+      }
+
       const playerInput: PlayerInput = {
         left: isLeft,
         right: isRight,
+        up: isUp,
+        down: isDown,
         run: isRun,
         jump: isJump,
         attackDown,
         attackRelease,
         divinePower: isDivine,
         interact: !!keys['KeyE'],
+        aimDir: calculatedAimDir,
       };
 
       // 1. Update Environment & Parallax
@@ -176,9 +223,9 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
         dt,
         playerInput,
         platforms,
-        (isCharged) => {
-          // Shoot Arrow
-          combatSystem.shootHeroArrow(characterController.hero, isCharged);
+        (isCharged, shootAimDir) => {
+          // Shoot Arrow in the aimed direction (up, down, diagonal, left, right)
+          combatSystem.shootHeroArrow(characterController.hero, isCharged, shootAimDir || calculatedAimDir);
         },
         () => {
           // Trigger Divine Blessing Banner & FX
@@ -189,7 +236,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
           onShowDivineBlessing('DIVINE BLESSING');
         },
         () => {
-          // All 3 lives lost -> Game Over
+          // All lives lost -> Game Over
           onGameOver();
         }
       );
@@ -202,43 +249,63 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
         dt
       );
 
-      // 4. Update Supporting Character (Purneema)
-      supportSystem.update(dt, characterController.hero, () => {
-        characterController.collectDivineEnergy(35);
-        combatSystem.spawnDivineBlessingBurst(supportSystem.purneema.x, supportSystem.purneema.y - 40);
-        onShowDivineBlessing('SACRED LOTUS BLESSING');
-      });
+      // 4. Update Supporting Character (Purneema) & Story Abduction
+      supportSystem.update(
+        dt,
+        characterController.hero,
+        () => {
+          characterController.collectDivineEnergy(35);
+          combatSystem.spawnDivineBlessingBurst(supportSystem.purneema.x, supportSystem.purneema.y - 40);
+          onShowDivineBlessing('SACRED LOTUS BLESSING');
+        },
+        (dialogueText) => {
+          onOpenDialogue(dialogueText);
+        }
+      );
       canInteractPurneema(supportSystem.isNearHero);
 
-      // 5. Update Main Villain (Raone)
-      villainSystem.update(dt);
+      // 5. Update Chapter Boss System
+      bossSystem.update(
+        dt,
+        characterController.hero,
+        platforms,
+        (proj) => {
+          combatSystem.addEnemyProjectile(proj);
+        },
+        (bossMeleeDmg, knockDir) => {
+          characterController.takeDamage(bossMeleeDmg, knockDir);
+        },
+        (chId) => {
+          onChapterVictory(chId);
+        }
+      );
 
-      // 6. Update Enemy System (AI, Movement, Attacks)
+      // 6. Update Chapter Enemies
       enemySystem.update(
         dt,
         characterController.hero,
         platforms,
-        (enemyProj) => {
-          combatSystem.addEnemyProjectile(enemyProj);
+        (proj) => {
+          combatSystem.addEnemyProjectile(proj);
         },
-        (meleeDmg, knockbackDir) => {
-          characterController.takeDamage(meleeDmg, knockbackDir);
-          combatSystem.addFloatingText(
-            `-${meleeDmg}`,
-            characterController.hero.x + characterController.hero.width * 0.5,
-            characterController.hero.y - 10,
-            '#ef4444'
-          );
-          combatSystem.spawnImpactSparks(
-            characterController.hero.x + characterController.hero.width * 0.5,
-            characterController.hero.y + characterController.hero.height * 0.5,
-            '#ef4444',
-            8
-          );
+        (enemyMeleeDmg, knockDir) => {
+          characterController.takeDamage(enemyMeleeDmg, knockDir);
         }
       );
 
-      // 7. Update Combat System (Projectiles, Particles, Collectibles)
+      // 7. Divine Aura Periodic Pulse
+      if (characterController.hero.isDivineActive) {
+        divineAuraTickTimer += dt;
+        if (divineAuraTickTimer >= 0.35) {
+          divineAuraTickTimer = 0;
+          combatSystem.spawnDivineBlessingBurst(
+            characterController.hero.x + characterController.hero.width * 0.5,
+            characterController.hero.y + characterController.hero.height * 0.5
+          );
+        }
+      }
+
+      // 8. Update Combat Projectiles & Enemy/Boss Hits
       combatSystem.update(
         dt,
         characterController.hero,
@@ -250,13 +317,33 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
         (enemyId, enemyDmg, knockDir) => {
           const res = enemySystem.applyDamage(enemyId, enemyDmg, knockDir);
           if (res.died) {
-            // Reward small divine energy on enemy defeat
             characterController.collectDivineEnergy(12);
             combatSystem.addFloatingText('+12 DIVINE', res.enemy!.x, res.enemy!.y - 20, '#fbbf24');
           }
         },
         (energyValue) => {
           characterController.collectDivineEnergy(energyValue);
+        },
+        bossSystem.boss,
+        (bossDmg, knockDir, isCharged) => {
+          const res = bossSystem.applyDamage(
+            bossDmg,
+            knockDir,
+            (chId) => {
+              onChapterVictory(chId);
+            },
+            isCharged,
+            characterController.hero.isDivineActive
+          );
+          if (res.absorbed) {
+            combatSystem.addFloatingText('SHIELDED! (-55%)', bossSystem.boss.x, bossSystem.boss.y - 30, '#c084fc');
+          }
+          if (res.died) {
+            combatSystem.spawnDivineBlessingBurst(
+              bossSystem.boss.x + bossSystem.boss.width * 0.5,
+              bossSystem.boss.y + bossSystem.boss.height * 0.5
+            );
+          }
         }
       );
 
@@ -274,52 +361,95 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
 
         ctx.clearRect(0, 0, camera.viewportWidth, camera.viewportHeight);
 
-        // 1. Render Environment & 5 Parallax Layers
+        // 1. Render Environment & Parallax Layers for this Chapter
         envRenderer.render(ctx, camera, platforms, combatSystem.collectibles);
 
-        // 2. Render Purneema (Heroine)
+        // 2. Render Purneema (Heroine) or Abduction Scene
         ctx.save();
         ctx.translate(-camera.x, -camera.y);
-        renderPurneema(
-          ctx,
-          supportSystem.purneema.x - 22,
-          supportSystem.purneema.y - 68,
-          44,
-          68,
-          supportSystem.purneema.facing,
-          supportSystem.purneema.animState,
-          supportSystem.purneema.currentFrame
-        );
 
-        // Purneema overhead interaction prompt if nearby
-        if (supportSystem.isNearHero) {
-          ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-          ctx.fillRect(supportSystem.purneema.x - 45, supportSystem.purneema.y - 95, 90, 20);
-          ctx.strokeStyle = '#f43f5e';
-          ctx.lineWidth = 1;
-          ctx.strokeRect(supportSystem.purneema.x - 45, supportSystem.purneema.y - 95, 90, 20);
-          ctx.fillStyle = '#fbcfe8';
-          ctx.font = 'bold 10px "Cinzel", sans-serif';
-          ctx.fillText('Press E to Talk', supportSystem.purneema.x - 38, supportSystem.purneema.y - 81);
+        if (!supportSystem.isAbducted) {
+          renderPurneema(
+            ctx,
+            supportSystem.purneema.x - 22,
+            supportSystem.purneema.y - 68,
+            44,
+            68,
+            supportSystem.purneema.facing,
+            supportSystem.purneema.animState,
+            supportSystem.purneema.currentFrame
+          );
+
+          // In Chapter 10: Render celestial prison cage
+          if (chapterId === 10) {
+            ctx.strokeStyle = '#fbbf24';
+            ctx.lineWidth = 3;
+            ctx.strokeRect(supportSystem.purneema.x - 28, supportSystem.purneema.y - 78, 56, 82);
+            // Cage bars
+            for (let i = 1; i <= 4; i++) {
+              ctx.beginPath();
+              ctx.moveTo(supportSystem.purneema.x - 28 + i * 11, supportSystem.purneema.y - 78);
+              ctx.lineTo(supportSystem.purneema.x - 28 + i * 11, supportSystem.purneema.y + 4);
+              ctx.stroke();
+            }
+          }
+
+          // Raone Spectral Sky Chariot during abduction cutscene (Chapters 1-9)
+          if (supportSystem.raoneAlpha > 0) {
+            ctx.save();
+            ctx.globalAlpha = supportSystem.raoneAlpha;
+            const rx = supportSystem.purneema.x;
+            const ry = supportSystem.raoneY;
+
+            // Dark clouds & red lightning
+            ctx.fillStyle = 'rgba(15, 5, 25, 0.85)';
+            ctx.beginPath();
+            ctx.arc(rx, ry, 65, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Raone's Golden Flying Chariot & 10-Headed Silhouette
+            ctx.fillStyle = '#991b1b';
+            ctx.beginPath();
+            ctx.roundRect(rx - 35, ry + 15, 70, 20, [8, 8, 4, 4]);
+            ctx.fill();
+
+            // Raone silhouette
+            ctx.fillStyle = '#171717';
+            ctx.beginPath();
+            ctx.arc(rx, ry - 10, 18, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Glowing red demonic eyes
+            ctx.fillStyle = '#ef4444';
+            ctx.fillRect(rx - 8, ry - 12, 4, 3);
+            ctx.fillRect(rx + 4, ry - 12, 4, 3);
+
+            // Banner title
+            ctx.fillStyle = '#f87171';
+            ctx.font = 'bold 11px serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('दशानन रावण Pushpaka Chariot', rx, ry - 35);
+            ctx.restore();
+          }
+
+          // Purneema overhead interaction prompt if nearby
+          if (supportSystem.isNearHero) {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.75)';
+            ctx.fillRect(supportSystem.purneema.x - 55, supportSystem.purneema.y - 95, 110, 22);
+            ctx.strokeStyle = '#f43f5e';
+            ctx.lineWidth = 1.5;
+            ctx.strokeRect(supportSystem.purneema.x - 55, supportSystem.purneema.y - 95, 110, 22);
+            ctx.fillStyle = '#fbcfe8';
+            ctx.font = 'bold 10px "Cinzel", sans-serif';
+            ctx.fillText('Press E to Talk (कुरा)', supportSystem.purneema.x - 48, supportSystem.purneema.y - 80);
+          }
         }
         ctx.restore();
 
-        // 3. Render Raone (Main Villain at Eastern Mountain Cave outpost)
-        ctx.save();
-        ctx.translate(-camera.x, -camera.y);
-        renderRaone(
-          ctx,
-          villainSystem.raone.x - 35,
-          villainSystem.raone.y - 95,
-          70,
-          95,
-          villainSystem.raone.facing,
-          villainSystem.raone.animState,
-          villainSystem.raone.currentFrame
-        );
-        ctx.restore();
+        // 3. Render Chapter Boss
+        renderBoss(ctx, bossSystem.boss, camera, currentTime / 1000);
 
-        // 4. Render All Enemies
+        // 4. Render All Chapter Enemies
         ctx.save();
         ctx.translate(-camera.x, -camera.y);
         for (const enemy of enemySystem.enemies) {
@@ -355,9 +485,44 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
           characterController.hero.isDivineActive,
           characterController.hero.chargeTime / 0.8
         );
+
+        // 6. Directional Bow Aiming Trajectory Guide (When charging bow)
+        if (characterController.hero.isCharging) {
+          const h = characterController.hero;
+          let dirX = h.facing === 'right' ? 1 : -1;
+          let dirY = 0;
+
+          if (calculatedAimDir) {
+            const len = Math.hypot(calculatedAimDir.x, calculatedAimDir.y);
+            if (len > 0.05) {
+              dirX = calculatedAimDir.x / len;
+              dirY = calculatedAimDir.y / len;
+            }
+          }
+
+          const startX = h.x + h.width * 0.5;
+          const startY = h.y + h.height * 0.42;
+
+          ctx.save();
+          ctx.strokeStyle = h.chargeTime >= 0.8 ? '#fbbf24' : 'rgba(254, 240, 138, 0.7)';
+          ctx.setLineDash([5, 5]);
+          ctx.lineWidth = 2.5;
+          ctx.beginPath();
+          ctx.moveTo(startX, startY);
+          ctx.lineTo(startX + dirX * 140, startY + dirY * 140);
+          ctx.stroke();
+
+          // Reticle target tip
+          ctx.fillStyle = h.chargeTime >= 0.8 ? '#f59e0b' : '#38bdf8';
+          ctx.beginPath();
+          ctx.arc(startX + dirX * 140, startY + dirY * 140, 5, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+
         ctx.restore();
 
-        // 6. Render Combat Projectiles, Particles & Floating Texts
+        // 7. Render Combat Projectiles, Particles & Floating Texts
         combatSystem.render(ctx, camera.x, camera.y);
 
         ctx.restore();
@@ -375,18 +540,21 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       window.removeEventListener('keyup', onKeyUp);
       canvas.removeEventListener('mousedown', onMouseDown);
       window.removeEventListener('mouseup', onMouseUp);
+      window.removeEventListener('mousemove', onMouseMove);
       canvas.removeEventListener('contextmenu', onContextMenu);
     };
-  }, [gameKey]);
+  }, [gameKey, chapterId]);
 
   return (
     <div
+      id="game-canvas-container"
       ref={containerRef}
-      className="relative w-full h-full overflow-hidden bg-neutral-950 flex items-center justify-center cursor-crosshair select-none"
+      className="relative w-full h-full bg-neutral-950 overflow-hidden select-none cursor-crosshair"
     >
       <canvas
+        id="game-canvas"
         ref={canvasRef}
-        className="w-full h-full block"
+        className="block w-full h-full"
       />
     </div>
   );

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { soundManager } from '../audio/soundManager';
 import { adminConfig } from '../systems/adminConfig';
+import { PWAInstallButton } from './PWAInstallButton';
 import {
   Play,
   RotateCcw,
@@ -16,12 +17,15 @@ import {
   Swords,
   Heart,
   Zap,
+  Sliders,
 } from 'lucide-react';
 
 interface MainMenuProps {
   onNewGame: () => void;
   onResumeGame?: () => void;
   onOpenSettings: () => void;
+  onOpenChapters?: () => void;
+  onOpenDifficulty?: () => void;
   isGameActive: boolean;
 }
 
@@ -82,6 +86,8 @@ export const MainMenu: React.FC<MainMenuProps> = ({
   onNewGame,
   onResumeGame,
   onOpenSettings,
+  onOpenChapters,
+  onOpenDifficulty,
   isGameActive,
 }) => {
   const [activeSubModal, setActiveSubModal] = useState<'chapters' | 'howToPlay' | null>(null);
@@ -348,6 +354,7 @@ export const MainMenu: React.FC<MainMenuProps> = ({
         </div>
 
         <div className="flex items-center gap-2">
+          <PWAInstallButton />
           <button
             id="main-menu-sound-toggle"
             onClick={handleToggleMute}
@@ -411,16 +418,40 @@ export const MainMenu: React.FC<MainMenuProps> = ({
           {/* Chapters */}
           <button
             id="menu-chapters-btn"
-            onClick={() => handleMenuClick(() => setActiveSubModal('chapters'))}
+            onClick={() =>
+              handleMenuClick(() => {
+                if (onOpenChapters) {
+                  onOpenChapters();
+                } else {
+                  setActiveSubModal('chapters');
+                }
+              })
+            }
             onMouseEnter={handleMenuHover}
             className="group relative flex items-center justify-between px-6 py-3.5 rounded-xl bg-neutral-900/80 hover:bg-neutral-800 border border-amber-500/30 hover:border-amber-500/60 text-neutral-200 hover:text-amber-200 font-bold text-sm tracking-wider uppercase font-['Cinzel'] backdrop-blur-md transition-all shadow-md active:scale-95 cursor-pointer"
           >
             <div className="flex items-center gap-3">
               <BookOpen className="w-4 h-4 text-amber-400" />
-              <span>Chapters</span>
+              <span>Chapters (अध्याय)</span>
             </div>
             <ChevronRight className="w-4 h-4 text-neutral-400 group-hover:text-amber-400 group-hover:translate-x-1 transition-transform" />
           </button>
+
+          {/* Level Mode / Difficulty Selector */}
+          {onOpenDifficulty && (
+            <button
+              id="menu-level-mode-btn"
+              onClick={() => handleMenuClick(onOpenDifficulty)}
+              onMouseEnter={handleMenuHover}
+              className="group relative flex items-center justify-between px-6 py-3.5 rounded-xl bg-neutral-900/80 hover:bg-neutral-800 border border-amber-500/30 hover:border-amber-500/60 text-neutral-200 hover:text-amber-200 font-bold text-sm tracking-wider uppercase font-['Cinzel'] backdrop-blur-md transition-all shadow-md active:scale-95 cursor-pointer"
+            >
+              <div className="flex items-center gap-3">
+                <Sliders className="w-4 h-4 text-amber-400" />
+                <span>Level Mode (कठिनाई)</span>
+              </div>
+              <ChevronRight className="w-4 h-4 text-neutral-400 group-hover:text-amber-400 group-hover:translate-x-1 transition-transform" />
+            </button>
+          )}
 
           {/* How to Play / Controls */}
           <button

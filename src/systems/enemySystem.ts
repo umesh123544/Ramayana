@@ -1,8 +1,6 @@
 import {
   Enemy,
   EnemyType,
-  EnemyAIState,
-  EnemyAnimationState,
   Platform,
   HeroState,
   Projectile,
@@ -13,31 +11,51 @@ import { adminConfig } from './adminConfig';
 
 export class EnemySystem {
   public enemies: Enemy[] = [];
+  public chapterId: number = 1;
 
-  constructor() {
+  constructor(chapterId: number = 1) {
+    this.chapterId = chapterId;
     this.spawnInitialEnemies();
   }
 
   public spawnInitialEnemies() {
-    this.enemies = [
-      // Type 1: Small demon warrior (Melee Rakshasa)
+    const ch = this.chapterId;
+    const baseList: Enemy[] = [
+      // Melee Rakshasas
       this.createEnemy('small_demon', 'e1', 750, 600, 650, 950),
       this.createEnemy('small_demon', 'e2', 2600, 600, 2500, 2800),
 
-      // Type 2: Archer demon (Ranged Rakshasa)
+      // Archer Rakshasa
       this.createEnemy('archer_demon', 'e3', 1150, 480, 1050, 1250),
       this.createEnemy('archer_demon', 'e4', 3300, 600, 3150, 3450),
 
-      // Type 3: Heavy demon warrior (Kumbha Brute)
+      // Heavy Demon Warrior
       this.createEnemy('heavy_demon', 'e5', 1850, 600, 1750, 2050),
-
-      // Type 4: Flying demon (Aerial Winged Rakshasa)
-      this.createEnemy('flying_demon', 'e6', 1400, 340, 1300, 1600),
-      this.createEnemy('flying_demon', 'e7', 2900, 360, 2750, 3100),
-
-      // Type 5: Elite demon warrior (Golden Commander Rakshasa)
-      this.createEnemy('elite_demon', 'e8', 2150, 600, 2000, 2300),
     ];
+
+    // Chapters 3+: add flying demons
+    if (ch >= 3) {
+      baseList.push(
+        this.createEnemy('flying_demon', 'e6', 1400, 340, 1300, 1600),
+        this.createEnemy('flying_demon', 'e7', 2900, 360, 2750, 3100)
+      );
+    }
+
+    // Chapters 5+: add elite demon commander
+    if (ch >= 5) {
+      baseList.push(
+        this.createEnemy('elite_demon', 'e8', 2150, 600, 2000, 2300)
+      );
+    }
+
+    // Chapters 8+: add another elite demon guard for Lanka / Yuddha
+    if (ch >= 8) {
+      baseList.push(
+        this.createEnemy('elite_demon', 'e9', 3050, 500, 2950, 3200)
+      );
+    }
+
+    this.enemies = baseList;
   }
 
   private createEnemy(
@@ -45,13 +63,14 @@ export class EnemySystem {
     id: string,
     x: number,
     y: number,
-    patrolStart: number,
-    patrolEnd: number
+    patrolStartX: number,
+    patrolEndX: number
   ): Enemy {
     const config = this.getEnemyConfig(type);
     const enemiesCfg = adminConfig.get().enemies;
-    const hpMult = enemiesCfg.hpMultiplier || 1.0;
-    const dmgMult = enemiesCfg.damageMultiplier || 1.0;
+    const chMultiplier = 1 + (this.chapterId - 1) * 0.08; // Chapter scaling
+    const hpMult = (enemiesCfg.hpMultiplier || 1.0) * chMultiplier;
+    const dmgMult = (enemiesCfg.damageMultiplier || 1.0) * chMultiplier;
     const finalHp = Math.round(config.maxHp * hpMult);
     const finalDmg = Math.round(config.damage * dmgMult);
     return {
@@ -68,18 +87,18 @@ export class EnemySystem {
       maxHp: finalHp,
       damage: finalDmg,
       attackRange: config.attackRange,
-      detectionRange: config.detectionRange,
+      detectionRange: type === 'archer_demon' ? 450 : 320,
+      attackCooldown: config.attackCooldown,
+      attackTimer: Math.random() * config.attackCooldown,
       aiState: 'PATROL',
       animState: 'Enemy_Walk',
       animTimer: 0,
       currentFrame: 0,
-      attackCooldown: config.cooldown,
-      attackTimer: 0,
+      patrolStartX,
+      patrolEndX,
+      patrolDir: -1,
       isAttacking: false,
-      isGrounded: false,
-      patrolStartX: patrolStart,
-      patrolEndX: patrolEnd,
-      patrolDir: 1,
+      isGrounded: true,
       hurtTimer: 0,
       deathTimer: 0,
       isDead: false,
@@ -89,60 +108,17 @@ export class EnemySystem {
   private getEnemyConfig(type: EnemyType) {
     switch (type) {
       case 'small_demon':
-        return {
-          width: 44,
-          height: 60,
-          maxHp: 50,
-          damage: 15,
-          attackRange: 55,
-          detectionRange: 320,
-          speed: 130,
-          cooldown: 1.2,
-        };
+        return { width: 38, height: 48, maxHp: 65, damage: 12, speed: 90, attackRange: 50, attackCooldown: 1.6 };
       case 'archer_demon':
-        return {
-          width: 42,
-          height: 64,
-          maxHp: 45,
-          damage: 18,
-          attackRange: 340,
-          detectionRange: 420,
-          speed: 100,
-          cooldown: 2.0,
-        };
+        return { width: 36, height: 50, maxHp: 55, damage: 14, speed: 70, attackRange: 380, attackCooldown: 2.2 };
       case 'heavy_demon':
-        return {
-          width: 64,
-          height: 84,
-          maxHp: 120,
-          damage: 32,
-          attackRange: 70,
-          detectionRange: 280,
-          speed: 75,
-          cooldown: 1.8,
-        };
+        return { width: 56, height: 68, maxHp: 160, damage: 25, speed: 50, attackRange: 65, attackCooldown: 2.4 };
       case 'flying_demon':
-        return {
-          width: 48,
-          height: 52,
-          maxHp: 40,
-          damage: 14,
-          attackRange: 180,
-          detectionRange: 360,
-          speed: 140,
-          cooldown: 1.5,
-        };
+        return { width: 44, height: 40, maxHp: 50, damage: 15, speed: 110, attackRange: 220, attackCooldown: 1.8 };
       case 'elite_demon':
-        return {
-          width: 50,
-          height: 72,
-          maxHp: 90,
-          damage: 25,
-          attackRange: 65,
-          detectionRange: 360,
-          speed: 180,
-          cooldown: 1.1,
-        };
+        return { width: 48, height: 64, maxHp: 190, damage: 28, speed: 80, attackRange: 70, attackCooldown: 1.5 };
+      default:
+        return { width: 40, height: 50, maxHp: 80, damage: 15, speed: 80, attackRange: 60, attackCooldown: 1.8 };
     }
   }
 
@@ -150,201 +126,201 @@ export class EnemySystem {
     dt: number,
     hero: HeroState,
     platforms: Platform[],
-    onSpawnEnemyProjectile: (proj: Projectile) => void,
-    onEnemyMeleeHit: (damage: number, knockbackDir: number) => void
+    onSpawnProjectile: (proj: Projectile) => void,
+    onMeleeHero: (damage: number, knockbackDir: number) => void
   ) {
     for (let i = this.enemies.length - 1; i >= 0; i--) {
-      const e = this.enemies[i];
+      const enemy = this.enemies[i];
+      const cfg = this.getEnemyConfig(enemy.type);
 
-      // Handle Death
-      if (e.isDead) {
-        e.deathTimer += dt;
-        e.animState = 'Enemy_Death';
-        e.currentFrame = Math.min(8, e.deathTimer * 8);
-        if (e.deathTimer >= 1.2) {
-          this.enemies.splice(i, 1);
-        }
-        continue;
+      // Handle hurt recovery timer
+      if (enemy.hurtTimer > 0) {
+        enemy.hurtTimer -= dt;
       }
 
-      // Handle Hurt State
-      if (e.hurtTimer > 0) {
-        e.hurtTimer -= dt;
-        e.animState = 'Enemy_Hurt';
-        if (e.hurtTimer <= 0 && e.aiState === 'HURT') {
-          e.aiState = 'CHASE';
-        }
-        continue;
+      // Decrement attack cooldown
+      if (enemy.attackTimer > 0) {
+        enemy.attackTimer -= dt;
       }
 
-      // Cooldown timer
-      if (e.attackTimer > 0) {
-        e.attackTimer -= dt;
-      }
-
-      const config = this.getEnemyConfig(e.type);
-      const distToHero = Math.hypot(hero.x - e.x, hero.y - e.y);
-      const xDiff = hero.x - e.x;
-      const yDiff = hero.y - e.y;
-
-      // Line of sight check: Enemies do NOT attack or chase through solid platforms/walls
-      const hasLOS = hasLineOfSight(
-        e.x + e.width * 0.5,
-        e.y + e.height * 0.5,
-        hero.x + hero.width * 0.5,
-        hero.y + hero.height * 0.5,
-        platforms
-      );
+      // Distance to Hero
+      const distToHero = Math.hypot(hero.x - enemy.x, hero.y - enemy.y);
+      const detectionRadius = enemy.detectionRange;
+      const canSeeHero = distToHero < detectionRadius && hasLineOfSight(enemy.x, enemy.y - 20, hero.x, hero.y - 20, platforms);
 
       // AI State Machine
-      if (distToHero <= e.detectionRange && hasLOS && !hero.isDead) {
-        e.facing = xDiff > 0 ? 'right' : 'left';
-
-        if (e.type === 'archer_demon') {
-          // Ranged Archer Demon AI:
-          // Keep distance, aim, shoot projectiles, retreat if hero gets too close
-          if (distToHero < 140) {
-            // Reposition backwards away from hero
-            e.aiState = 'CHASE';
-            e.vx = xDiff > 0 ? -config.speed : config.speed;
-            e.animState = 'Enemy_Run';
-          } else if (distToHero <= e.attackRange) {
-            // Stop and Attack
-            e.aiState = 'ATTACK';
-            e.vx = 0;
-            e.animState = 'Enemy_Attack';
-
-            if (e.attackTimer <= 0) {
-              e.attackTimer = config.cooldown;
-              soundManager.play('enemyAttack');
-              // Shoot dark arrow projectile
-              const dir = e.facing === 'right' ? 1 : -1;
-              onSpawnEnemyProjectile({
-                id: `e-arrow-${Date.now()}-${Math.random()}`,
-                owner: 'enemy',
-                x: e.x + (dir === 1 ? e.width + 5 : -15),
-                y: e.y + e.height * 0.4,
-                vx: dir * 420,
-                vy: (hero.y - e.y) * 0.8,
-                damage: e.damage,
-                isCharged: false,
-                type: 'dark_arrow',
-                radius: 6,
-                life: 3.5,
-                facing: e.facing,
-              });
-            }
-          } else {
-            // Move closer to get in attack range
-            e.aiState = 'CHASE';
-            e.vx = xDiff > 0 ? config.speed : -config.speed;
-            e.animState = 'Enemy_Walk';
-          }
-        } else if (e.type === 'flying_demon') {
-          // Flying Demon AI (navigates in 2D air space)
-          if (distToHero <= e.attackRange) {
-            e.aiState = 'ATTACK';
-            e.animState = 'Enemy_Attack';
-            // Swoop attack
-            e.vx = (xDiff / distToHero) * (config.speed * 1.5);
-            e.vy = (yDiff / distToHero) * (config.speed * 1.5);
-
-            if (distToHero < 50 && e.attackTimer <= 0) {
-              e.attackTimer = config.cooldown;
-              soundManager.play('enemyAttack');
-              onEnemyMeleeHit(e.damage, e.facing === 'right' ? 1 : -1);
-            }
-          } else {
-            e.aiState = 'CHASE';
-            e.animState = 'Enemy_Run';
-            e.vx = (xDiff / distToHero) * config.speed;
-            e.vy = ((hero.y - 120 - e.y) / distToHero) * config.speed; // Hover above
-          }
+      if (enemy.aiState === 'PATROL') {
+        if (canSeeHero) {
+          enemy.aiState = 'CHASE';
+          enemy.animState = 'Enemy_Walk';
         } else {
-          // Melee Demon Warriors (Small, Heavy, Elite)
-          if (distToHero <= e.attackRange) {
-            // In attack range
-            e.aiState = 'ATTACK';
-            e.vx = 0;
-            e.animState = 'Enemy_Attack';
-
-            if (e.attackTimer <= 0) {
-              e.attackTimer = config.cooldown;
-              soundManager.play('enemyAttack');
-              onEnemyMeleeHit(e.damage, e.facing === 'right' ? 1 : -1);
+          // Patrol back and forth
+          if (enemy.facing === 'left') {
+            enemy.vx = -cfg.speed * 0.6;
+            if (enemy.x <= enemy.patrolStartX) {
+              enemy.facing = 'right';
             }
           } else {
-            // Chase hero
-            e.aiState = 'CHASE';
-            e.vx = xDiff > 0 ? config.speed : -config.speed;
-            e.animState = 'Enemy_Run';
+            enemy.vx = cfg.speed * 0.6;
+            if (enemy.x >= enemy.patrolEndX) {
+              enemy.facing = 'left';
+            }
+          }
+          enemy.animState = 'Enemy_Walk';
+        }
+      } else if (enemy.aiState === 'CHASE') {
+        if (!canSeeHero && distToHero > detectionRadius * 1.5) {
+          enemy.aiState = 'PATROL';
+        } else {
+          // Face toward hero
+          enemy.facing = hero.x < enemy.x ? 'left' : 'right';
+
+          if (distToHero <= enemy.attackRange) {
+            // Within attack range -> Switch to attack
+            enemy.aiState = 'ATTACK';
+            enemy.vx = 0;
+          } else {
+            // Move toward hero
+            const dir = enemy.facing === 'left' ? -1 : 1;
+            enemy.vx = dir * cfg.speed;
+            enemy.animState = 'Enemy_Walk';
           }
         }
-      } else {
-        // Hero not detected or obstructed -> Patrol along boundary
-        e.aiState = 'PATROL';
-        e.animState = 'Enemy_Walk';
+      } else if (enemy.aiState === 'ATTACK') {
+        enemy.vx = 0;
+        enemy.facing = hero.x < enemy.x ? 'left' : 'right';
 
-        if (e.type !== 'flying_demon') {
-          if (e.x >= e.patrolEndX) {
-            e.patrolDir = -1;
-            e.facing = 'left';
-          } else if (e.x <= e.patrolStartX) {
-            e.patrolDir = 1;
-            e.facing = 'right';
+        if (distToHero > enemy.attackRange * 1.2) {
+          enemy.aiState = 'CHASE';
+        } else if (enemy.attackTimer <= 0) {
+          // Execute Attack
+          enemy.attackTimer = enemy.attackCooldown;
+          enemy.animState = 'Enemy_Attack';
+
+          if (enemy.type === 'archer_demon') {
+            // Ranged Shot
+            const shootDir = enemy.facing === 'left' ? -1 : 1;
+            onSpawnProjectile({
+              id: `enemy_arrow_${Date.now()}_${Math.random()}`,
+              owner: 'enemy',
+              x: enemy.x + (shootDir === 1 ? enemy.width + 4 : -4),
+              y: enemy.y - 25,
+              vx: shootDir * 420,
+              vy: 0,
+              damage: enemy.damage,
+              isCharged: false,
+              type: 'dark_arrow',
+              radius: 6,
+              life: 2.2,
+              facing: enemy.facing,
+            });
+            soundManager.play('enemyAttack');
+          } else if (enemy.type === 'flying_demon') {
+            // Dive bomb melee
+            const dir = enemy.facing === 'left' ? -1 : 1;
+            onMeleeHero(enemy.damage, dir);
+            soundManager.play('enemyAttack');
+          } else {
+            // Ground Melee Strike
+            const dir = enemy.facing === 'left' ? -1 : 1;
+            onMeleeHero(enemy.damage, dir);
+            soundManager.play('enemyAttack');
           }
-          e.vx = e.patrolDir * (config.speed * 0.65);
         } else {
-          // Flying patrol bobbing
-          e.vx = Math.sin(e.animTimer * 1.5) * 60;
-          e.vy = Math.cos(e.animTimer * 2) * 40;
+          // Resting between attacks
+          enemy.animState = 'Enemy_Idle';
         }
       }
 
-      // Physics & Platform Resolution for grounded demons
-      if (e.type !== 'flying_demon') {
-        e.vy = Math.min(e.vy + GRAVITY * dt, TERMINAL_VELOCITY);
-        const prevY = e.y;
-        e.x += e.vx * dt;
-        e.y += e.vy * dt;
-        resolvePlatformCollision(e, prevY, platforms);
+      // Physics & Movement
+      if (enemy.type === 'flying_demon') {
+        // Floating sinusoidal movement
+        enemy.vy = Math.sin(Date.now() * 0.005 + enemy.x) * 40;
+        enemy.x += enemy.vx * dt;
+        enemy.y += enemy.vy * dt;
       } else {
-        // Free air movement
-        e.x += e.vx * dt;
-        e.y += e.vy * dt;
+        // Apply Gravity
+        const prevFootY = enemy.y - enemy.height;
+        enemy.vy = Math.min(enemy.vy + GRAVITY * dt, TERMINAL_VELOCITY);
+        enemy.x += enemy.vx * dt;
+        enemy.y += enemy.vy * dt;
+
+        // Platform collision
+        const colEntity = {
+          x: enemy.x - enemy.width * 0.5,
+          y: enemy.y - enemy.height,
+          vx: enemy.vx,
+          vy: enemy.vy,
+          width: enemy.width,
+          height: enemy.height,
+          isGrounded: enemy.isGrounded,
+        };
+
+        resolvePlatformCollision(colEntity, prevFootY, platforms);
+        enemy.y = colEntity.y + enemy.height;
+        enemy.vy = colEntity.vy;
+        enemy.isGrounded = colEntity.isGrounded;
       }
 
-      // Animation tick
-      e.animTimer += dt;
-      e.currentFrame = Math.floor(e.animTimer * 8);
+      // Strict Map Boundary Enforcement (prevent enemies from going outside the world)
+      const MIN_MAP_X = 60;
+      const MAX_MAP_X = 4120;
+      const MAX_GROUND_Y = 672;
+
+      if (enemy.x < MIN_MAP_X) {
+        enemy.x = MIN_MAP_X;
+        enemy.vx = Math.abs(enemy.vx);
+        enemy.facing = 'right';
+      } else if (enemy.x > MAX_MAP_X) {
+        enemy.x = MAX_MAP_X;
+        enemy.vx = -Math.abs(enemy.vx);
+        enemy.facing = 'left';
+      }
+
+      if (enemy.type === 'flying_demon') {
+        if (enemy.y < 160) {
+          enemy.y = 160;
+          enemy.vy = Math.abs(enemy.vy);
+        } else if (enemy.y > 580) {
+          enemy.y = 580;
+          enemy.vy = -Math.abs(enemy.vy);
+        }
+      } else {
+        if (enemy.y > MAX_GROUND_Y) {
+          enemy.y = MAX_GROUND_Y;
+          enemy.vy = 0;
+          enemy.isGrounded = true;
+        }
+      }
+
+      // Animation Frame Cycling
+      enemy.currentFrame += dt * 8;
     }
   }
 
   public applyDamage(
     enemyId: string,
-    amount: number,
+    damage: number,
     knockbackDir: number
   ): { died: boolean; enemy?: Enemy } {
-    const e = this.enemies.find((item) => item.id === enemyId);
-    if (!e || e.isDead) return { died: false };
+    const enemy = this.enemies.find((e) => e.id === enemyId);
+    if (!enemy) return { died: false };
 
-    e.hp = Math.max(0, e.hp - amount);
-    e.hurtTimer = 0.25;
-    e.aiState = 'HURT';
-    e.vx = knockbackDir * 180;
-    e.vy = -120;
+    enemy.hp -= damage;
+    enemy.hurtTimer = 0.25;
+    enemy.animState = 'Enemy_Hurt';
+    enemy.vx = knockbackDir * 150; // Apply knockback
+    enemy.aiState = 'CHASE'; // Aggro onto attacker
 
-    if (e.hp <= 0) {
-      e.isDead = true;
-      e.deathTimer = 0;
+    soundManager.play('heroHurt');
+
+    if (enemy.hp <= 0) {
+      // Enemy Defeated
+      this.enemies = this.enemies.filter((e) => e.id !== enemyId);
       soundManager.play('enemyDeath');
-      return { died: true, enemy: e };
+      return { died: true, enemy };
     }
 
-    return { died: false, enemy: e };
-  }
-
-  public respawnAll() {
-    this.spawnInitialEnemies();
+    return { died: false, enemy };
   }
 }

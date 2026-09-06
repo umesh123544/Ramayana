@@ -6,6 +6,8 @@ import { adminConfig } from './adminConfig';
 export interface PlayerInput {
   left: boolean;
   right: boolean;
+  up?: boolean;
+  down?: boolean;
   run: boolean;
   jump: boolean;
   attackDown: boolean;
@@ -14,6 +16,7 @@ export interface PlayerInput {
   interact: boolean;
   dodge?: boolean;
   block?: boolean;
+  aimDir?: { x: number; y: number };
 }
 
 export class CharacterController {
@@ -99,7 +102,7 @@ export class CharacterController {
     dt: number,
     input: PlayerInput,
     platforms: Platform[],
-    onShootArrow: (isCharged: boolean) => void,
+    onShootArrow: (isCharged: boolean, aimDir?: { x: number; y: number }) => void,
     onDivineBlessing: () => void,
     onGameOver: () => void
   ) {
@@ -253,6 +256,14 @@ export class CharacterController {
       }
     }
 
+    // Map horizontal & floor boundary clamping (prevent falling or walking outside the world)
+    h.x = Math.max(30, Math.min(4180, h.x));
+    if (h.y > 672 && h.y < 850) {
+      h.y = 672;
+      h.vy = 0;
+      h.isGrounded = true;
+    }
+
     // 3. Fall into chasm check
     if (h.y > 900) {
       this.takeDamage(100, 0); // Fatal fall
@@ -271,7 +282,7 @@ export class CharacterController {
       h.attackTimer = 0.25;
       h.attackCooldown = isCharged ? 0.45 : 0.22;
       soundManager.play('bowAttack');
-      onShootArrow(isCharged);
+      onShootArrow(isCharged, input.aimDir);
     }
 
     if (h.attackTimer > 0) {

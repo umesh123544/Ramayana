@@ -4,16 +4,20 @@ import { HUD } from './components/HUD';
 import { VirtualControls } from './components/VirtualControls';
 import { DivineBlessingBanner } from './components/DivineBlessingBanner';
 import { GameOverModal } from './components/GameOverModal';
+import { ChapterVictoryModal } from './components/ChapterVictoryModal';
 import { DialogueBox } from './components/DialogueBox';
 import { AnimationPipelineModal } from './components/AnimationPipelineModal';
 import { AdminPanelModal } from './components/AdminPanelModal';
 import { MainMenu } from './components/MainMenu';
 import { DifficultySelector } from './components/DifficultySelector';
+import { ChapterSelection } from './components/ChapterSelection';
+import { Chapter } from './data/gameData';
 import { HeroState } from './types';
 import { PlayerInput } from './systems/characterController';
 import { soundManager } from './audio/soundManager';
-import { adminConfig, AdminGameConfig, DifficultyLevel } from './systems/adminConfig';
-import { Info, Sparkles, Sliders } from 'lucide-react';
+import { adminConfig, DifficultyLevel } from './systems/adminConfig';
+import { saveSystem } from './data/saveSystem';
+import { Info } from 'lucide-react';
 
 export default function App() {
   const [heroState, setHeroState] = useState<HeroState>({
@@ -55,9 +59,14 @@ export default function App() {
   });
 
   const [gameKey, setGameKey] = useState<number>(0);
+  const [currentChapterId, setCurrentChapterId] = useState<number>(1);
+  const [completedChapterId, setCompletedChapterId] = useState<number | null>(null);
+  const [isVictoryModalOpen, setIsVictoryModalOpen] = useState<boolean>(false);
   const [isGameOver, setIsGameOver] = useState<boolean>(false);
   const [isMainMenuOpen, setIsMainMenuOpen] = useState<boolean>(true);
   const [isDifficultySelectorOpen, setIsDifficultySelectorOpen] = useState<boolean>(false);
+  const [isChapterSelectOpen, setIsChapterSelectOpen] = useState<boolean>(false);
+  const [selectedChapter, setSelectedChapter] = useState<Chapter | null>(null);
   const [hasGameStarted, setHasGameStarted] = useState<boolean>(false);
   const [divineBannerMsg, setDivineBannerMsg] = useState<string | null>(null);
   const [isNearPurneema, setIsNearPurneema] = useState<boolean>(false);
@@ -65,7 +74,7 @@ export default function App() {
   const [isPipelineModalOpen, setIsPipelineModalOpen] = useState<boolean>(false);
   const [isAdminModalOpen, setIsAdminModalOpen] = useState<boolean>(false);
   const [isMuted, setIsMuted] = useState<boolean>(false);
-  const [showControlsHint, setShowControlsHint] = useState<boolean>(false);
+  const [showVirtualControls, setShowVirtualControls] = useState<boolean>(true);
 
   // Reference for passing virtual touch input without re-renders
   const externalInputRef = useRef<Partial<PlayerInput>>({});
@@ -74,9 +83,19 @@ export default function App() {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        if (isDifficultySelectorOpen) {
-          setIsDifficultySelectorOpen(false);
+        if (isVictoryModalOpen) {
+          setIsVictoryModalOpen(false);
           setIsMainMenuOpen(true);
+        } else if (isChapterSelectOpen) {
+          setIsChapterSelectOpen(false);
+          setIsMainMenuOpen(true);
+        } else if (isDifficultySelectorOpen) {
+          setIsDifficultySelectorOpen(false);
+          if (selectedChapter) {
+            setIsChapterSelectOpen(true);
+          } else {
+            setIsMainMenuOpen(true);
+          }
         } else if (!isAdminModalOpen && !isPipelineModalOpen && !activeDialogue) {
           setIsMainMenuOpen((prev) => !prev);
         }
@@ -84,7 +103,7 @@ export default function App() {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isDifficultySelectorOpen, isAdminModalOpen, isPipelineModalOpen, activeDialogue]);
+  }, [isVictoryModalOpen, isChapterSelectOpen, isDifficultySelectorOpen, selectedChapter, isAdminModalOpen, isPipelineModalOpen, activeDialogue]);
 
   const handleHeroStateChange = useCallback((newHero: HeroState) => {
     setHeroState(newHero);
@@ -102,6 +121,13 @@ export default function App() {
     soundManager.play('gameOver');
   }, []);
 
+  const handleChapterVictory = useCallback((defeatedChapterId: number) => {
+    soundManager.play('levelComplete');
+    saveSystem.unlockNextChapter(defeatedChapterId);
+    setCompletedChapterId(defeatedChapterId);
+    setIsVictoryModalOpen(true);
+  }, []);
+
   const handleRestart = () => {
     setIsGameOver(false);
     setGameKey((k) => k + 1);
@@ -110,6 +136,11 @@ export default function App() {
 
   const handleStartNewGame = (diff: DifficultyLevel) => {
     adminConfig.setDifficulty(diff);
+    if (selectedChapter) {
+      setCurrentChapterId(selectedChapter.id);
+    } else {
+      setCurrentChapterId(1);
+    }
     setIsDifficultySelectorOpen(false);
     setIsMainMenuOpen(false);
     setHasGameStarted(true);
@@ -152,16 +183,27 @@ export default function App() {
           soundManager.play('uiClick');
           setIsMainMenuOpen(true);
         }}
+        onOpenChapters={() => {
+          soundManager.play('uiClick');
+          setIsMainMenuOpen(false);
+          setIsDifficultySelectorOpen(false);
+          setIsChapterSelectOpen(true);
+        }}
+        currentChapterId={currentChapterId}
+        showControls={showVirtualControls}
+        onToggleControls={() => setShowVirtualControls((prev) => !prev)}
       />
 
       {/* Main 2D Game Canvas */}
       <main className="flex-1 w-full h-full relative">
         <GameCanvas
-          key={gameKey}
+          key={`${gameKey}-ch${currentChapterId}`}
           gameKey={gameKey}
+          chapterId={currentChapterId}
           onHeroStateChange={handleHeroStateChange}
           onShowDivineBlessing={handleShowDivineBlessing}
           onGameOver={handleGameOver}
+          onChapterVictory={handleChapterVictory}
           canInteractPurneema={setIsNearPurneema}
           onOpenDialogue={setActiveDialogue}
           externalInputRef={externalInputRef}
@@ -174,6 +216,7 @@ export default function App() {
         canInteract={isNearPurneema}
         onInteract={handleInteractPurneema}
         divineReady={heroState.divinePower >= 40 && heroState.divineCooldown <= 0}
+        visible={showVirtualControls}
       />
 
       {/* Divine Blessing Announcement Banner */}
@@ -201,15 +244,41 @@ export default function App() {
         }}
       />
 
+      {/* Chapter Victory & Next Chapter Unlock Modal */}
+      {isVictoryModalOpen && (
+        <ChapterVictoryModal
+          completedChapterId={completedChapterId || currentChapterId}
+          nextChapterId={(completedChapterId || currentChapterId) < 10 ? (completedChapterId || currentChapterId) + 1 : null}
+          onProceedNextChapter={(nextId) => {
+            setIsVictoryModalOpen(false);
+            setCurrentChapterId(nextId);
+            setGameKey((k) => k + 1);
+          }}
+          onOpenChapterSelect={() => {
+            setIsVictoryModalOpen(false);
+            setIsChapterSelectOpen(true);
+          }}
+          onReturnToMainMenu={() => {
+            setIsVictoryModalOpen(false);
+            setIsMainMenuOpen(true);
+          }}
+        />
+      )}
+
       {/* Main Menu Overlay with Animated Mythological Background */}
-      {isMainMenuOpen && !isDifficultySelectorOpen && (
+      {isMainMenuOpen && !isDifficultySelectorOpen && !isChapterSelectOpen && !isVictoryModalOpen && (
         <MainMenu
           onNewGame={() => {
+            setSelectedChapter(null);
             setIsMainMenuOpen(false);
             setIsDifficultySelectorOpen(true);
           }}
           onResumeGame={() => {
             setIsMainMenuOpen(false);
+          }}
+          onOpenChapters={() => {
+            setIsMainMenuOpen(false);
+            setIsChapterSelectOpen(true);
           }}
           onOpenSettings={() => {
             setIsAdminModalOpen(true);
@@ -218,13 +287,35 @@ export default function App() {
         />
       )}
 
+      {/* Chapter Selection Screen */}
+      {isChapterSelectOpen && (
+        <ChapterSelection
+          onBack={() => {
+            setIsChapterSelectOpen(false);
+            setIsMainMenuOpen(true);
+          }}
+          onSelectChapter={(chapter) => {
+            setSelectedChapter(chapter);
+            setCurrentChapterId(chapter.id);
+            setIsChapterSelectOpen(false);
+            setIsDifficultySelectorOpen(true);
+          }}
+          initialChapterId={currentChapterId}
+        />
+      )}
+
       {/* Difficulty Selector Screen */}
       {isDifficultySelectorOpen && (
         <DifficultySelector
           onBack={() => {
             setIsDifficultySelectorOpen(false);
-            setIsMainMenuOpen(true);
+            if (selectedChapter) {
+              setIsChapterSelectOpen(true);
+            } else {
+              setIsMainMenuOpen(true);
+            }
           }}
+          selectedChapter={selectedChapter || undefined}
           onConfirmStart={(selectedDiff) => {
             handleStartNewGame(selectedDiff);
           }}
@@ -247,7 +338,7 @@ export default function App() {
           soundManager.play('uiClick');
           setIsAdminModalOpen(false);
         }}
-        onConfigSaved={(newConfig) => {
+        onConfigSaved={() => {
           // Re-key canvas to re-initialize character controller with new base attributes
           setGameKey((k) => k + 1);
         }}
