@@ -1,6 +1,6 @@
 import React from 'react';
 import { HeroState } from '../types';
-import { Heart, Zap, Volume2, VolumeX, Sparkles, Sliders, ShieldAlert, Settings } from 'lucide-react';
+import { Heart, Zap, Volume2, VolumeX, Sparkles, Sliders, ShieldAlert, Settings, Menu } from 'lucide-react';
 import { adminConfig } from '../systems/adminConfig';
 
 interface HUDProps {
@@ -9,6 +9,7 @@ interface HUDProps {
   onToggleMute: () => void;
   onOpenPipelineModal: () => void;
   onOpenAdminModal: () => void;
+  onOpenMainMenu?: () => void;
 }
 
 export const HUD: React.FC<HUDProps> = ({
@@ -17,6 +18,7 @@ export const HUD: React.FC<HUDProps> = ({
   onToggleMute,
   onOpenPipelineModal,
   onOpenAdminModal,
+  onOpenMainMenu,
 }) => {
   const hpPercent = Math.max(0, Math.min(100, (hero.hp / hero.maxHp) * 100));
   const divinePercent = Math.max(0, Math.min(100, hero.divinePower));
@@ -128,14 +130,26 @@ export const HUD: React.FC<HUDProps> = ({
             </span>
           </div>
 
-          {/* Quick Buttons: Admin, Sound, Pipeline */}
+          {/* Quick Buttons: Menu, Admin, Sound, Pipeline */}
           <div className="flex sm:flex-col gap-1 sm:gap-1.5">
+            {/* Main Menu Button */}
+            {onOpenMainMenu && (
+              <button
+                id="main-menu-toggle-btn"
+                onClick={onOpenMainMenu}
+                title="Main Menu & Difficulty (मेन्यू)"
+                className="p-1.5 sm:p-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/50 shadow transition-all cursor-pointer flex items-center justify-center active:scale-95"
+              >
+                <Menu className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400" />
+              </button>
+            )}
+
             {/* Admin Panel Button */}
             <button
               id="admin-panel-toggle-btn"
               onClick={onOpenAdminModal}
               title="Admin Panel: Change Character, Name, HP, Speed, Colors & Story (एडमिन प्यानल)"
-              className="p-1.5 sm:p-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/50 shadow transition-all cursor-pointer flex items-center justify-center active:scale-95"
+              className="p-1.5 sm:p-2 rounded-xl bg-neutral-900/90 hover:bg-neutral-800 text-amber-300 border border-amber-500/30 shadow transition-all cursor-pointer flex items-center justify-center active:scale-95"
             >
               <Settings className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400" />
             </button>

@@ -12,6 +12,8 @@ export interface PlayerInput {
   attackRelease: boolean;
   divinePower: boolean;
   interact: boolean;
+  dodge?: boolean;
+  block?: boolean;
 }
 
 export class CharacterController {
@@ -72,7 +74,17 @@ export class CharacterController {
       isDivineActive: false,
       divineTimer: 0,
       divineCooldown: 0,
+
+      isDodging: false,
+      dodgeTimer: 0,
+      dodgeCooldown: 0,
+      isBlocking: false,
     };
+  }
+
+  public setCheckpoint(x: number, y: number) {
+    this.hero.respawnX = x;
+    this.hero.respawnY = y;
   }
 
   public syncWithConfig() {
@@ -149,9 +161,39 @@ export class CharacterController {
       }
     }
 
+    // Dodge timers & execution
+    if ((h.dodgeCooldown || 0) > 0) {
+      h.dodgeCooldown = (h.dodgeCooldown || 0) - dt;
+    }
+
+    if (h.isDodging) {
+      h.dodgeTimer = (h.dodgeTimer || 0) - dt;
+      if (h.dodgeTimer <= 0) {
+        h.isDodging = false;
+      }
+    }
+
+    // Initiate Dodge
+    if (input.dodge && !h.isDodging && (h.dodgeCooldown || 0) <= 0 && !h.isHurt && !h.isDead) {
+      h.isDodging = true;
+      h.dodgeTimer = 0.32;
+      h.dodgeCooldown = 0.85;
+      h.isInvulnerable = true;
+      h.invulnerableTimer = 0.35;
+      h.vx = (h.facing === 'right' ? 1 : -1) * 520;
+      soundManager.play('dodge');
+    }
+
+    // Block state
+    h.isBlocking = !!input.block && !h.isDodging && !h.isAttacking && !h.isHurt;
+
     // 1. Horizontal Movement & Acceleration
     let targetSpeed = 0;
-    if (input.left && !input.right) {
+    if (h.isDodging) {
+      targetSpeed = (h.facing === 'right' ? 1 : -1) * 480;
+    } else if (h.isBlocking) {
+      targetSpeed = 0; // Stationary while guarding
+    } else if (input.left && !input.right) {
       h.facing = 'left';
       targetSpeed = input.run ? -this.runSpeed : -this.walkSpeed;
     } else if (input.right && !input.left) {
@@ -283,6 +325,26 @@ export class CharacterController {
     const h = this.hero;
     if (h.isInvulnerable || h.isDead) return false;
 
+    // Dodge completely avoids damage
+    if (h.isDodging) {
+      return false;
+    }
+
+    // Blocking reduces damage by 80% and negates knockback
+    if (h.isBlocking) {
+      const blockedDmg = Math.max(1, Math.round(amount * 0.2));
+      h.hp = Math.max(0, h.hp - blockedDmg);
+      soundManager.play('block');
+      h.invulnerableTimer = 0.4;
+      if (h.hp <= 0) {
+        h.lives = Math.max(0, h.lives - 1);
+        h.isDead = true;
+        h.deathTimer = 0;
+        soundManager.play('heroHurt');
+      }
+      return true;
+    }
+
     // Divine aura damage resistance
     const actualDamage = h.isDivineActive ? Math.round(amount * 0.5) : amount;
     h.hp = Math.max(0, h.hp - actualDamage);
@@ -309,12 +371,17 @@ export class CharacterController {
   }
 
   public collectDivineEnergy(amount: number) {
-    this.hero.divinePower = Math.min(100, this.hero.divinePower + amount);
+    const scaling = adminConfig.get().divinePowerScaling ?? 1.0;
+    const finalAmount = Math.max(1, Math.round(amount * scaling));
+    this.hero.divinePower = Math.min(100, this.hero.divinePower + finalAmount);
   }
 
   public resetHero() {
-    this.hero.lives = 3;
-    this.hero.hp = 100;
+    const heroCfg = adminConfig.get().hero;
+    this.hero.maxLives = heroCfg.lives;
+    this.hero.lives = heroCfg.lives;
+    this.hero.maxHp = heroCfg.maxHp;
+    this.hero.hp = heroCfg.maxHp;
     this.hero.divinePower = 40;
     this.hero.isDead = false;
     this.hero.deathTimer = 0;

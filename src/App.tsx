@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { GameCanvas } from './components/GameCanvas';
 import { HUD } from './components/HUD';
 import { VirtualControls } from './components/VirtualControls';
@@ -7,10 +7,12 @@ import { GameOverModal } from './components/GameOverModal';
 import { DialogueBox } from './components/DialogueBox';
 import { AnimationPipelineModal } from './components/AnimationPipelineModal';
 import { AdminPanelModal } from './components/AdminPanelModal';
+import { MainMenu } from './components/MainMenu';
+import { DifficultySelector } from './components/DifficultySelector';
 import { HeroState } from './types';
 import { PlayerInput } from './systems/characterController';
 import { soundManager } from './audio/soundManager';
-import { adminConfig, AdminGameConfig } from './systems/adminConfig';
+import { adminConfig, AdminGameConfig, DifficultyLevel } from './systems/adminConfig';
 import { Info, Sparkles, Sliders } from 'lucide-react';
 
 export default function App() {
@@ -54,6 +56,9 @@ export default function App() {
 
   const [gameKey, setGameKey] = useState<number>(0);
   const [isGameOver, setIsGameOver] = useState<boolean>(false);
+  const [isMainMenuOpen, setIsMainMenuOpen] = useState<boolean>(true);
+  const [isDifficultySelectorOpen, setIsDifficultySelectorOpen] = useState<boolean>(false);
+  const [hasGameStarted, setHasGameStarted] = useState<boolean>(false);
   const [divineBannerMsg, setDivineBannerMsg] = useState<string | null>(null);
   const [isNearPurneema, setIsNearPurneema] = useState<boolean>(false);
   const [activeDialogue, setActiveDialogue] = useState<string | null>(null);
@@ -64,6 +69,22 @@ export default function App() {
 
   // Reference for passing virtual touch input without re-renders
   const externalInputRef = useRef<Partial<PlayerInput>>({});
+
+  // Escape key toggle for Main Menu
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (isDifficultySelectorOpen) {
+          setIsDifficultySelectorOpen(false);
+          setIsMainMenuOpen(true);
+        } else if (!isAdminModalOpen && !isPipelineModalOpen && !activeDialogue) {
+          setIsMainMenuOpen((prev) => !prev);
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isDifficultySelectorOpen, isAdminModalOpen, isPipelineModalOpen, activeDialogue]);
 
   const handleHeroStateChange = useCallback((newHero: HeroState) => {
     setHeroState(newHero);
@@ -85,6 +106,14 @@ export default function App() {
     setIsGameOver(false);
     setGameKey((k) => k + 1);
     soundManager.play('uiClick');
+  };
+
+  const handleStartNewGame = (diff: DifficultyLevel) => {
+    adminConfig.setDifficulty(diff);
+    setIsDifficultySelectorOpen(false);
+    setIsMainMenuOpen(false);
+    setHasGameStarted(true);
+    setGameKey((k) => k + 1);
   };
 
   const handleToggleMute = () => {
@@ -118,6 +147,10 @@ export default function App() {
         onOpenAdminModal={() => {
           soundManager.play('uiClick');
           setIsAdminModalOpen(true);
+        }}
+        onOpenMainMenu={() => {
+          soundManager.play('uiClick');
+          setIsMainMenuOpen(true);
         }}
       />
 
@@ -162,7 +195,41 @@ export default function App() {
       <GameOverModal
         isOpen={isGameOver}
         onRestart={handleRestart}
+        onMainMenu={() => {
+          setIsGameOver(false);
+          setIsMainMenuOpen(true);
+        }}
       />
+
+      {/* Main Menu Overlay with Animated Mythological Background */}
+      {isMainMenuOpen && !isDifficultySelectorOpen && (
+        <MainMenu
+          onNewGame={() => {
+            setIsMainMenuOpen(false);
+            setIsDifficultySelectorOpen(true);
+          }}
+          onResumeGame={() => {
+            setIsMainMenuOpen(false);
+          }}
+          onOpenSettings={() => {
+            setIsAdminModalOpen(true);
+          }}
+          isGameActive={hasGameStarted}
+        />
+      )}
+
+      {/* Difficulty Selector Screen */}
+      {isDifficultySelectorOpen && (
+        <DifficultySelector
+          onBack={() => {
+            setIsDifficultySelectorOpen(false);
+            setIsMainMenuOpen(true);
+          }}
+          onConfirmStart={(selectedDiff) => {
+            handleStartNewGame(selectedDiff);
+          }}
+        />
+      )}
 
       {/* Pixler.dev Animation Pipeline Modal */}
       <AnimationPipelineModal

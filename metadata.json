@@ -1,6 +1,6 @@
 {
-  "name": "Ramayana 2D Action Adventure",
-  "description": "A 2D action-adventure platformer inspired by the Ramayana featuring hero Umesh, bow combat, divine powers, animated enemies, and mythological environment.",
+  "name": "RAMAYAN - The Epic Journey",
+  "description": "A cinematic Indian mythological 2D action-adventure platformer inspired by the Ramayana featuring hero Umesh, bow combat, divine powers, 10 chapters, checkpoints, and boss encounters.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

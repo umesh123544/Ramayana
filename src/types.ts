@@ -49,7 +49,8 @@ export type EnemyType =
   | 'archer_demon' // Type 2: Archer demon (ranged)
   | 'heavy_demon' // Type 3: Heavy demon warrior (high HP, slow, high dmg)
   | 'flying_demon' // Type 4: Flying demon (wings, dive/ranged)
-  | 'elite_demon'; // Type 5: Elite demon warrior (fast, special attack)
+  | 'elite_demon' // Type 5: Elite demon warrior (fast, special attack)
+  | 'magical_demon'; // Type 6: Magical demon sorcerer (shadow void orbs)
 
 // Enemy AI States
 export type EnemyAIState =
@@ -200,6 +201,12 @@ export interface HeroState {
   isDivineActive: boolean;
   divineTimer: number;
   divineCooldown: number;
+
+  // Dodge & Block
+  isDodging?: boolean;
+  dodgeTimer?: number;
+  dodgeCooldown?: number;
+  isBlocking?: boolean;
 }
 
 export interface PurneemaState {

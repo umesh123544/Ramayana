@@ -6,11 +6,13 @@ import { adminConfig } from '../systems/adminConfig';
 interface GameOverModalProps {
   isOpen: boolean;
   onRestart: () => void;
+  onMainMenu?: () => void;
 }
 
 export const GameOverModal: React.FC<GameOverModalProps> = ({
   isOpen,
   onRestart,
+  onMainMenu,
 }) => {
   const heroName = adminConfig.get().hero.name || 'Umesh';
 
@@ -46,14 +48,26 @@ export const GameOverModal: React.FC<GameOverModalProps> = ({
               {heroName} has fallen before the demon forces. Reignite the inner divine fire and try again.
             </p>
 
-            <button
-              id="restart-game-btn"
-              onClick={onRestart}
-              className="flex items-center justify-center gap-2 w-full py-3 px-5 sm:py-3.5 sm:px-6 rounded-xl bg-gradient-to-r from-amber-600 to-yellow-500 hover:from-amber-500 hover:to-yellow-400 text-neutral-950 font-extrabold text-xs sm:text-sm tracking-wide shadow-lg shadow-amber-500/20 active:scale-98 transition-all cursor-pointer"
-            >
-              <RotateCcw className="w-4 h-4" />
-              <span>RESTART ADVENTURE</span>
-            </button>
+            <div className="flex flex-col gap-2.5 w-full">
+              <button
+                id="restart-game-btn"
+                onClick={onRestart}
+                className="flex items-center justify-center gap-2 w-full py-3 px-5 sm:py-3.5 sm:px-6 rounded-xl bg-gradient-to-r from-amber-600 to-yellow-500 hover:from-amber-500 hover:to-yellow-400 text-neutral-950 font-extrabold text-xs sm:text-sm tracking-wide shadow-lg shadow-amber-500/20 active:scale-98 transition-all cursor-pointer"
+              >
+                <RotateCcw className="w-4 h-4" />
+                <span>RESTART ADVENTURE</span>
+              </button>
+
+              {onMainMenu && (
+                <button
+                  id="game-over-main-menu-btn"
+                  onClick={onMainMenu}
+                  className="flex items-center justify-center gap-2 w-full py-2.5 px-5 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-300 hover:text-amber-300 border border-neutral-700 font-bold text-xs uppercase tracking-wider transition-all cursor-pointer"
+                >
+                  <span>Main Menu / Change Difficulty</span>
+                </button>
+              )}
+            </div>
           </motion.div>
         </motion.div>
       )}

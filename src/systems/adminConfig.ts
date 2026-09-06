@@ -28,6 +28,8 @@ export interface VillainConfig {
   armorColor: string;
 }
 
+export type DifficultyLevel = 'EASY' | 'NORMAL' | 'HARD' | 'EPIC';
+
 export interface EnemiesConfig {
   smallDemonName: string;
   archerDemonName: string;
@@ -41,6 +43,8 @@ export interface EnemiesConfig {
 export interface AdminGameConfig {
   gameTitle: string;
   gameSubtitle: string;
+  difficulty: DifficultyLevel;
+  divinePowerScaling: number;
   hero: HeroConfig;
   companion: CompanionConfig;
   villain: VillainConfig;
@@ -50,6 +54,8 @@ export interface AdminGameConfig {
 export const DEFAULT_ADMIN_CONFIG: AdminGameConfig = {
   gameTitle: 'Ramayana 2D Action Adventure',
   gameSubtitle: 'A Mythological Epic Platformer • धनुर्धर उमेशको गाथा',
+  difficulty: 'NORMAL',
+  divinePowerScaling: 1.0,
   hero: {
     name: 'Umesh',
     title: 'Ramayana Hero • Bow Warrior',
@@ -136,6 +142,53 @@ class AdminConfigManager {
       console.warn('Failed to persist admin config to localStorage:', e);
     }
     this.notify();
+  }
+
+  public setDifficulty(diff: DifficultyLevel): AdminGameConfig {
+    const next = JSON.parse(JSON.stringify(this.config)) as AdminGameConfig;
+    next.difficulty = diff;
+
+    switch (diff) {
+      case 'EASY':
+        next.enemies.hpMultiplier = 0.7;
+        next.enemies.damageMultiplier = 0.65;
+        next.divinePowerScaling = 1.5;
+        next.companion.blessingEnergy = 50;
+        next.hero.lives = 4;
+        next.hero.arrowDamage = 32;
+        next.hero.chargedArrowDamage = 65;
+        break;
+      case 'NORMAL':
+        next.enemies.hpMultiplier = 1.0;
+        next.enemies.damageMultiplier = 1.0;
+        next.divinePowerScaling = 1.0;
+        next.companion.blessingEnergy = 35;
+        next.hero.lives = 3;
+        next.hero.arrowDamage = 25;
+        next.hero.chargedArrowDamage = 50;
+        break;
+      case 'HARD':
+        next.enemies.hpMultiplier = 1.45;
+        next.enemies.damageMultiplier = 1.4;
+        next.divinePowerScaling = 0.8;
+        next.companion.blessingEnergy = 25;
+        next.hero.lives = 3;
+        next.hero.arrowDamage = 22;
+        next.hero.chargedArrowDamage = 45;
+        break;
+      case 'EPIC':
+        next.enemies.hpMultiplier = 2.0;
+        next.enemies.damageMultiplier = 1.85;
+        next.divinePowerScaling = 0.6;
+        next.companion.blessingEnergy = 20;
+        next.hero.lives = 2;
+        next.hero.arrowDamage = 20;
+        next.hero.chargedArrowDamage = 40;
+        break;
+    }
+
+    this.save(next);
+    return this.config;
   }
 
   public resetToDefaults(): AdminGameConfig {
