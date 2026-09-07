@@ -1,3 +1,5 @@
+import { safeStorage } from '../utils/safeStorage';
+
 export interface HeroConfig {
   name: string;
   title: string;
@@ -131,7 +133,7 @@ class AdminConfigManager {
 
   private loadConfig(): AdminGameConfig {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
+      const raw = safeStorage.getItem(STORAGE_KEY);
       if (raw) {
         const parsed = JSON.parse(raw);
         // Deep merge with defaults to guard against missing fields
@@ -146,7 +148,7 @@ class AdminConfigManager {
         };
       }
     } catch (e) {
-      console.warn('Failed to load admin config from localStorage:', e);
+      console.warn('Failed to load admin config from storage:', e);
     }
     return JSON.parse(JSON.stringify(DEFAULT_ADMIN_CONFIG));
   }
@@ -162,9 +164,9 @@ class AdminConfigManager {
   public save(newConfig: AdminGameConfig) {
     this.config = JSON.parse(JSON.stringify(newConfig));
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(this.config));
+      safeStorage.setItem(STORAGE_KEY, JSON.stringify(this.config));
     } catch (e) {
-      console.warn('Failed to persist admin config to localStorage:', e);
+      console.warn('Failed to persist admin config to storage:', e);
     }
     this.notify();
   }

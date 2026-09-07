@@ -12,6 +12,7 @@ import {
   SettingsData,
   PlayerProgression,
 } from './gameData';
+import { safeStorage } from '../utils/safeStorage';
 
 const SAVE_KEY_PREFIX = 'ramayan_epic_save_';
 const ACTIVE_SAVE_KEY = 'ramayan_active_save_slot';
@@ -22,7 +23,7 @@ class SaveSystem {
 
   public getMaxUnlockedChapter(): number {
     try {
-      const raw = localStorage.getItem(MAX_UNLOCKED_CHAPTER_KEY);
+      const raw = safeStorage.getItem(MAX_UNLOCKED_CHAPTER_KEY);
       if (raw) {
         const val = parseInt(raw, 10);
         if (!isNaN(val) && val >= 1 && val <= 10) {
@@ -39,7 +40,7 @@ class SaveSystem {
     try {
       const current = this.getMaxUnlockedChapter();
       const clamped = Math.min(10, Math.max(current, maxChapter));
-      localStorage.setItem(MAX_UNLOCKED_CHAPTER_KEY, String(clamped));
+      safeStorage.setItem(MAX_UNLOCKED_CHAPTER_KEY, String(clamped));
     } catch {
       // ignore
     }
@@ -77,7 +78,7 @@ class SaveSystem {
     try {
       data.savedAt = new Date().toISOString();
       data.slotId = slotId;
-      localStorage.setItem(`${SAVE_KEY_PREFIX}${slotId}`, JSON.stringify(data));
+      safeStorage.setItem(`${SAVE_KEY_PREFIX}${slotId}`, JSON.stringify(data));
       return true;
     } catch (e) {
       console.error('Failed to save game data:', e);
@@ -87,7 +88,7 @@ class SaveSystem {
 
   public loadGame(slotId: string = 'autosave'): GameSaveData | null {
     try {
-      const raw = localStorage.getItem(`${SAVE_KEY_PREFIX}${slotId}`);
+      const raw = safeStorage.getItem(`${SAVE_KEY_PREFIX}${slotId}`);
       if (!raw) return null;
       const data = JSON.parse(raw) as GameSaveData;
       return data;
@@ -99,7 +100,7 @@ class SaveSystem {
 
   public hasSavedGame(): boolean {
     const slots = ['autosave', 'slot_1', 'slot_2', 'slot_3'];
-    return slots.some((s) => !!localStorage.getItem(`${SAVE_KEY_PREFIX}${s}`));
+    return slots.some((s) => !!safeStorage.getItem(`${SAVE_KEY_PREFIX}${s}`));
   }
 
   public getSavedSlots(): { id: string; name: string; data: GameSaveData | null }[] {
@@ -117,7 +118,7 @@ class SaveSystem {
 
   public deleteSlot(slotId: string): boolean {
     try {
-      localStorage.removeItem(`${SAVE_KEY_PREFIX}${slotId}`);
+      safeStorage.removeItem(`${SAVE_KEY_PREFIX}${slotId}`);
       return true;
     } catch {
       return false;
@@ -126,11 +127,11 @@ class SaveSystem {
 
   public setActiveSlot(slotId: string) {
     this.activeSlot = slotId;
-    localStorage.setItem(ACTIVE_SAVE_KEY, slotId);
+    safeStorage.setItem(ACTIVE_SAVE_KEY, slotId);
   }
 
   public getActiveSlot(): string {
-    return localStorage.getItem(ACTIVE_SAVE_KEY) || 'autosave';
+    return safeStorage.getItem(ACTIVE_SAVE_KEY) || 'autosave';
   }
 
   public getLatestSave(): GameSaveData | null {

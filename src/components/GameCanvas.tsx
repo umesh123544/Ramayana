@@ -73,10 +73,12 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     const handleResize = () => {
       if (!canvas || !container) return;
       const rect = container.getBoundingClientRect();
-      const dpr = window.devicePixelRatio || 1;
-      canvas.width = rect.width * dpr;
-      canvas.height = rect.height * dpr;
-      camera.resize(rect.width, rect.height);
+      const dpr = Math.min(window.devicePixelRatio || 1, 2); // Cap dpr to 2 for mobile performance
+      const width = Math.max(320, rect.width || window.innerWidth || 360);
+      const height = Math.max(240, rect.height || window.innerHeight || 640);
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+      camera.resize(width, height);
     };
 
     const resizeObserver = new ResizeObserver(handleResize);
@@ -153,11 +155,12 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     // MAIN 60FPS GAME LOOP
     // ==========================================
     const gameLoop = (currentTime: number) => {
-      const dt = Math.min((currentTime - lastTime) / 1000, 0.05); // Cap delta time
-      lastTime = currentTime;
+      try {
+        const dt = Math.min((currentTime - lastTime) / 1000, 0.05); // Cap delta time
+        lastTime = currentTime;
 
-      const keys = keysRef.current;
-      const ext = externalInputRef.current;
+        const keys = keysRef.current;
+        const ext = externalInputRef.current;
 
       // Merge keyboard & virtual inputs
       const isLeft = !!(keys['KeyA'] || keys['ArrowLeft'] || ext.left);
@@ -393,7 +396,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       const ctx = canvas.getContext('2d');
       if (ctx) {
         ctx.save();
-        const dpr = window.devicePixelRatio || 1;
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
         ctx.scale(dpr, dpr);
 
         ctx.clearRect(0, 0, camera.viewportWidth, camera.viewportHeight);
@@ -557,9 +560,12 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
 
         ctx.restore();
       }
+    } catch (err) {
+      console.warn('GameCanvas gameLoop exception:', err);
+    }
 
-      animFrameId = requestAnimationFrame(gameLoop);
-    };
+    animFrameId = requestAnimationFrame(gameLoop);
+  };
 
     animFrameId = requestAnimationFrame(gameLoop);
 

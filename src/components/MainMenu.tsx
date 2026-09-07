@@ -94,13 +94,13 @@ export const MainMenu: React.FC<MainMenuProps> = ({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    let width = (canvas.width = window.innerWidth);
-    let height = (canvas.height = window.innerHeight);
+    let width = (canvas.width = Math.max(320, window.innerWidth || 360));
+    let height = (canvas.height = Math.max(240, window.innerHeight || 640));
 
     const handleResize = () => {
       if (!canvas) return;
-      width = canvas.width = window.innerWidth;
-      height = canvas.height = window.innerHeight;
+      width = canvas.width = Math.max(320, window.innerWidth || 360);
+      height = canvas.height = Math.max(240, window.innerHeight || 640);
     };
     window.addEventListener('resize', handleResize);
 
@@ -118,55 +118,59 @@ export const MainMenu: React.FC<MainMenuProps> = ({
     let time = 0;
 
     const render = () => {
-      time += 0.015;
-      ctx.clearRect(0, 0, width, height);
+      try {
+        time += 0.015;
+        ctx.clearRect(0, 0, width, height);
 
-      // Sky Gradient
-      const skyGrad = ctx.createLinearGradient(0, 0, 0, height);
-      skyGrad.addColorStop(0, '#0c0a09');
-      skyGrad.addColorStop(0.35, '#291108');
-      skyGrad.addColorStop(0.65, '#5b1f0d');
-      skyGrad.addColorStop(0.85, '#9a3412');
-      skyGrad.addColorStop(1, '#b45309');
-      ctx.fillStyle = skyGrad;
-      ctx.fillRect(0, 0, width, height);
+        // Sky Gradient
+        const skyGrad = ctx.createLinearGradient(0, 0, 0, Math.max(1, height));
+        skyGrad.addColorStop(0, '#0c0a09');
+        skyGrad.addColorStop(0.35, '#291108');
+        skyGrad.addColorStop(0.65, '#5b1f0d');
+        skyGrad.addColorStop(0.85, '#9a3412');
+        skyGrad.addColorStop(1, '#b45309');
+        ctx.fillStyle = skyGrad;
+        ctx.fillRect(0, 0, width, height);
 
-      // Distant mountains
-      ctx.fillStyle = '#1c0f0a';
-      ctx.beginPath();
-      ctx.moveTo(0, height * 0.7);
-      for (let x = 0; x <= width; x += 100) {
-        ctx.lineTo(x, height * 0.65 + Math.sin(x * 0.005 + 1) * 40);
-      }
-      ctx.lineTo(width, height);
-      ctx.lineTo(0, height);
-      ctx.closePath();
-      ctx.fill();
+        // Distant mountains
+        ctx.fillStyle = '#1c0f0a';
+        ctx.beginPath();
+        ctx.moveTo(0, height * 0.7);
+        for (let x = 0; x <= width; x += 100) {
+          ctx.lineTo(x, height * 0.65 + Math.sin(x * 0.005 + 1) * 40);
+        }
+        ctx.lineTo(width, height);
+        ctx.lineTo(0, height);
+        ctx.closePath();
+        ctx.fill();
 
-      // Floating particles
-      for (const p of particles) {
-        p.y += p.vy;
-        p.x += p.vx + Math.sin(time + p.pulse) * 0.3;
-        p.pulse += 0.02;
+        // Floating particles
+        for (const p of particles) {
+          p.y += p.vy;
+          p.x += p.vx + Math.sin(time + p.pulse) * 0.3;
+          p.pulse += 0.02;
 
-        if (p.y < 0) {
-          p.y = height + 10;
-          p.x = Math.random() * width;
+          if (p.y < 0) {
+            p.y = height + 10;
+            p.x = Math.random() * width;
+          }
+
+          const currentAlpha = p.alpha * (0.6 + Math.sin(p.pulse) * 0.4);
+          ctx.fillStyle = `rgba(251, 191, 36, ${currentAlpha})`;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+          ctx.fill();
         }
 
-        const currentAlpha = p.alpha * (0.6 + Math.sin(p.pulse) * 0.4);
-        ctx.fillStyle = `rgba(251, 191, 36, ${currentAlpha})`;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fill();
+        // Subtle atmospheric ground mist
+        const mistGrad = ctx.createLinearGradient(0, height * 0.75, 0, Math.max(1, height));
+        mistGrad.addColorStop(0, 'rgba(10, 9, 8, 0)');
+        mistGrad.addColorStop(1, 'rgba(10, 9, 8, 0.85)');
+        ctx.fillStyle = mistGrad;
+        ctx.fillRect(0, height * 0.75, width, height * 0.25);
+      } catch (err) {
+        console.warn('MainMenu animation frame error:', err);
       }
-
-      // Subtle atmospheric ground mist
-      const mistGrad = ctx.createLinearGradient(0, height * 0.75, 0, height);
-      mistGrad.addColorStop(0, 'rgba(10, 9, 8, 0)');
-      mistGrad.addColorStop(1, 'rgba(10, 9, 8, 0.85)');
-      ctx.fillStyle = mistGrad;
-      ctx.fillRect(0, height * 0.75, width, height * 0.25);
 
       animFrameRef.current = requestAnimationFrame(render);
     };

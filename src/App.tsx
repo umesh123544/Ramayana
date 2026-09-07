@@ -216,7 +216,7 @@ export default function App() {
         canInteract={isNearPurneema}
         onInteract={handleInteractPurneema}
         divineReady={heroState.divinePower >= 40 && heroState.divineCooldown <= 0}
-        visible={showVirtualControls}
+        visible={showVirtualControls && !isMainMenuOpen && !isDifficultySelectorOpen && !isChapterSelectOpen && !isVictoryModalOpen && !isGameOver}
       />
 
       {/* Divine Blessing Announcement Banner */}
