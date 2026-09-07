@@ -40,6 +40,16 @@ export interface EnemiesConfig {
   hpMultiplier: number;
 }
 
+export interface ControlsConfig {
+  scale: number; // 0.75 to 1.4
+  opacity: number; // 0.3 to 1.0
+  dpadType: 'dpad' | 'joystick';
+  bottomOffset: number; // 0 to 60px
+  sideOffset: number; // 0 to 60px
+  swapSides: boolean; // Swap left and right control positions
+  showControls: boolean;
+}
+
 export interface AdminGameConfig {
   gameTitle: string;
   gameSubtitle: string;
@@ -49,17 +59,18 @@ export interface AdminGameConfig {
   companion: CompanionConfig;
   villain: VillainConfig;
   enemies: EnemiesConfig;
+  controls: ControlsConfig;
 }
 
 export const DEFAULT_ADMIN_CONFIG: AdminGameConfig = {
   gameTitle: 'Ramayana 2D Action Adventure',
-  gameSubtitle: 'A Mythological Epic Platformer • धनुर्धर उमेशको गाथा',
+  gameSubtitle: 'A Mythological Epic Platformer • The Saga of Archer Umesh',
   difficulty: 'NORMAL',
   divinePowerScaling: 1.0,
   hero: {
     name: 'Umesh',
     title: 'Ramayana Hero • Bow Warrior',
-    skinTone: '#38bdf8', // Divine Sky Blue (Shri Rama warrior hue)
+    skinTone: '#38bdf8', // Divine Sky Blue
     dhotiColor: '#ea580c', // Sacred Saffron
     armorColor: '#f59e0b', // Golden Kavach
     maxHp: 100,
@@ -84,7 +95,7 @@ export const DEFAULT_ADMIN_CONFIG: AdminGameConfig = {
   },
   villain: {
     name: 'Raone',
-    title: 'Demon King of Lanka (दशानन)',
+    title: 'Demon King of Lanka (Ten-Headed Ravana)',
     maxHp: 500,
     armorColor: '#7f1d1d', // Dark Demon Crimson / Obsidian
   },
@@ -96,6 +107,15 @@ export const DEFAULT_ADMIN_CONFIG: AdminGameConfig = {
     eliteDemonName: 'Elite Demon Commander',
     damageMultiplier: 1.0,
     hpMultiplier: 1.0,
+  },
+  controls: {
+    scale: 1.0,
+    opacity: 0.9,
+    dpadType: 'dpad',
+    bottomOffset: 12,
+    sideOffset: 14,
+    swapSides: false,
+    showControls: true,
   },
 };
 
@@ -122,6 +142,7 @@ class AdminConfigManager {
           companion: { ...DEFAULT_ADMIN_CONFIG.companion, ...(parsed.companion || {}) },
           villain: { ...DEFAULT_ADMIN_CONFIG.villain, ...(parsed.villain || {}) },
           enemies: { ...DEFAULT_ADMIN_CONFIG.enemies, ...(parsed.enemies || {}) },
+          controls: { ...DEFAULT_ADMIN_CONFIG.controls, ...(parsed.controls || {}) },
         };
       }
     } catch (e) {
@@ -132,6 +153,10 @@ class AdminConfigManager {
 
   public get(): AdminGameConfig {
     return this.config;
+  }
+
+  public getDifficulty(): DifficultyLevel {
+    return this.config.difficulty;
   }
 
   public save(newConfig: AdminGameConfig) {

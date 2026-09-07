@@ -200,8 +200,9 @@ export class BossSystem {
     b.isGrounded = colEntity.isGrounded;
 
     // Strict boundary enforcement (prevent boss falling out of map)
-    if (b.y > 672) {
-      b.y = 672;
+    const maxBossY = 672 - b.height;
+    if (b.y > maxBossY) {
+      b.y = maxBossY;
       b.vy = 0;
       b.isGrounded = true;
     }

@@ -125,8 +125,8 @@ export class SupportingCharacterSystem {
     // Show narrative kidnapping dialogue
     const abductionText =
       this.chapterId < 10
-        ? `दशानन रावण: 'हाहाहा! हे मुर्ख उमेश! तिम्री पूर्णिमा अब मेरो स्वर्ण लङ्कामा बन्दी हुनेछिन्! मलाई भेट्न अघि मेरा सेनापतिहरूलाई जितेर देखाऊ!'\n\nपूर्णिमा: 'उमेश! मलाई बचाउनुहोस्! अधर्मको अन्त्य गरी लङ्का आउनुहोस्!'`
-        : `पूर्णिमा: 'उमेश! दशानन रावण महाबलवान् छ! उसको छातीमा दिव्य ब्रह्मास्त्र प्रहार गर्नुहोस्!'`;
+        ? `Raone: 'Hahaha! Foolish Umesh! Your beloved Purneema is now captive in my golden citadel of Lanka! Prove your courage by defeating my demon commanders first!'\n\nPurneema: 'Umesh! Save me! End the darkness and march upon Lanka!'`
+        : `Purneema: 'Umesh! Demon King Raone is immensely formidable! Strike at his heart with the sacred Brahmastra!'`;
 
     this.activeDialogue = abductionText;
     onShowDialogue(abductionText);
@@ -148,7 +148,7 @@ export class SupportingCharacterSystem {
       soundManager.play('divinePower');
       onConferBlessing();
       const dialogue =
-        "पूर्णिमा: 'हे उमेश! रावण अत्यन्त शक्तिशाली छ! उसका दशै शिरमा नभई उसको हृदयमा अमृत छ, त्यहाँ प्रहार गर्नुहोस्!'";
+        "Purneema: 'O Umesh! Raone is vastly powerful! The nectar of his immortality resides within his heart, not his ten heads—aim your celestial arrow there!'";
       this.activeDialogue = dialogue;
       onShowDialogue(dialogue);
     }

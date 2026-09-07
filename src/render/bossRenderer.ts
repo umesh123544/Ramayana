@@ -12,7 +12,7 @@ export function renderBoss(
   const { x, y, width, height, facing, hp, maxHp, isHurt, isDead, deathTimer, isRaging, type } = boss;
 
   ctx.save();
-  ctx.translate(x + width * 0.5, y + height);
+  ctx.translate(x + width * 0.5 - camera.x, y + height - camera.y);
 
   if (facing === 'left') {
     ctx.scale(-1, 1);

@@ -48,7 +48,7 @@ const CHAPTER_ICON_MAP: Record<string, React.FC<{ className?: string }>> = {
 
 // Lore extensions for each chapter
 interface ChapterExtendedLore {
-  epicSanskrit: string;
+  epicKanda: string;
   antagonist: string;
   sacredWeapon: string;
   dharmaLesson: string;
@@ -56,62 +56,62 @@ interface ChapterExtendedLore {
 
 const CHAPTER_EXTENDED_LORE: Record<number, ChapterExtendedLore> = {
   1: {
-    epicSanskrit: 'बालकाण्ड • अयोध्या वैभव',
+    epicKanda: 'Bala Kanda • Glory of Ayodhya',
     antagonist: 'Border Rakshasa Marauders',
     sacredWeapon: 'Kodanda Divine Bow',
     dharmaLesson: 'Mastery of mind, humility before sages, and righteousness in royalty.',
   },
   2: {
-    epicSanskrit: 'अयोध्या काण्ड • त्याग व तप',
+    epicKanda: 'Ayodhya Kanda • Renunciation & Penance',
     antagonist: 'Primeval Wilderness Predators',
     sacredWeapon: 'Hermit Birch Staff & Arrows',
     dharmaLesson: 'Fulfilling filial duty without bitterness, embracing simplicity.',
   },
   3: {
-    epicSanskrit: 'अरण्य काण्ड • असुर वध',
+    epicKanda: 'Aranya Kanda • Slaying the Demons',
     antagonist: 'Khara, Dushana & Demon War-Bands',
     sacredWeapon: 'Agneyastra (Fire Arrow)',
     dharmaLesson: 'Protecting the vulnerable hermits and standing unwavering against cruelty.',
   },
   4: {
-    epicSanskrit: 'पञ्चवटी • स्वर्णमृग माया',
+    epicKanda: 'Panchavati • The Golden Deer',
     antagonist: 'Maricha the Illusionary Deer',
     sacredWeapon: 'Piercing Suryastra',
     dharmaLesson: 'Vigilance against alluring illusions that distract from truth.',
   },
   5: {
-    epicSanskrit: 'सीता हरण • विरह व संकल्प',
+    epicKanda: 'Aranya Kanda • Abduction & Vow',
     antagonist: 'Raone (Disguised Ascetic)',
     sacredWeapon: 'Divya Baan of Vengeance',
     dharmaLesson: 'Unshakable devotion and grief forged into unyielding resolve.',
   },
   6: {
-    epicSanskrit: 'किष्किन्धा काण्ड • वानर मैत्री',
+    epicKanda: 'Kishkindha Kanda • Vanara Alliance',
     antagonist: 'Unchecked Wrath of Vali',
     sacredWeapon: 'Seven Sal Trees Arrow',
     dharmaLesson: 'The power of sacred friendship, humility, and restoring justice.',
   },
   7: {
-    epicSanskrit: 'सुन्दर काण्ड • सेतु बन्धन',
+    epicKanda: 'Sundara Kanda • The Ocean Bridge',
     antagonist: 'Varuna Sea Tempests & Sea Monsters',
     sacredWeapon: 'Consecrated Floating Shilas',
     dharmaLesson: 'Faith can make heavy stones float; unified purpose crosses any ocean.',
   },
   8: {
-    epicSanskrit: 'युद्ध काण्ड • लंका प्रवेश',
+    epicKanda: 'Yuddha Kanda • Lanka Citadels',
     antagonist: 'Lanka Citadel Gatekeepers',
     sacredWeapon: 'Varunastra & Golden Spear',
     dharmaLesson: 'Penetrating the most fortified ego with purity of intention.',
   },
   9: {
-    epicSanskrit: 'महासंग्राम • कुम्भकर्ण-इन्द्रजीत वध',
+    epicKanda: 'Yuddha Kanda • Fall of Indrajit',
     antagonist: 'Kumbhakarna & Indrajit (Meghnada)',
     sacredWeapon: 'Aindra & Pashupatastra',
     dharmaLesson: 'Dark sorcery falls before unwavering cosmic truth.',
   },
   10: {
-    epicSanskrit: 'अन्तिम युद्ध • रावण संहार',
-    antagonist: 'Ten-Headed Demon King Raone (दशानन)',
+    epicKanda: 'Final Battle • Victory of Dharma',
+    antagonist: 'Ten-Headed Demon King Raone',
     sacredWeapon: 'Brahmastra (Supreme Celestial Arrow)',
     dharmaLesson: 'The eternal triumph of Dharma: Truth alone triumphs, not falsehood.',
   },
@@ -162,7 +162,7 @@ export const ChapterSelection: React.FC<ChapterSelectionProps> = ({
     if (!isUnlocked) {
       soundManager.play('uiClick');
       setLockedNotice(
-        `अध्याय ${ch.id} बन्द छ! अनलक गर्न पहिले अध्याय ${ch.id - 1} पूरा गर्नुहोस्। (Chapter ${ch.id} is locked! Defeat Chapter ${ch.id - 1} first to unlock.)`
+        `Chapter ${ch.id} is locked! Defeat Chapter ${ch.id - 1} first to unlock.`
       );
       setTimeout(() => {
         setLockedNotice(null);
@@ -180,7 +180,7 @@ export const ChapterSelection: React.FC<ChapterSelectionProps> = ({
     if (!isUnlocked) {
       soundManager.play('uiClick');
       setLockedNotice(
-        `अध्याय ${ch.id} बन्द छ! पहिले अध्याय ${ch.id - 1} पूरा गर्नुहोस्।`
+        `Chapter ${ch.id} is locked! Defeat Chapter ${ch.id - 1} first.`
       );
       setTimeout(() => setLockedNotice(null), 3500);
       return;
@@ -211,7 +211,7 @@ export const ChapterSelection: React.FC<ChapterSelectionProps> = ({
     if (!isSelectedUnlocked) {
       soundManager.play('uiClick');
       setLockedNotice(
-        `अध्याय ${selectedChapter.id} बन्द छ! पहिले अध्याय ${selectedChapter.id - 1} जित्नुहोस्।`
+        `Chapter ${selectedChapter.id} is locked! Defeat Chapter ${selectedChapter.id - 1} first.`
       );
       setTimeout(() => setLockedNotice(null), 3500);
       return;
@@ -265,7 +265,7 @@ export const ChapterSelection: React.FC<ChapterSelectionProps> = ({
         <div className="flex flex-col items-center text-center">
           <div className="flex items-center gap-1.5 text-amber-400 text-xs font-bold tracking-widest uppercase">
             <Sun className="w-3.5 h-3.5 text-amber-400" />
-            <span>RAMAYANA CHRONICLES • अध्याय संग्रह</span>
+            <span>RAMAYANA CHRONICLES</span>
           </div>
           <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-amber-200 tracking-wider font-['Cinzel'] mt-0.5">
             CHOOSE YOUR CHAPTER
@@ -428,7 +428,7 @@ export const ChapterSelection: React.FC<ChapterSelectionProps> = ({
                       id={`play-chapter-1click-${ch.id}`}
                       onClick={(e) => handle1ClickPlay(ch, e)}
                       className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-neutral-950 font-black text-[11px] shadow active:scale-95 transition-all cursor-pointer"
-                      title={`Play Chapter ${ch.id} (१ क्लिकमा सुरु)`}
+                      title={`Play Chapter ${ch.id}`}
                     >
                       <Play className="w-3 h-3 fill-neutral-950 stroke-neutral-950" />
                       <span>PLAY</span>
@@ -472,7 +472,7 @@ export const ChapterSelection: React.FC<ChapterSelectionProps> = ({
                   Chapter {selectedChapter.id} of 10
                 </span>
                 <span className="text-sm font-semibold text-neutral-300 font-mono">
-                  {lore.epicSanskrit}
+                  {lore.epicKanda}
                 </span>
                 <span className="text-xs text-neutral-400 font-mono">
                   • {selectedChapter.location}
@@ -480,7 +480,7 @@ export const ChapterSelection: React.FC<ChapterSelectionProps> = ({
               </div>
 
               <h2 className="text-xl sm:text-2xl font-black text-amber-100 font-['Cinzel'] tracking-wide">
-                {selectedChapter.title} ({selectedChapter.hindiTitle})
+                {selectedChapter.title}
               </h2>
 
               <p className="text-xs sm:text-sm text-neutral-300/90 leading-relaxed max-w-2xl mt-0.5">
@@ -528,14 +528,14 @@ export const ChapterSelection: React.FC<ChapterSelectionProps> = ({
                   onClick={() => {
                     soundManager.play('uiClick');
                     setLockedNotice(
-                      `अध्याय ${selectedChapter.id} बन्द छ! अनलक गर्न पहिले अध्याय ${selectedChapter.id - 1} पूरा गर्नुहोस्।`
+                      `Chapter ${selectedChapter.id} is locked! Defeat Chapter ${selectedChapter.id - 1} first to unlock.`
                     );
                     setTimeout(() => setLockedNotice(null), 3500);
                   }}
                   className="w-full px-5 py-3 rounded-xl bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-neutral-300 hover:text-amber-300 font-bold text-xs tracking-wider uppercase font-['Cinzel'] transition-all cursor-pointer flex items-center justify-center gap-2"
                 >
                   <Lock className="w-4 h-4 text-red-400" />
-                  <span>Sealed (लक गरिएको)</span>
+                  <span>Sealed Chapter</span>
                 </button>
                 <span className="text-[10px] text-center text-amber-400/90 font-mono">
                   Requires defeating Chapter {selectedChapter.id - 1} first

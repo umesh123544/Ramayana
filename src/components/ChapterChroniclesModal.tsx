@@ -53,7 +53,7 @@ export const ChapterChroniclesModal: React.FC<ChapterChroniclesModalProps> = ({
             </div>
             <div>
               <div className="text-[11px] font-mono tracking-widest text-amber-400 uppercase">
-                रामायण कथा मञ्जरी • Epic Chronicles
+                Epic Chronicles
               </div>
               <h2 className="text-lg sm:text-xl font-serif font-bold text-white flex items-center gap-2">
                 Chapter Story Blogs & Sacred Lore
@@ -188,7 +188,7 @@ export const ChapterChroniclesModal: React.FC<ChapterChroniclesModalProps> = ({
                   </span>
                 </div>
                 <div className="font-serif font-bold text-white text-base">
-                  {currentBlog.antagonistProfile.name} ({currentBlog.antagonistProfile.hindiName})
+                  {currentBlog.antagonistProfile.name}
                 </div>
                 <div className="text-xs text-neutral-400">
                   {currentBlog.antagonistProfile.title}

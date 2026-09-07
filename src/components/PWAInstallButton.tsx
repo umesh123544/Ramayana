@@ -62,10 +62,10 @@ export const PWAInstallButton: React.FC = () => {
 
               <div className="space-y-2.5 text-xs text-neutral-300 bg-neutral-950 p-3.5 rounded-xl border border-neutral-800">
                 <p>
-                  1. Tap the <strong className="text-amber-300">Share</strong> icon (बटन) in Safari toolbar.
+                  1. Tap the <strong className="text-amber-300">Share</strong> icon in the Safari toolbar.
                 </p>
                 <p>
-                  2. Scroll down and select <strong className="text-amber-300">'Add to Home Screen'</strong> (होम स्क्रिनमा थप्नुहोस्).
+                  2. Scroll down and select <strong className="text-amber-300">'Add to Home Screen'</strong>.
                 </p>
                 <p>
                   3. Tap <strong className="text-amber-300">'Add'</strong> at the top right to install!
@@ -74,9 +74,9 @@ export const PWAInstallButton: React.FC = () => {
 
               <button
                 onClick={() => setShowIOSGuide(false)}
-                className="mt-5 w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-neutral-950 font-bold text-xs tracking-wider transition-colors"
+                className="mt-5 w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-neutral-950 font-bold text-xs tracking-wider transition-colors cursor-pointer"
               >
-                GOT IT (बुझें)
+                GOT IT
               </button>
             </div>
           </div>
@@ -93,7 +93,7 @@ export const PWAInstallButton: React.FC = () => {
         alert('To install RAMAYAN App on your device, open your browser menu (⋮ or Share) and tap "Install App" or "Add to Home Screen".');
       }}
       className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-neutral-900/80 hover:bg-neutral-800 text-amber-300 text-[11px] font-mono border border-amber-500/30 active:scale-95 transition-all cursor-pointer"
-      title="Install App / होम स्क्रिनमा राख्नुहोस्"
+      title="Install App"
     >
       <Download className="w-3.5 h-3.5 text-amber-400" />
       <span>Install App</span>

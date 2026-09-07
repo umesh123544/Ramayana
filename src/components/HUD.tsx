@@ -120,7 +120,7 @@ export const HUD: React.FC<HUDProps> = ({
                   id="hud-one-click-chapters-btn"
                   onClick={onOpenChapters}
                   className="flex items-center gap-1 px-2 py-1 sm:px-2.5 sm:py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/50 text-[10px] sm:text-xs font-bold font-mono tracking-wider cursor-pointer active:scale-95 transition-all shadow-sm"
-                  title="Open Chapter Selection in 1-Click (अध्याय छनोट)"
+                  title="Open Chapter Selection"
                 >
                   <BookOpen className="w-3 h-3 text-amber-400" />
                   <span>CHAPTERS</span>
@@ -133,7 +133,7 @@ export const HUD: React.FC<HUDProps> = ({
                   id="hud-one-click-level-mode-btn"
                   onClick={onOpenDifficulty}
                   className="flex items-center gap-1 px-2 py-1 sm:px-2.5 sm:py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/50 text-[10px] sm:text-xs font-bold font-mono tracking-wider cursor-pointer active:scale-95 transition-all shadow-sm"
-                  title="Open Level Mode / Difficulty in 1-Click (तह / कठिनाई छनोट)"
+                  title="Open Level Mode / Difficulty"
                 >
                   <Sliders className="w-3 h-3 text-amber-400" />
                   <span>LEVEL: {currentDifficulty}</span>
@@ -184,7 +184,7 @@ export const HUD: React.FC<HUDProps> = ({
                 <button
                   id="main-menu-toggle-btn"
                   onClick={onOpenMainMenu}
-                  title="Main Menu (मेन्यू)"
+                  title="Main Menu"
                   className="p-1.5 sm:p-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/50 shadow transition-all cursor-pointer flex items-center justify-center active:scale-95"
                 >
                   <Menu className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400" />
@@ -196,7 +196,7 @@ export const HUD: React.FC<HUDProps> = ({
                 <button
                   id="hud-toggle-controls-btn"
                   onClick={onToggleControls}
-                  title={showControls ? 'Hide Touch Controls' : 'Show Touch Controls (मोबाइल कन्ट्रोल)'}
+                  title={showControls ? 'Hide Touch Controls' : 'Show Touch Controls'}
                   className={`p-1.5 sm:p-2 rounded-xl border shadow transition-all cursor-pointer flex items-center justify-center active:scale-95 ${
                     showControls
                       ? 'bg-amber-500/30 border-amber-400 text-amber-300 shadow-[0_0_8px_rgba(245,158,11,0.5)]'
@@ -211,7 +211,7 @@ export const HUD: React.FC<HUDProps> = ({
               <button
                 id="admin-panel-toggle-btn"
                 onClick={onOpenAdminModal}
-                title="Admin Panel & Customizer (एडमिन प्यानल)"
+                title="Admin Panel & Controls Customizer"
                 className="p-1.5 sm:p-2 rounded-xl bg-neutral-900/90 hover:bg-neutral-800 text-amber-300 border border-amber-500/30 shadow transition-all cursor-pointer flex items-center justify-center active:scale-95"
               >
                 <Settings className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400" />

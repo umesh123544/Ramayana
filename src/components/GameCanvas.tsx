@@ -1,5 +1,6 @@
 import React, { useRef, useEffect } from 'react';
 import { Camera2D } from '../engine/camera';
+import { ParticleSystem } from '../engine/particleSystem';
 import { EnvironmentRenderer } from '../render/environmentRenderer';
 import { CharacterController, PlayerInput } from '../systems/characterController';
 import { EnemySystem } from '../systems/enemySystem';
@@ -57,6 +58,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     envRenderer.setChapter(chapterId);
 
     const characterController = new CharacterController(250, 600);
+    const particleSystem = new ParticleSystem();
     const enemySystem = new EnemySystem(chapterId);
     const combatSystem = new CombatSystem();
     const supportSystem = new SupportingCharacterSystem(chapterId, 1650, 580);
@@ -175,32 +177,6 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       if (ext.divinePower) ext.divinePower = false;
       if (ext.attackRelease) ext.attackRelease = false;
 
-      // Multi-Directional Aiming Calculation (Up, Down, Left, Right, Diagonals, 360°)
-      let calculatedAimDir = ext.aimDir;
-
-      if (!calculatedAimDir) {
-        if (isUp || isDown) {
-          const dx: number = isRight ? 1 : isLeft ? -1 : 0;
-          const dy: number = isUp ? -1 : isDown ? 1 : 0;
-          const finalDx = dx === 0 && dy === 0 ? (characterController.hero.facing === 'right' ? 1 : -1) : dx;
-          calculatedAimDir = {
-            x: finalDx,
-            y: dy,
-          };
-        } else if (isMouseDownRef.current && mousePosRef.current && canvas) {
-          const canvasRect = canvas.getBoundingClientRect();
-          const screenMouseX = (mousePosRef.current.x - canvasRect.left) * (canvas.width / (canvasRect.width || 1));
-          const screenMouseY = (mousePosRef.current.y - canvasRect.top) * (canvas.height / (canvasRect.height || 1));
-          const heroScreenX = characterController.hero.x + characterController.hero.width * 0.5 - camera.x;
-          const heroScreenY = characterController.hero.y + characterController.hero.height * 0.42 - camera.y;
-          const mdx = screenMouseX - heroScreenX;
-          const mdy = screenMouseY - heroScreenY;
-          if (Math.hypot(mdx, mdy) > 15) {
-            calculatedAimDir = { x: mdx, y: mdy };
-          }
-        }
-      }
-
       const playerInput: PlayerInput = {
         left: isLeft,
         right: isRight,
@@ -212,7 +188,6 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
         attackRelease,
         divinePower: isDivine,
         interact: !!keys['KeyE'],
-        aimDir: calculatedAimDir,
       };
 
       // 1. Update Environment & Parallax
@@ -223,9 +198,25 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
         dt,
         playerInput,
         platforms,
-        (isCharged, shootAimDir) => {
-          // Shoot Arrow in the aimed direction (up, down, diagonal, left, right)
-          combatSystem.shootHeroArrow(characterController.hero, isCharged, shootAimDir || calculatedAimDir);
+        (isCharged) => {
+          // Shoot Arrow directly in player facing direction with smart auto-target assist
+          combatSystem.shootHeroArrow(
+            characterController.hero,
+            isCharged,
+            enemySystem.enemies,
+            bossSystem?.boss || undefined
+          );
+
+          // Calculate bow launch muzzle point
+          const dirX = characterController.hero.facing === 'right' ? 1 : -1;
+          const bowX = characterController.hero.x + characterController.hero.width * 0.5 + dirX * 24;
+          const bowY = characterController.hero.y + characterController.hero.height * 0.42;
+
+          // Bow firing impact with ParticleSystem
+          particleSystem.createBowFireImpact(bowX, bowY, characterController.hero.facing, isCharged);
+          if (isCharged) {
+            camera.addTrauma(0.24); // Screen shake impact on heavy charged arrow release
+          }
         },
         () => {
           // Trigger Divine Blessing Banner & FX
@@ -238,6 +229,25 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
         () => {
           // All lives lost -> Game Over
           onGameOver();
+        },
+        (landX, landY, fallSpeed) => {
+          // Ground landing impact particles and dust plumes
+          const isHighJump = fallSpeed > 450;
+          particleSystem.createLandingImpact(
+            landX,
+            landY,
+            fallSpeed,
+            characterController.hero.isDivineActive
+          );
+          if (isHighJump) {
+            // Screen shake effect when Umesh lands from a high jump
+            const trauma = Math.min(0.48, Math.max(0.2, (fallSpeed - 350) / 550));
+            camera.addTrauma(trauma);
+          }
+        },
+        (jumpX, jumpY) => {
+          // Dust takeoff puff when leaping into the air
+          particleSystem.createJumpTakeoff(jumpX, jumpY);
         }
       );
 
@@ -313,9 +323,24 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
         platforms,
         (heroDmg, knockDir) => {
           characterController.takeDamage(heroDmg, knockDir);
+          camera.addTrauma(0.32); // Screen shake on hero taking damage
+          particleSystem.createHitImpact(
+            characterController.hero.x + characterController.hero.width * 0.5,
+            characterController.hero.y + characterController.hero.height * 0.5,
+            false,
+            '#ef4444'
+          );
         },
         (enemyId, enemyDmg, knockDir) => {
           const res = enemySystem.applyDamage(enemyId, enemyDmg, knockDir);
+          if (res.enemy) {
+            particleSystem.createHitImpact(
+              res.enemy.x + res.enemy.width * 0.5,
+              res.enemy.y + res.enemy.height * 0.5,
+              false,
+              '#f59e0b'
+            );
+          }
           if (res.died) {
             characterController.collectDivineEnergy(12);
             combatSystem.addFloatingText('+12 DIVINE', res.enemy!.x, res.enemy!.y - 20, '#fbbf24');
@@ -335,10 +360,19 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
             isCharged,
             characterController.hero.isDivineActive
           );
+          // Cinematic boss impact shockwave and screen shake
+          particleSystem.createBossImpact(
+            bossSystem.boss.x + bossSystem.boss.width * 0.5,
+            bossSystem.boss.y + bossSystem.boss.height * 0.5,
+            isCharged ? 1.4 : 1.0
+          );
+          camera.addTrauma(isCharged ? 0.42 : 0.22);
+
           if (res.absorbed) {
             combatSystem.addFloatingText('SHIELDED! (-55%)', bossSystem.boss.x, bossSystem.boss.y - 30, '#c084fc');
           }
           if (res.died) {
+            camera.addTrauma(0.65); // Epic victory screen shake
             combatSystem.spawnDivineBlessingBurst(
               bossSystem.boss.x + bossSystem.boss.width * 0.5,
               bossSystem.boss.y + bossSystem.boss.height * 0.5
@@ -346,6 +380,9 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
           }
         }
       );
+
+      // 9. Update Engine Particle System
+      particleSystem.update(dt);
 
       // Notify React state of hero updates
       onHeroStateChange({ ...characterController.hero });
@@ -428,7 +465,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
             ctx.fillStyle = '#f87171';
             ctx.font = 'bold 11px serif';
             ctx.textAlign = 'center';
-            ctx.fillText('दशानन रावण Pushpaka Chariot', rx, ry - 35);
+            ctx.fillText('Raone Pushpaka Chariot', rx, ry - 35);
             ctx.restore();
           }
 
@@ -441,7 +478,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
             ctx.strokeRect(supportSystem.purneema.x - 55, supportSystem.purneema.y - 95, 110, 22);
             ctx.fillStyle = '#fbcfe8';
             ctx.font = 'bold 10px "Cinzel", sans-serif';
-            ctx.fillText('Press E to Talk (कुरा)', supportSystem.purneema.x - 48, supportSystem.purneema.y - 80);
+            ctx.fillText('Press E to Talk', supportSystem.purneema.x - 38, supportSystem.purneema.y - 80);
           }
         }
         ctx.restore();
@@ -486,20 +523,10 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
           characterController.hero.chargeTime / 0.8
         );
 
-        // 6. Directional Bow Aiming Trajectory Guide (When charging bow)
+        // 6. Bow Charge Guide (When charging bow)
         if (characterController.hero.isCharging) {
           const h = characterController.hero;
-          let dirX = h.facing === 'right' ? 1 : -1;
-          let dirY = 0;
-
-          if (calculatedAimDir) {
-            const len = Math.hypot(calculatedAimDir.x, calculatedAimDir.y);
-            if (len > 0.05) {
-              dirX = calculatedAimDir.x / len;
-              dirY = calculatedAimDir.y / len;
-            }
-          }
-
+          const dirX = h.facing === 'right' ? 1 : -1;
           const startX = h.x + h.width * 0.5;
           const startY = h.y + h.height * 0.42;
 
@@ -509,13 +536,13 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
           ctx.lineWidth = 2.5;
           ctx.beginPath();
           ctx.moveTo(startX, startY);
-          ctx.lineTo(startX + dirX * 140, startY + dirY * 140);
+          ctx.lineTo(startX + dirX * 140, startY);
           ctx.stroke();
 
           // Reticle target tip
           ctx.fillStyle = h.chargeTime >= 0.8 ? '#f59e0b' : '#38bdf8';
           ctx.beginPath();
-          ctx.arc(startX + dirX * 140, startY + dirY * 140, 5, 0, Math.PI * 2);
+          ctx.arc(startX + dirX * 140, startY, 5, 0, Math.PI * 2);
           ctx.fill();
           ctx.restore();
         }
@@ -524,6 +551,9 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
 
         // 7. Render Combat Projectiles, Particles & Floating Texts
         combatSystem.render(ctx, camera.x, camera.y);
+
+        // 8. Render Engine Particle System (cinematic bow & landing impacts)
+        particleSystem.render(ctx, camera.x, camera.y);
 
         ctx.restore();
       }

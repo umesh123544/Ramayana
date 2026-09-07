@@ -102,9 +102,11 @@ export class CharacterController {
     dt: number,
     input: PlayerInput,
     platforms: Platform[],
-    onShootArrow: (isCharged: boolean, aimDir?: { x: number; y: number }) => void,
+    onShootArrow: (isCharged: boolean) => void,
     onDivineBlessing: () => void,
-    onGameOver: () => void
+    onGameOver: () => void,
+    onLand?: (x: number, y: number, fallSpeed: number) => void,
+    onJump?: (x: number, y: number) => void
   ) {
     const h = this.hero;
 
@@ -234,13 +236,17 @@ export class CharacterController {
       h.isGrounded = false;
       h.isJumping = true;
       soundManager.play('jump');
+      if (onJump) {
+        onJump(h.x + h.width * 0.5, h.y + h.height);
+      }
     }
 
     // Apply gravity
     h.vy = Math.min(h.vy + GRAVITY * dt, TERMINAL_VELOCITY);
 
-    // Save previous Y for collision check
+    // Save previous Y and fall speed for collision check
     const prevY = h.y;
+    const fallSpeedBeforeCollision = h.vy;
     h.x += h.vx * dt;
     h.y += h.vy * dt;
 
@@ -249,6 +255,9 @@ export class CharacterController {
     if (landed && !wasGrounded) {
       soundManager.play('landing');
       h.isJumping = false;
+      if (onLand) {
+        onLand(h.x + h.width * 0.5, h.y + h.height, fallSpeedBeforeCollision);
+      }
       // Record safe respawn point on ground
       if (h.y >= 500) {
         h.respawnX = h.x;
@@ -259,9 +268,17 @@ export class CharacterController {
     // Map horizontal & floor boundary clamping (prevent falling or walking outside the world)
     h.x = Math.max(30, Math.min(4180, h.x));
     if (h.y > 672 && h.y < 850) {
+      const neededLanding = !wasGrounded && !h.isGrounded;
       h.y = 672;
       h.vy = 0;
       h.isGrounded = true;
+      if (neededLanding) {
+        soundManager.play('landing');
+        h.isJumping = false;
+        if (onLand) {
+          onLand(h.x + h.width * 0.5, h.y + h.height, fallSpeedBeforeCollision);
+        }
+      }
     }
 
     // 3. Fall into chasm check
@@ -282,7 +299,7 @@ export class CharacterController {
       h.attackTimer = 0.25;
       h.attackCooldown = isCharged ? 0.45 : 0.22;
       soundManager.play('bowAttack');
-      onShootArrow(isCharged, input.aimDir);
+      onShootArrow(isCharged);
     }
 
     if (h.attackTimer > 0) {

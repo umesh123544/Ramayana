@@ -25,7 +25,7 @@ export class CheckpointSystem {
       {
         id: 'cp_1',
         name: 'Sacred Sarayu Shrine',
-        hindiName: 'सरयू तीर्थ पीठ',
+        hindiName: 'Sarayu Sanctuary',
         x: 850,
         y: 630,
         type: 'divine_shrine',
@@ -35,7 +35,7 @@ export class CheckpointSystem {
       {
         id: 'cp_2',
         name: 'Hermitage Campfire',
-        hindiName: 'ऋषि आश्रम अग्निहोत्र',
+        hindiName: 'Hermitage Hearth',
         x: 1750,
         y: 630,
         type: 'campfire',
@@ -45,7 +45,7 @@ export class CheckpointSystem {
       {
         id: 'cp_3',
         name: 'Ancient Rishi Statue',
-        hindiName: 'प्राचीन महर्षि शिला',
+        hindiName: 'Ancient Sage Relic',
         x: 2700,
         y: 630,
         type: 'ancient_statue',
@@ -55,7 +55,7 @@ export class CheckpointSystem {
       {
         id: 'cp_4',
         name: 'Surya Sun Temple',
-        hindiName: 'सूर्य मन्दिर प्राङ्गण',
+        hindiName: 'Solar Sanctum',
         x: 3650,
         y: 630,
         type: 'sacred_temple',

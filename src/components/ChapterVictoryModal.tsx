@@ -36,10 +36,10 @@ export const ChapterVictoryModal: React.FC<ChapterVictoryModalProps> = ({
 
         {/* Sanskrit & English Title */}
         <div className="text-amber-400 font-serif text-sm tracking-widest uppercase mb-1">
-          अध्याय विजय • Chapter Conquered
+          Chapter Conquered
         </div>
         <h2 className="text-2xl sm:text-3xl font-serif font-bold text-white mb-2">
-          {currentTheme.name} ({currentTheme.hindiName})
+          {currentTheme.name}
         </h2>
         <p className="text-neutral-400 text-xs sm:text-sm mb-6 max-w-sm">
           {currentTheme.boss.name} has been vanquished. Dharma shines bright once more upon this sacred realm!
@@ -54,7 +54,7 @@ export const ChapterVictoryModal: React.FC<ChapterVictoryModalProps> = ({
             <div>
               <div className="text-xs text-neutral-400">Defeated Boss</div>
               <div className="text-sm font-semibold text-white">
-                {currentTheme.boss.name} ({currentTheme.boss.hindiName})
+                {currentTheme.boss.name}
               </div>
             </div>
           </div>
@@ -68,10 +68,10 @@ export const ChapterVictoryModal: React.FC<ChapterVictoryModalProps> = ({
           <div className="w-full bg-gradient-to-r from-amber-950/40 via-amber-900/30 to-amber-950/40 border border-amber-500/50 rounded-xl p-4 mb-6 text-left">
             <div className="flex items-center gap-2 text-amber-400 text-xs font-semibold uppercase tracking-wider mb-1">
               <Sparkles className="w-4 h-4" />
-              <span>Next Chapter Unlocked (अर्को अध्याय खुल्यो)</span>
+              <span>Next Chapter Unlocked</span>
             </div>
             <div className="text-base font-bold text-white">
-              Chapter {nextTheme.id}: {nextTheme.name} ({nextTheme.hindiName})
+              Chapter {nextTheme.id}: {nextTheme.name}
             </div>
             <div className="text-xs text-amber-200/80 mt-0.5">
               Next Boss: {nextTheme.boss.name} — {nextTheme.boss.title}
@@ -80,7 +80,7 @@ export const ChapterVictoryModal: React.FC<ChapterVictoryModalProps> = ({
         ) : (
           <div className="w-full bg-emerald-950/40 border border-emerald-500/50 rounded-xl p-4 mb-6">
             <div className="text-emerald-400 font-bold text-base">
-              🎉 सम्पुर्ण रामायण यात्रा सम्पन्न! All Chapters Conquered!
+              All Chapters Conquered!
             </div>
             <div className="text-xs text-neutral-300 mt-1">
               You have defeated the Ten-Headed Emperor Raone and restored cosmic balance to the universe!
@@ -96,7 +96,7 @@ export const ChapterVictoryModal: React.FC<ChapterVictoryModalProps> = ({
               onClick={() => onProceedNextChapter(nextTheme.id)}
               className="w-full py-3.5 px-4 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 active:scale-[0.98] text-neutral-950 font-bold rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-amber-500/25 transition-all text-sm sm:text-base cursor-pointer"
             >
-              <span>PROCEED TO CHAPTER {nextTheme.id} (अर्को अध्याय सुरु)</span>
+              <span>PROCEED TO CHAPTER {nextTheme.id}</span>
               <ChevronRight className="w-5 h-5" />
             </button>
           )}
@@ -108,7 +108,7 @@ export const ChapterVictoryModal: React.FC<ChapterVictoryModalProps> = ({
               className="flex-1 py-3 px-3 bg-neutral-800 hover:bg-neutral-700 active:scale-[0.98] text-white font-medium rounded-xl flex items-center justify-center gap-2 border border-neutral-700 transition-all text-xs sm:text-sm cursor-pointer"
             >
               <ListOrdered className="w-4 h-4 text-amber-400" />
-              <span>CHAPTERS (अध्याय सूची)</span>
+              <span>CHAPTERS</span>
             </button>
 
             <button

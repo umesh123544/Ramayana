@@ -20,7 +20,7 @@ import {
 interface DifficultyOption {
   level: DifficultyLevel;
   title: string;
-  hindiTitle: string;
+  modeTag: string;
   subtitle: string;
   description: string;
   badge?: string;
@@ -47,7 +47,7 @@ const DIFFICULTY_OPTIONS: DifficultyOption[] = [
   {
     level: 'EASY',
     title: 'Easy',
-    hindiTitle: 'सरल • सुलभ',
+    modeTag: 'Gentle • Story',
     subtitle: 'Novice of the Divine Bow',
     description:
       'Forgiving combat with weakened demons and abundant divine lotus grace. Recommended for players focusing on story and relaxed exploration.',
@@ -72,7 +72,7 @@ const DIFFICULTY_OPTIONS: DifficultyOption[] = [
   {
     level: 'NORMAL',
     title: 'Normal',
-    hindiTitle: 'सन्तुलित • धर्ममार्ग',
+    modeTag: 'Standard • Dharma',
     subtitle: 'Canonical Journey of Dharma',
     description:
       'The balanced, canonical trial of Shri Rama’s epic. Fair enemy aggression, standard bow velocity, and authentic mythological challenge.',
@@ -98,7 +98,7 @@ const DIFFICULTY_OPTIONS: DifficultyOption[] = [
   {
     level: 'HARD',
     title: 'Hard',
-    hindiTitle: 'कठिन • वीर परीक्षा',
+    modeTag: 'Challenging • Valor',
     subtitle: 'Trial of the Seasoned Warrior',
     description:
       'Aggressive demon commanders with punishing strikes and scarce divine aid. Requires deliberate dodging, blocking, and charged archery.',
@@ -124,7 +124,7 @@ const DIFFICULTY_OPTIONS: DifficultyOption[] = [
   {
     level: 'EPIC',
     title: 'Epic',
-    hindiTitle: 'महायज्ञ • अति-कठिन',
+    modeTag: 'Master • Ordeal',
     subtitle: 'Supreme Mythological Ordeal',
     description:
       'Brutal demon hordes with immense resilience and deadly strikes. Divine grace is elusive. Only an unyielding master of Dharma can prevail.',
@@ -212,12 +212,12 @@ export const DifficultySelector: React.FC<DifficultySelectorProps> = ({
           {selectedChapter ? (
             <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/40 text-amber-300 text-xs font-mono mb-1">
               <BookOpen className="w-3.5 h-3.5 text-amber-400" />
-              <span>Chapter {selectedChapter.id}: {selectedChapter.title} ({selectedChapter.hindiTitle})</span>
+              <span>Chapter {selectedChapter.id}: {selectedChapter.title}</span>
             </div>
           ) : (
             <div className="flex items-center gap-2 text-amber-400 text-xs sm:text-sm font-bold tracking-widest uppercase">
               <Sun className="w-4 h-4 animate-spin-slow text-amber-400" />
-              <span>Trial of Dharma • परीक्षा चयन</span>
+              <span>Trial of Dharma</span>
             </div>
           )}
           <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-amber-200 tracking-wider font-['Cinzel'] mt-0.5">
@@ -252,7 +252,7 @@ export const DifficultySelector: React.FC<DifficultySelectorProps> = ({
                 {/* Top Badge */}
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-[10px] sm:text-xs font-mono tracking-wider font-semibold text-neutral-400 uppercase">
-                    {opt.hindiTitle}
+                    {opt.modeTag}
                   </span>
                   {opt.badge && (
                     <span
@@ -334,7 +334,7 @@ export const DifficultySelector: React.FC<DifficultySelectorProps> = ({
               <div className="flex items-center gap-2">
                 <span className="text-sm font-bold text-neutral-100">Selected Trial:</span>
                 <span className={`text-base font-extrabold uppercase font-['Cinzel'] ${selectedOpt.colorScheme.accent}`}>
-                  {selectedOpt.title} ({selectedOpt.hindiTitle})
+                  {selectedOpt.title} • {selectedOpt.subtitle}
                 </span>
               </div>
               <p className="text-xs text-neutral-400 mt-0.5 max-w-xl">

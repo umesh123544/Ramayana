@@ -21,37 +21,37 @@ export class EnemySystem {
   public spawnInitialEnemies() {
     const ch = this.chapterId;
     const baseList: Enemy[] = [
-      // Melee Rakshasas
-      this.createEnemy('small_demon', 'e1', 750, 600, 650, 950),
-      this.createEnemy('small_demon', 'e2', 2600, 600, 2500, 2800),
+      // Melee Rakshasas - securely positioned on ground/bridge
+      this.createEnemy('small_demon', 'e1', 750, 672 - 48, 620, 950),
+      this.createEnemy('small_demon', 'e2', 2550, 660 - 48, 2350, 2750),
 
-      // Archer Rakshasa
-      this.createEnemy('archer_demon', 'e3', 1150, 480, 1050, 1250),
-      this.createEnemy('archer_demon', 'e4', 3300, 600, 3150, 3450),
+      // Archer Rakshasa perched safely on stone platforms
+      this.createEnemy('archer_demon', 'e3', 1120, 530 - 50, 1040, 1220),
+      this.createEnemy('archer_demon', 'e4', 3220, 530 - 50, 3120, 3320),
 
-      // Heavy Demon Warrior
-      this.createEnemy('heavy_demon', 'e5', 1850, 600, 1750, 2050),
+      // Heavy Demon Warrior on main ground
+      this.createEnemy('heavy_demon', 'e5', 1850, 672 - 68, 1700, 2050),
     ];
 
-    // Chapters 3+: add flying demons
+    // Chapters 3+: add flying demons in reachable airspace
     if (ch >= 3) {
       baseList.push(
-        this.createEnemy('flying_demon', 'e6', 1400, 340, 1300, 1600),
-        this.createEnemy('flying_demon', 'e7', 2900, 360, 2750, 3100)
+        this.createEnemy('flying_demon', 'e6', 1400, 320, 1250, 1600),
+        this.createEnemy('flying_demon', 'e7', 2850, 340, 2700, 3050)
       );
     }
 
     // Chapters 5+: add elite demon commander
     if (ch >= 5) {
       baseList.push(
-        this.createEnemy('elite_demon', 'e8', 2150, 600, 2000, 2300)
+        this.createEnemy('elite_demon', 'e8', 2100, 672 - 64, 1950, 2200)
       );
     }
 
     // Chapters 8+: add another elite demon guard for Lanka / Yuddha
     if (ch >= 8) {
       baseList.push(
-        this.createEnemy('elite_demon', 'e9', 3050, 500, 2950, 3200)
+        this.createEnemy('elite_demon', 'e9', 2950, 672 - 64, 2820, 3100)
       );
     }
 
@@ -234,21 +234,30 @@ export class EnemySystem {
 
       // Physics & Movement
       if (enemy.type === 'flying_demon') {
-        // Floating sinusoidal movement
-        enemy.vy = Math.sin(Date.now() * 0.005 + enemy.x) * 40;
+        // Floating sinusoidal movement in comfortable reachable airspace
+        enemy.vy = Math.sin(Date.now() * 0.005 + enemy.x) * 35;
         enemy.x += enemy.vx * dt;
         enemy.y += enemy.vy * dt;
+
+        // Strict vertical bounds for flying demons (always visible and hittable)
+        if (enemy.y < 180) {
+          enemy.y = 180;
+          enemy.vy = Math.abs(enemy.vy);
+        } else if (enemy.y > 480) {
+          enemy.y = 480;
+          enemy.vy = -Math.abs(enemy.vy);
+        }
       } else {
         // Apply Gravity
-        const prevFootY = enemy.y - enemy.height;
+        const prevY = enemy.y;
         enemy.vy = Math.min(enemy.vy + GRAVITY * dt, TERMINAL_VELOCITY);
         enemy.x += enemy.vx * dt;
         enemy.y += enemy.vy * dt;
 
-        // Platform collision
+        // Platform collision: pass standard bounding box
         const colEntity = {
-          x: enemy.x - enemy.width * 0.5,
-          y: enemy.y - enemy.height,
+          x: enemy.x,
+          y: enemy.y,
           vx: enemy.vx,
           vy: enemy.vy,
           width: enemy.width,
@@ -256,16 +265,36 @@ export class EnemySystem {
           isGrounded: enemy.isGrounded,
         };
 
-        resolvePlatformCollision(colEntity, prevFootY, platforms);
-        enemy.y = colEntity.y + enemy.height;
+        resolvePlatformCollision(colEntity, prevY, platforms);
+        enemy.y = colEntity.y;
         enemy.vy = colEntity.vy;
         enemy.isGrounded = colEntity.isGrounded;
+
+        // Strict Ground Floor limit: keep firmly on top of ground
+        const maxGroundY = 672 - enemy.height;
+        if (enemy.y > maxGroundY) {
+          enemy.y = maxGroundY;
+          enemy.vy = 0;
+          enemy.isGrounded = true;
+        }
+
+        // Archer demons on elevated platforms: constrain patrol so they never fall off
+        if (enemy.type === 'archer_demon') {
+          if (enemy.x <= enemy.patrolStartX) {
+            enemy.x = enemy.patrolStartX;
+            enemy.facing = 'right';
+            if (enemy.vx < 0) enemy.vx = Math.abs(enemy.vx);
+          } else if (enemy.x >= enemy.patrolEndX) {
+            enemy.x = enemy.patrolEndX;
+            enemy.facing = 'left';
+            if (enemy.vx > 0) enemy.vx = -Math.abs(enemy.vx);
+          }
+        }
       }
 
-      // Strict Map Boundary Enforcement (prevent enemies from going outside the world)
-      const MIN_MAP_X = 60;
-      const MAX_MAP_X = 4120;
-      const MAX_GROUND_Y = 672;
+      // Strict Map Boundary Enforcement (prevent enemies from leaving the map world)
+      const MIN_MAP_X = 80;
+      const MAX_MAP_X = 4100 - enemy.width;
 
       if (enemy.x < MIN_MAP_X) {
         enemy.x = MIN_MAP_X;
@@ -275,22 +304,6 @@ export class EnemySystem {
         enemy.x = MAX_MAP_X;
         enemy.vx = -Math.abs(enemy.vx);
         enemy.facing = 'left';
-      }
-
-      if (enemy.type === 'flying_demon') {
-        if (enemy.y < 160) {
-          enemy.y = 160;
-          enemy.vy = Math.abs(enemy.vy);
-        } else if (enemy.y > 580) {
-          enemy.y = 580;
-          enemy.vy = -Math.abs(enemy.vy);
-        }
-      } else {
-        if (enemy.y > MAX_GROUND_Y) {
-          enemy.y = MAX_GROUND_Y;
-          enemy.vy = 0;
-          enemy.isGrounded = true;
-        }
       }
 
       // Animation Frame Cycling

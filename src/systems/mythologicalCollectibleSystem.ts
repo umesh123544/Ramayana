@@ -90,12 +90,12 @@ export class MythologicalCollectibleSystem {
           ctx.strokeStyle = '#fef08a';
           ctx.lineWidth = 1.5;
           ctx.stroke();
-          // Inner Om symbol
+          // Inner Star emblem
           ctx.fillStyle = '#78350f';
-          ctx.font = 'bold 9px sans-serif';
+          ctx.font = 'bold 10px sans-serif';
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
-          ctx.fillText('ॐ', px, py);
+          ctx.fillText('★', px, py);
           break;
         }
 

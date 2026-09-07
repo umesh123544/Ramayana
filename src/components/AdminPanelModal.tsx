@@ -4,24 +4,25 @@ import {
   X,
   Shield,
   User,
-  Heart,
-  Zap,
   Sparkles,
   Sliders,
   RotateCcw,
   CheckCircle2,
-  Sword,
   MessageSquare,
   Skull,
   Plus,
   Trash2,
   Palette,
   Eye,
+  Gamepad2,
+  MoveHorizontal,
+  ArrowUp,
+  Crosshair,
+  Zap,
 } from 'lucide-react';
 import {
   adminConfig,
   AdminGameConfig,
-  DEFAULT_ADMIN_CONFIG,
 } from '../systems/adminConfig';
 import { renderUmesh } from '../render/sprites';
 
@@ -31,7 +32,7 @@ interface AdminPanelModalProps {
   onConfigSaved: (newConfig: AdminGameConfig) => void;
 }
 
-type TabType = 'game' | 'hero' | 'companion' | 'villain';
+type TabType = 'hero' | 'controls' | 'companion' | 'villain' | 'game';
 
 export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
   isOpen,
@@ -101,16 +102,16 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
   const handleSave = () => {
     adminConfig.save(config);
     onConfigSaved(config);
-    setSaveToast('सेटिङहरू सफलतापूर्वक सुरक्षित गरियो! (Changes saved & applied!)');
+    setSaveToast('Settings successfully saved & applied to the game!');
     setTimeout(() => setSaveToast(null), 3000);
   };
 
   const handleReset = () => {
-    if (window.confirm('के तपाईं पूर्वनिर्धारित सेटिङहरू पुनःस्थापना गर्न चाहनुहुन्छ? (Reset to factory defaults?)')) {
+    if (window.confirm('Are you sure you want to reset all configurations to factory defaults?')) {
       const def = adminConfig.resetToDefaults();
       setConfig(JSON.parse(JSON.stringify(def)));
       onConfigSaved(def);
-      setSaveToast('पूर्वनिर्धारित सेटिङहरू पुनःस्थापना गरियो! (Restored defaults)');
+      setSaveToast('Default settings restored!');
       setTimeout(() => setSaveToast(null), 3000);
     }
   };
@@ -141,7 +142,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
         hero: {
           ...prev.hero,
           name: 'Shri Umesh Avatar',
-          title: 'Divine Sun Incarnation • अजेय योद्धा',
+          title: 'Divine Sun Incarnation • Invincible Archer',
           skinTone: '#fde047',
           dhotiColor: '#ea580c',
           armorColor: '#f59e0b',
@@ -160,7 +161,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
         hero: {
           ...prev.hero,
           name: 'Umesh Dhanurdhar',
-          title: 'Master Divine Archer • महाधनुर्धर',
+          title: 'Master Divine Archer',
           skinTone: '#38bdf8',
           dhotiColor: '#059669',
           armorColor: '#e2e8f0',
@@ -174,7 +175,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
         },
       }));
     }
-    setSaveToast(`'${presetName}' प्रिसेट लागू गरियो! 'Save & Apply' थिच्नुहोस्।`);
+    setSaveToast(`'${presetName}' preset applied! Click 'Save & Apply Changes' below.`);
     setTimeout(() => setSaveToast(null), 3000);
   };
 
@@ -222,13 +223,13 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
               </div>
               <div>
                 <h3 className="font-bold text-sm sm:text-base text-amber-300 font-['Cinzel'] flex items-center gap-2">
-                  <span>Admin & Character Studio</span>
+                  <span>Admin & Game Studio</span>
                   <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40">
-                    एडमिन प्यानल
+                    Admin
                   </span>
                 </h3>
                 <p className="text-[11px] text-neutral-400 font-mono hidden sm:block">
-                  Change game name, hero character attributes, companion, and villain
+                  Customize hero stats, on-screen controls, companion dialogues, and difficulty
                 </p>
               </div>
             </div>
@@ -257,7 +258,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
           {/* ================= PRESET QUICK SELECTOR ================= */}
           <div className="bg-neutral-950/50 px-4 sm:px-6 py-2 border-b border-neutral-800 flex items-center justify-between gap-2 overflow-x-auto text-xs scrollbar-none">
             <span className="text-neutral-400 font-mono text-[11px] whitespace-nowrap shrink-0">
-              ⚡ Quick Presets:
+              ⚡ Quick Hero Presets:
             </span>
             <div className="flex items-center gap-1.5">
               <button
@@ -270,7 +271,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                 onClick={() => applyPreset('godmode')}
                 className="px-2.5 py-1 rounded-lg bg-neutral-800/80 hover:bg-yellow-600/30 text-yellow-300 border border-yellow-500/30 whitespace-nowrap text-[11px] cursor-pointer"
               >
-                ⚡ God Mode (Super HP)
+                ⚡ God Mode (High HP)
               </button>
               <button
                 onClick={() => applyPreset('archer')}
@@ -292,7 +293,19 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
               }`}
             >
               <User className="w-4 h-4 text-amber-400" />
-              <span>Hero (उमेश पात्र)</span>
+              <span>Hero (Umesh)</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('controls')}
+              className={`px-3 sm:px-4 py-2 font-medium text-xs sm:text-sm rounded-t-xl transition-all cursor-pointer flex items-center gap-1.5 border-t border-x whitespace-nowrap ${
+                activeTab === 'controls'
+                  ? 'bg-neutral-900 text-cyan-300 border-cyan-500/40 border-b-neutral-900'
+                  : 'text-neutral-400 border-transparent hover:text-neutral-200'
+              }`}
+            >
+              <Gamepad2 className="w-4 h-4 text-cyan-400" />
+              <span>Controls (Buttons & Stick)</span>
             </button>
 
             <button
@@ -304,7 +317,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
               }`}
             >
               <Sparkles className="w-4 h-4 text-rose-400" />
-              <span>Companion (पूर्णिमा)</span>
+              <span>Companion (Purneema)</span>
             </button>
 
             <button
@@ -316,7 +329,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
               }`}
             >
               <Skull className="w-4 h-4 text-red-500" />
-              <span>Villains (रावण र शत्रु)</span>
+              <span>Villains & Demons</span>
             </button>
 
             <button
@@ -328,7 +341,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
               }`}
             >
               <Shield className="w-4 h-4 text-emerald-400" />
-              <span>Game Title (खेल सेटिङ)</span>
+              <span>Game Settings</span>
             </button>
           </div>
 
@@ -343,7 +356,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                       <label className="block text-xs font-semibold text-neutral-300 mb-1">
-                        Hero Character Name (पात्रको नाम)
+                        Hero Character Name
                       </label>
                       <input
                         type="text"
@@ -382,14 +395,14 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                   <div className="p-3.5 rounded-xl bg-neutral-950/70 border border-neutral-800 space-y-3">
                     <h4 className="text-xs font-bold text-amber-300 uppercase tracking-wide flex items-center gap-1.5">
                       <Palette className="w-3.5 h-3.5" />
-                      <span>Character Appearance & Attire (रङ तथा पहिरन)</span>
+                      <span>Character Appearance & Attire</span>
                     </h4>
 
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
                       {/* Skin tone */}
                       <div>
                         <label className="block text-[11px] text-neutral-400 mb-1">
-                          Skin Complexion (छालाको रङ)
+                          Skin Complexion
                         </label>
                         <div className="flex items-center gap-2">
                           <input
@@ -428,7 +441,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                       {/* Dhoti / Robe color */}
                       <div>
                         <label className="block text-[11px] text-neutral-400 mb-1">
-                          Dhoti Robe Color (धोतीको रङ)
+                          Dhoti Robe Color
                         </label>
                         <div className="flex items-center gap-2">
                           <input
@@ -467,7 +480,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                       {/* Armor / Kavach */}
                       <div>
                         <label className="block text-[11px] text-neutral-400 mb-1">
-                          Armor Kavach (कवच रङ)
+                          Armor Kavach
                         </label>
                         <div className="flex items-center gap-2">
                           <input
@@ -505,11 +518,11 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                     </div>
                   </div>
 
-                  {/* Attributes: HP, Lives, Speeds, Damage */}
+                  {/* Attributes: HP, Lives, Damage */}
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
                     <div className="p-3 rounded-xl bg-neutral-950/50 border border-neutral-800">
                       <label className="block text-[11px] text-neutral-400 mb-1 font-mono">
-                        Max HP (स्वास्थ्य)
+                        Max HP
                       </label>
                       <input
                         type="number"
@@ -529,7 +542,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
 
                     <div className="p-3 rounded-xl bg-neutral-950/50 border border-neutral-800">
                       <label className="block text-[11px] text-neutral-400 mb-1 font-mono">
-                        Sacred Lives (जीवन संख्या)
+                        Sacred Lives
                       </label>
                       <input
                         type="number"
@@ -548,7 +561,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
 
                     <div className="p-3 rounded-xl bg-neutral-950/50 border border-neutral-800">
                       <label className="block text-[11px] text-neutral-400 mb-1 font-mono">
-                        Arrow Dmg (सामान्य बाण)
+                        Arrow Damage
                       </label>
                       <input
                         type="number"
@@ -567,7 +580,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
 
                     <div className="p-3 rounded-xl bg-neutral-950/50 border border-neutral-800">
                       <label className="block text-[11px] text-neutral-400 mb-1 font-mono">
-                        Charged Dmg (शक्ति बाण)
+                        Charged Arrow Dmg
                       </label>
                       <input
                         type="number"
@@ -670,13 +683,377 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
               </div>
             )}
 
-            {/* ---------------- TAB 2: COMPANION (PURNEEMA) ---------------- */}
+            {/* ---------------- TAB 2: CONTROLS CUSTOMIZER ---------------- */}
+            {activeTab === 'controls' && (
+              <div className="space-y-5">
+                {/* Header note */}
+                <div className="flex items-center justify-between p-3.5 rounded-xl bg-cyan-950/30 border border-cyan-500/30 text-xs">
+                  <div className="flex items-center gap-2 text-cyan-300">
+                    <Gamepad2 className="w-5 h-5 shrink-0" />
+                    <div>
+                      <div className="font-bold">Virtual On-Screen Controls Adjuster</div>
+                      <div className="text-[11px] text-cyan-200/70">
+                        Adjust button size, opacity, positions, and controller mode for phone & tablet screens.
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setConfig((prev) => ({
+                          ...prev,
+                          controls: {
+                            scale: 1.0,
+                            opacity: 0.9,
+                            dpadType: 'dpad',
+                            bottomOffset: 12,
+                            sideOffset: 14,
+                            swapSides: false,
+                            showControls: true,
+                          },
+                        }))
+                      }
+                      className="px-2.5 py-1 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-300 text-[11px] flex items-center gap-1 cursor-pointer transition-colors"
+                    >
+                      <RotateCcw className="w-3 h-3" />
+                      <span>Reset Controls</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Left Column: Sliders */}
+                  <div className="space-y-4">
+                    {/* Scale Slider */}
+                    <div className="p-3.5 rounded-xl bg-neutral-950/60 border border-neutral-800 space-y-2">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="font-semibold text-neutral-200">Control Size / Scale</span>
+                        <span className="font-mono text-cyan-400 font-bold">
+                          {Math.round((config.controls?.scale || 1.0) * 100)}%
+                        </span>
+                      </div>
+                      <input
+                        type="range"
+                        min={0.75}
+                        max={1.4}
+                        step={0.05}
+                        value={config.controls?.scale || 1.0}
+                        onChange={(e) =>
+                          setConfig((prev) => ({
+                            ...prev,
+                            controls: {
+                              ...prev.controls,
+                              scale: Number(e.target.value),
+                            },
+                          }))
+                        }
+                        className="w-full accent-cyan-500 cursor-pointer"
+                      />
+                      <div className="flex items-center justify-between text-[10px] text-neutral-400">
+                        <span>Compact (75%)</span>
+                        <span>Standard (100%)</span>
+                        <span>Large (140%)</span>
+                      </div>
+                      {/* Scale Presets */}
+                      <div className="flex items-center gap-1.5 pt-1">
+                        {[
+                          { label: 'Compact (85%)', val: 0.85 },
+                          { label: 'Standard (100%)', val: 1.0 },
+                          { label: 'Large (120%)', val: 1.2 },
+                        ].map((preset) => (
+                          <button
+                            key={preset.label}
+                            type="button"
+                            onClick={() =>
+                              setConfig((prev) => ({
+                                ...prev,
+                                controls: { ...prev.controls, scale: preset.val },
+                              }))
+                            }
+                            className={`px-2 py-1 rounded text-[10px] font-mono cursor-pointer transition-all ${
+                              Math.abs((config.controls?.scale || 1.0) - preset.val) < 0.01
+                                ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40'
+                                : 'bg-neutral-900 text-neutral-400 hover:text-white'
+                            }`}
+                          >
+                            {preset.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Opacity Slider */}
+                    <div className="p-3.5 rounded-xl bg-neutral-950/60 border border-neutral-800 space-y-2">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="font-semibold text-neutral-200">Opacity / Transparency</span>
+                        <span className="font-mono text-cyan-400 font-bold">
+                          {Math.round((config.controls?.opacity !== undefined ? config.controls.opacity : 0.9) * 100)}%
+                        </span>
+                      </div>
+                      <input
+                        type="range"
+                        min={0.3}
+                        max={1.0}
+                        step={0.05}
+                        value={config.controls?.opacity !== undefined ? config.controls.opacity : 0.9}
+                        onChange={(e) =>
+                          setConfig((prev) => ({
+                            ...prev,
+                            controls: {
+                              ...prev.controls,
+                              opacity: Number(e.target.value),
+                            },
+                          }))
+                        }
+                        className="w-full accent-cyan-500 cursor-pointer"
+                      />
+                      <div className="flex items-center justify-between text-[10px] text-neutral-400">
+                        <span>Subtle Ghost (30%)</span>
+                        <span>Semi (65%)</span>
+                        <span>Solid (100%)</span>
+                      </div>
+                    </div>
+
+                    {/* Edge Margin Offsets */}
+                    <div className="p-3.5 rounded-xl bg-neutral-950/60 border border-neutral-800 space-y-3">
+                      <div className="text-xs font-semibold text-neutral-200">Edge Margins & Spacing</div>
+                      <div className="grid grid-cols-2 gap-3 text-xs">
+                        <div>
+                          <div className="flex justify-between text-[11px] text-neutral-400 mb-1">
+                            <span>Bottom:</span>
+                            <span className="font-mono text-cyan-300">{config.controls?.bottomOffset ?? 12}px</span>
+                          </div>
+                          <input
+                            type="range"
+                            min={0}
+                            max={50}
+                            step={2}
+                            value={config.controls?.bottomOffset ?? 12}
+                            onChange={(e) =>
+                              setConfig((prev) => ({
+                                ...prev,
+                                controls: {
+                                  ...prev.controls,
+                                  bottomOffset: Number(e.target.value),
+                                },
+                              }))
+                            }
+                            className="w-full accent-cyan-500 cursor-pointer"
+                          />
+                        </div>
+                        <div>
+                          <div className="flex justify-between text-[11px] text-neutral-400 mb-1">
+                            <span>Sides:</span>
+                            <span className="font-mono text-cyan-300">{config.controls?.sideOffset ?? 14}px</span>
+                          </div>
+                          <input
+                            type="range"
+                            min={0}
+                            max={50}
+                            step={2}
+                            value={config.controls?.sideOffset ?? 14}
+                            onChange={(e) =>
+                              setConfig((prev) => ({
+                                ...prev,
+                                controls: {
+                                  ...prev.controls,
+                                  sideOffset: Number(e.target.value),
+                                },
+                              }))
+                            }
+                            className="w-full accent-cyan-500 cursor-pointer"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right Column: Modes & Layout Toggles + Preview */}
+                  <div className="space-y-4">
+                    {/* Control Style Mode: D-Pad vs Joystick */}
+                    <div className="p-3.5 rounded-xl bg-neutral-950/60 border border-neutral-800 space-y-2">
+                      <label className="block text-xs font-semibold text-neutral-200 mb-1">
+                        Preferred Movement Style
+                      </label>
+                      <div className="grid grid-cols-2 gap-2">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setConfig((prev) => ({
+                              ...prev,
+                              controls: { ...prev.controls, dpadType: 'dpad' },
+                            }))
+                          }
+                          className={`p-2.5 rounded-xl border text-xs font-medium flex items-center justify-center gap-2 cursor-pointer transition-all ${
+                            (config.controls?.dpadType || 'dpad') === 'dpad'
+                              ? 'bg-cyan-950/60 border-cyan-500/60 text-cyan-300 shadow-md'
+                              : 'bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-neutral-200'
+                          }`}
+                        >
+                          <Gamepad2 className="w-4 h-4" />
+                          <span>4-Way D-Pad</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setConfig((prev) => ({
+                              ...prev,
+                              controls: { ...prev.controls, dpadType: 'joystick' },
+                            }))
+                          }
+                          className={`p-2.5 rounded-xl border text-xs font-medium flex items-center justify-center gap-2 cursor-pointer transition-all ${
+                            config.controls?.dpadType === 'joystick'
+                              ? 'bg-cyan-950/60 border-cyan-500/60 text-cyan-300 shadow-md'
+                              : 'bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-neutral-200'
+                          }`}
+                        >
+                          <MoveHorizontal className="w-4 h-4" />
+                          <span>360° Joystick</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Swap Sides (Left-Handed / Right-Handed) */}
+                    <div className="p-3.5 rounded-xl bg-neutral-950/60 border border-neutral-800 space-y-2">
+                      <label className="block text-xs font-semibold text-neutral-200 mb-1">
+                        Handedness / Button Placement
+                      </label>
+                      <div className="grid grid-cols-2 gap-2">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setConfig((prev) => ({
+                              ...prev,
+                              controls: { ...prev.controls, swapSides: false },
+                            }))
+                          }
+                          className={`p-2.5 rounded-xl border text-xs font-medium text-center cursor-pointer transition-all ${
+                            !config.controls?.swapSides
+                              ? 'bg-cyan-950/60 border-cyan-500/60 text-cyan-300 shadow-md'
+                              : 'bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-neutral-200'
+                          }`}
+                        >
+                          <div>Default</div>
+                          <div className="text-[10px] opacity-75 font-mono">Move: Left • Fire: Right</div>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setConfig((prev) => ({
+                              ...prev,
+                              controls: { ...prev.controls, swapSides: true },
+                            }))
+                          }
+                          className={`p-2.5 rounded-xl border text-xs font-medium text-center cursor-pointer transition-all ${
+                            config.controls?.swapSides
+                              ? 'bg-cyan-950/60 border-cyan-500/60 text-cyan-300 shadow-md'
+                              : 'bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-neutral-200'
+                          }`}
+                        >
+                          <div>Swapped</div>
+                          <div className="text-[10px] opacity-75 font-mono">Fire: Left • Move: Right</div>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Visibility Toggle */}
+                    <div className="p-3.5 rounded-xl bg-neutral-950/60 border border-neutral-800 flex items-center justify-between text-xs">
+                      <div>
+                        <div className="font-semibold text-neutral-200">Show On-Screen Controls</div>
+                        <div className="text-[11px] text-neutral-400">
+                          Keep visible for touch devices or hide if playing exclusively on keyboard
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setConfig((prev) => ({
+                            ...prev,
+                            controls: {
+                              ...prev.controls,
+                              showControls: prev.controls?.showControls === false ? true : false,
+                            },
+                          }))
+                        }
+                        className={`w-12 h-6 rounded-full transition-colors relative cursor-pointer ${
+                          config.controls?.showControls !== false ? 'bg-cyan-600' : 'bg-neutral-800'
+                        }`}
+                      >
+                        <div
+                          className={`w-4 h-4 rounded-full bg-white transition-transform absolute top-1 ${
+                            config.controls?.showControls !== false ? 'left-7' : 'left-1'
+                          }`}
+                        />
+                      </button>
+                    </div>
+
+                    {/* Visual Layout Mockup */}
+                    <div className="p-3 rounded-xl bg-neutral-950 border border-neutral-800 flex flex-col items-center">
+                      <div className="text-[11px] text-neutral-400 font-mono mb-2">
+                        Real-Time Layout Preview ({Math.round((config.controls?.scale || 1.0) * 100)}% size, {Math.round((config.controls?.opacity ?? 0.9) * 100)}% opacity)
+                      </div>
+                      <div
+                        className="w-full h-24 rounded-lg bg-neutral-900/90 border border-dashed border-neutral-700 p-2 flex items-end justify-between transition-opacity"
+                        style={{ opacity: config.controls?.opacity ?? 0.9 }}
+                      >
+                        {/* Box 1 (Left) */}
+                        <div
+                          className="flex items-center gap-1 transition-transform"
+                          style={{
+                            transform: `scale(${Math.min(1.15, config.controls?.scale || 1.0)})`,
+                            transformOrigin: 'bottom left',
+                          }}
+                        >
+                          {config.controls?.swapSides ? (
+                            <div className="flex items-center gap-1.5 p-1 rounded-lg bg-amber-500/20 border border-amber-500/40 text-amber-300 text-[9px] font-bold">
+                              <Zap className="w-3 h-3 text-amber-400" />
+                              <Crosshair className="w-4 h-4 text-amber-300" />
+                            </div>
+                          ) : (
+                            <div className="flex flex-col items-center p-1 rounded-lg bg-cyan-500/20 border border-cyan-500/40 text-cyan-300 text-[9px] font-bold">
+                              <ArrowUp className="w-3 h-3" />
+                              <span>DPAD</span>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Box 2 (Right) */}
+                        <div
+                          className="flex items-center gap-1 transition-transform"
+                          style={{
+                            transform: `scale(${Math.min(1.15, config.controls?.scale || 1.0)})`,
+                            transformOrigin: 'bottom right',
+                          }}
+                        >
+                          {config.controls?.swapSides ? (
+                            <div className="flex flex-col items-center p-1 rounded-lg bg-cyan-500/20 border border-cyan-500/40 text-cyan-300 text-[9px] font-bold">
+                              <ArrowUp className="w-3 h-3" />
+                              <span>DPAD</span>
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-1.5 p-1 rounded-lg bg-amber-500/20 border border-amber-500/40 text-amber-300 text-[9px] font-bold">
+                              <Zap className="w-3 h-3 text-amber-400" />
+                              <Crosshair className="w-4 h-4 text-amber-300" />
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* ---------------- TAB 3: COMPANION (PURNEEMA) ---------------- */}
             {activeTab === 'companion' && (
               <div className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="block text-xs font-semibold text-neutral-300 mb-1">
-                      Companion Name (सहयोगी पात्रको नाम)
+                      Companion Name
                     </label>
                     <input
                       type="text"
@@ -734,7 +1111,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
 
                   <div className="p-3 rounded-xl bg-neutral-950/60 border border-neutral-800">
                     <label className="block text-neutral-400 mb-1 font-mono">
-                      Sari / Attire Color (साडीको रङ)
+                      Sari / Attire Color
                     </label>
                     <div className="flex items-center gap-2">
                       <input
@@ -759,7 +1136,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                 <div className="p-4 rounded-xl bg-neutral-950/60 border border-neutral-800 space-y-3">
                   <h4 className="text-xs font-bold text-rose-300 uppercase tracking-wide flex items-center gap-1.5">
                     <MessageSquare className="w-3.5 h-3.5" />
-                    <span>Companion Dialogues (संवादहरू)</span>
+                    <span>Companion Dialogues</span>
                   </h4>
 
                   <div className="space-y-2 max-h-40 overflow-y-auto">
@@ -784,7 +1161,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                         />
                         <button
                           onClick={() => removeDialogue(idx)}
-                          className="p-1 text-neutral-500 hover:text-red-400 transition-colors"
+                          className="p-1 text-neutral-500 hover:text-red-400 transition-colors cursor-pointer"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
@@ -796,7 +1173,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                   <div className="flex items-center gap-2 pt-1">
                     <input
                       type="text"
-                      placeholder="नयाँ संवाद थप्नुहोस् (Type new dialogue)..."
+                      placeholder="Type a new dialogue line..."
                       value={newDialogueInput}
                       onChange={(e) => setNewDialogueInput(e.target.value)}
                       onKeyDown={(e) => e.key === 'Enter' && addDialogue()}
@@ -814,20 +1191,20 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
               </div>
             )}
 
-            {/* ---------------- TAB 3: VILLAIN & DEMON ARMY ---------------- */}
+            {/* ---------------- TAB 4: VILLAIN & DEMON ARMY ---------------- */}
             {activeTab === 'villain' && (
               <div className="space-y-4">
                 {/* Main Villain */}
                 <div className="p-4 rounded-xl bg-neutral-950/70 border border-red-900/40 space-y-3">
                   <h4 className="text-xs font-bold text-red-400 uppercase tracking-wide flex items-center gap-1.5">
                     <Skull className="w-4 h-4 text-red-500" />
-                    <span>Main Boss Villain (मुख्य खलनायक)</span>
+                    <span>Main Boss Villain</span>
                   </h4>
 
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div>
                       <label className="block text-xs font-semibold text-neutral-300 mb-1">
-                        Boss Name (खलनायक नाम)
+                        Boss Name
                       </label>
                       <input
                         type="text"
@@ -886,13 +1263,13 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                 {/* Demon Army Names */}
                 <div className="p-4 rounded-xl bg-neutral-950/60 border border-neutral-800 space-y-3 text-xs">
                   <h4 className="text-xs font-bold text-neutral-300 uppercase tracking-wide">
-                    Demon Army Archetypes (५ राक्षस प्रकारहरू)
+                    Demon Army Archetypes
                   </h4>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                       <label className="block text-[11px] text-neutral-400 mb-1 font-mono">
-                        Small Demon (हल्का राक्षस)
+                        Small Demon (Light Rakshasa)
                       </label>
                       <input
                         type="text"
@@ -909,7 +1286,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
 
                     <div>
                       <label className="block text-[11px] text-neutral-400 mb-1 font-mono">
-                        Archer Demon (धनुर्धारी राक्षस)
+                        Archer Demon (Bow Warrior Asura)
                       </label>
                       <input
                         type="text"
@@ -926,7 +1303,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
 
                     <div>
                       <label className="block text-[11px] text-neutral-400 mb-1 font-mono">
-                        Heavy Demon (कुम्भकरण दैत्य)
+                        Heavy Demon (Kumbhakarna Brute)
                       </label>
                       <input
                         type="text"
@@ -943,7 +1320,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
 
                     <div>
                       <label className="block text-[11px] text-neutral-400 mb-1 font-mono">
-                        Flying Demon (उड्ने असुर)
+                        Flying Demon (Winged Asura)
                       </label>
                       <input
                         type="text"
@@ -1005,12 +1382,12 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
               </div>
             )}
 
-            {/* ---------------- TAB 4: GAME & STORYLINE SETTINGS ---------------- */}
+            {/* ---------------- TAB 5: GAME & STORYLINE SETTINGS ---------------- */}
             {activeTab === 'game' && (
               <div className="space-y-4">
                 <div>
                   <label className="block text-xs font-semibold text-neutral-300 mb-1">
-                    Game Name / Title (खेलको नाम)
+                    Game Name / Title
                   </label>
                   <input
                     type="text"
@@ -1028,7 +1405,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
 
                 <div>
                   <label className="block text-xs font-semibold text-neutral-300 mb-1">
-                    Game Subtitle / Story Header (उपशीर्षक)
+                    Game Subtitle / Story Header
                   </label>
                   <input
                     type="text"
@@ -1040,7 +1417,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                       }))
                     }
                     className="w-full px-3 py-2 rounded-xl bg-neutral-950 border border-neutral-700 text-neutral-200 text-sm focus:border-amber-500 focus:outline-none"
-                    placeholder="e.g. A Mythological Epic Platformer • धनुर्धर उमेशको गाथा"
+                    placeholder="e.g. A Mythological Epic Platformer • The Saga of Archer Umesh"
                   />
                 </div>
 
@@ -1049,7 +1426,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                     Admin Storage & Real-Time Sync Information
                   </h4>
                   <p>
-                    All customizations (names, colors, damage numbers, HP values, dialogues) are instantly persisted in browser local storage and applied into the 2D canvas, HUD, dialogue system, and character physics engine without requiring page reload.
+                    All customizations (names, colors, damage numbers, HP values, control scale and opacity, dialogues) are instantly persisted in browser local storage and applied into the 2D canvas, HUD, dialogue system, and virtual controls without requiring page reload.
                   </p>
                 </div>
               </div>
@@ -1070,7 +1447,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
               onClick={onClose}
               className="px-4 py-2 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-300 text-xs font-semibold cursor-pointer transition-colors"
             >
-              Cancel (रद्द गर्नुहोस्)
+              Cancel
             </button>
 
             <button
@@ -1079,7 +1456,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
               className="px-6 py-2 rounded-xl bg-gradient-to-r from-amber-600 to-yellow-500 hover:from-amber-500 hover:to-yellow-400 text-neutral-950 text-xs font-bold tracking-wide shadow-lg shadow-amber-500/20 active:scale-98 transition-all cursor-pointer flex items-center gap-2"
             >
               <CheckCircle2 className="w-4 h-4" />
-              <span>Save & Apply Changes (सुरक्षित गर्नुहोस्)</span>
+              <span>Save & Apply Changes</span>
             </button>
           </div>
         </motion.div>

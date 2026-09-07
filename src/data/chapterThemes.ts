@@ -48,7 +48,7 @@ export const CHAPTER_THEMES: Record<number, ChapterTheme> = {
     id: 1,
     code: 'AYODHYA',
     name: 'Ayodhya',
-    hindiName: 'अयोध्या',
+    hindiName: 'Ayodhya',
     subtitle: 'The Sacred Kingdom of Kosala',
     skyColors: ['#1e1b4b', '#431407', '#7c2d12', '#ca8a04'], // Dawn sunrise
     celestialType: 'golden_sun',
@@ -68,7 +68,7 @@ export const CHAPTER_THEMES: Record<number, ChapterTheme> = {
     waterReflectColor: '#bae6fd',
     boss: {
       name: 'Subahu',
-      hindiName: 'सुबाहु',
+      hindiName: 'Subahu',
       title: 'Asura Warlord of the Sacrificial Woods',
       type: 'subahu',
       maxHp: 380,
@@ -87,7 +87,7 @@ export const CHAPTER_THEMES: Record<number, ChapterTheme> = {
     id: 2,
     code: 'VANVAS',
     name: 'Vanvas',
-    hindiName: 'वनवास',
+    hindiName: 'Vanvas',
     subtitle: 'The Hermit Path Beyond Kosala',
     skyColors: ['#064e3b', '#065f46', '#047857', '#a7f3d0'], // Misty forest morning
     celestialType: 'morning_sun',
@@ -107,7 +107,7 @@ export const CHAPTER_THEMES: Record<number, ChapterTheme> = {
     waterReflectColor: '#ccfbf1',
     boss: {
       name: 'Viradha',
-      hindiName: 'विराध',
+      hindiName: 'Viradha',
       title: 'Hulking Behemoth of the Deep Wilderness',
       type: 'viradha',
       maxHp: 460,
@@ -126,7 +126,7 @@ export const CHAPTER_THEMES: Record<number, ChapterTheme> = {
     id: 3,
     code: 'DANDAKARANYA',
     name: 'Dandakaranya',
-    hindiName: 'दण्डकारण्य',
+    hindiName: 'Dandakaranya',
     subtitle: 'The Haunted Wilderness',
     skyColors: ['#3b0764', '#581c87', '#701a75', '#991b1b'], // Cursed purple-crimson dusk
     celestialType: 'blood_moon',
@@ -146,7 +146,7 @@ export const CHAPTER_THEMES: Record<number, ChapterTheme> = {
     waterReflectColor: '#f472b6',
     boss: {
       name: 'Khara',
-      hindiName: 'खर',
+      hindiName: 'Khara',
       title: 'Supreme Commander of 14,000 Rakshasas',
       type: 'khara',
       maxHp: 540,
@@ -165,7 +165,7 @@ export const CHAPTER_THEMES: Record<number, ChapterTheme> = {
     id: 4,
     code: 'PANCHAVATI',
     name: 'Panchavati',
-    hindiName: 'पञ्चवटी',
+    hindiName: 'Panchavati',
     subtitle: 'Banks of River Godavari',
     skyColors: ['#1e1b4b', '#312e81', '#4338ca', '#f472b6'], // Serene violet-rose twilight
     celestialType: 'evening_star',
@@ -185,7 +185,7 @@ export const CHAPTER_THEMES: Record<number, ChapterTheme> = {
     waterReflectColor: '#93c5fd',
     boss: {
       name: 'Maricha',
-      hindiName: 'मारीच',
+      hindiName: 'Maricha',
       title: 'The Golden Demon of Deception',
       type: 'maricha',
       maxHp: 500,
@@ -204,7 +204,7 @@ export const CHAPTER_THEMES: Record<number, ChapterTheme> = {
     id: 5,
     code: 'SITA_HARAN',
     name: 'Sita Haran',
-    hindiName: 'सीता हरण',
+    hindiName: 'Sita Haran',
     subtitle: 'The Shadow of Abduction',
     skyColors: ['#0f172a', '#1e293b', '#451a03', '#c2410c'], // Ominous tempest sky
     celestialType: 'storm_lightning',
@@ -224,7 +224,7 @@ export const CHAPTER_THEMES: Record<number, ChapterTheme> = {
     waterReflectColor: '#cbd5e1',
     boss: {
       name: 'Dushana',
-      hindiName: 'दूषण',
+      hindiName: 'Dushana',
       title: 'Dark Chariot Commander of Shadow Forces',
       type: 'dushana',
       maxHp: 580,
@@ -243,7 +243,7 @@ export const CHAPTER_THEMES: Record<number, ChapterTheme> = {
     id: 6,
     code: 'KISHKINDHA',
     name: 'Kishkindha',
-    hindiName: 'किष्किन्धा',
+    hindiName: 'Kishkindha',
     subtitle: 'The Vanara Mountain Empire',
     skyColors: ['#164e63', '#0891b2', '#0e7490', '#fdba74'], // Turquoise & terracotta desert sky
     celestialType: 'desert_sun',
@@ -263,7 +263,7 @@ export const CHAPTER_THEMES: Record<number, ChapterTheme> = {
     waterReflectColor: '#a5f3fc',
     boss: {
       name: 'Vali Challenger',
-      hindiName: 'महाबली बाली',
+      hindiName: 'Mahabali Vali',
       title: 'Unconquered Sovereign of Kishkindha',
       type: 'vali',
       maxHp: 650,
@@ -282,7 +282,7 @@ export const CHAPTER_THEMES: Record<number, ChapterTheme> = {
     id: 7,
     code: 'SETU_NIRMAN',
     name: 'Setu Nirman',
-    hindiName: 'सेतु निर्माण',
+    hindiName: 'Setu Nirman',
     subtitle: 'The Roaring Southern Ocean',
     skyColors: ['#1e3a8a', '#1d4ed8', '#0284c7', '#7dd3fc'], // Oceanic azure expanse
     celestialType: 'ocean_haze',
@@ -302,7 +302,7 @@ export const CHAPTER_THEMES: Record<number, ChapterTheme> = {
     waterReflectColor: '#bae6fd',
     boss: {
       name: 'Surasa',
-      hindiName: 'समुद्र दानव',
+      hindiName: 'Ocean Demon',
       title: 'Leviathan Guardian of the Ocean Depths',
       type: 'surasa',
       maxHp: 680,
@@ -321,7 +321,7 @@ export const CHAPTER_THEMES: Record<number, ChapterTheme> = {
     id: 8,
     code: 'LANKA',
     name: 'Lanka',
-    hindiName: 'स्वर्ण लंका',
+    hindiName: 'Golden Lanka',
     subtitle: 'The Golden Island Fortress',
     skyColors: ['#09090b', '#1c1917', '#451a03', '#ca8a04'], // Obsidian night & golden battlements
     celestialType: 'lanka_moon',
@@ -341,7 +341,7 @@ export const CHAPTER_THEMES: Record<number, ChapterTheme> = {
     waterReflectColor: '#fde047',
     boss: {
       name: 'Indrajit',
-      hindiName: 'इन्द्रजित (मेघनाद)',
+      hindiName: 'Indrajit (Meghanada)',
       title: 'Conqueror of the Heavens & Lord of Lightning',
       type: 'indrajit',
       maxHp: 750,
@@ -360,7 +360,7 @@ export const CHAPTER_THEMES: Record<number, ChapterTheme> = {
     id: 9,
     code: 'YUDDHA',
     name: 'Yuddha',
-    hindiName: 'महासंग्राम',
+    hindiName: 'The Great War',
     subtitle: 'The Great Battlefield',
     skyColors: ['#450a0a', '#7f1d1d', '#991b1b', '#b91c1c'], // Fiery war storm
     celestialType: 'war_fire',
@@ -380,7 +380,7 @@ export const CHAPTER_THEMES: Record<number, ChapterTheme> = {
     waterReflectColor: '#fca5a5',
     boss: {
       name: 'Kumbhakarna',
-      hindiName: 'कुम्भकर्ण',
+      hindiName: 'Kumbhakarna',
       title: 'Colossal Mountain Titan of Lanka',
       type: 'kumbhakarna',
       maxHp: 950,
@@ -399,7 +399,7 @@ export const CHAPTER_THEMES: Record<number, ChapterTheme> = {
     id: 10,
     code: 'FINAL_BATTLE',
     name: 'Final Battle',
-    hindiName: 'अन्तिम युद्ध',
+    hindiName: 'Final Battle',
     subtitle: 'Chariot of the Sun & Ten-Headed King',
     skyColors: ['#0f172a', '#3b0764', '#831843', '#fbbf24'], // Cosmic dawn celestial clash
     celestialType: 'celestial_aurora',
@@ -419,7 +419,7 @@ export const CHAPTER_THEMES: Record<number, ChapterTheme> = {
     waterReflectColor: '#fef08a',
     boss: {
       name: 'Mahabali Raone',
-      hindiName: 'दशानन रावण',
+      hindiName: 'Dashanana Raone',
       title: 'The Ten-Headed Emperor of Lanka • Supreme Asura',
       type: 'raone',
       maxHp: 2800,

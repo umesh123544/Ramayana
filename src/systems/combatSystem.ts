@@ -37,27 +37,71 @@ export class CombatSystem {
     ];
   }
 
-  public shootHeroArrow(hero: HeroState, isCharged: boolean, aimDir?: { x: number; y: number }) {
+  public shootHeroArrow(
+    hero: HeroState,
+    isCharged: boolean,
+    enemies?: Enemy[],
+    boss?: BossState
+  ) {
     let dirX = hero.facing === 'right' ? 1 : -1;
     let dirY = 0;
 
-    if (aimDir) {
-      const len = Math.hypot(aimDir.x, aimDir.y);
-      if (len > 0.05) {
-        dirX = aimDir.x / len;
-        dirY = aimDir.y / len;
-        if (Math.abs(dirX) > 0.2) {
-          hero.facing = dirX > 0 ? 'right' : 'left';
+    const spawnX = hero.x + hero.width * 0.5 + dirX * 24;
+    const spawnY = hero.y + hero.height * 0.42;
+
+    // Smart Auto-Target Assist: lock onto nearest active enemy or boss in facing direction
+    let bestTarget: { x: number; y: number } | null = null;
+    let minDistance = 750;
+    const facingDir = hero.facing === 'right' ? 1 : -1;
+
+    if (enemies && enemies.length > 0) {
+      for (const e of enemies) {
+        if (e.isDead || e.hp <= 0) continue;
+        const targetCenterX = e.x + e.width * 0.5;
+        const targetCenterY = e.y + e.height * 0.45;
+        const dx = targetCenterX - spawnX;
+        const dy = targetCenterY - spawnY;
+
+        // Must be in front of hero
+        if (dx * facingDir > 0) {
+          const dist = Math.hypot(dx, dy);
+          // Within forward targeting arc
+          if (dist < minDistance && Math.abs(dy) < dist * 0.7) {
+            minDistance = dist;
+            bestTarget = { x: targetCenterX, y: targetCenterY };
+          }
         }
       }
     }
 
-    const speed = isCharged ? 780 : 580;
+    if (boss && !boss.isDead && boss.hp > 0) {
+      const bossCenterX = boss.x + boss.width * 0.5;
+      const bossCenterY = boss.y + boss.height * 0.45;
+      const dx = bossCenterX - spawnX;
+      const dy = bossCenterY - spawnY;
+
+      if (dx * facingDir > 0) {
+        const dist = Math.hypot(dx, dy);
+        if (dist < minDistance && Math.abs(dy) < dist * 0.7) {
+          minDistance = dist;
+          bestTarget = { x: bossCenterX, y: bossCenterY };
+        }
+      }
+    }
+
+    if (bestTarget) {
+      const tdx = bestTarget.x - spawnX;
+      const tdy = bestTarget.y - spawnY;
+      const tlen = Math.hypot(tdx, tdy);
+      if (tlen > 0.01) {
+        dirX = tdx / tlen;
+        dirY = tdy / tlen;
+      }
+    }
+
+    const speed = isCharged ? 860 : 680;
     const heroCfg = adminConfig.get().hero;
     const dmg = isCharged ? (heroCfg.chargedArrowDamage || 50) : (heroCfg.arrowDamage || 25);
-
-    const spawnX = hero.x + hero.width * 0.5 + dirX * 24;
-    const spawnY = hero.y + hero.height * 0.42 + dirY * 20;
 
     this.projectiles.push({
       id: `h-arrow-${Date.now()}-${Math.random()}`,
@@ -69,7 +113,7 @@ export class CombatSystem {
       damage: dmg,
       isCharged,
       type: 'arrow',
-      radius: isCharged ? 9 : 6,
+      radius: isCharged ? 10 : 7,
       life: 2.8,
       facing: dirX >= 0 ? 'right' : 'left',
     });
@@ -153,7 +197,7 @@ export class CombatSystem {
           if (
             checkAABB(
               { x: p.x - p.radius, y: p.y - p.radius, width: p.radius * 2, height: p.radius * 2 },
-              { x: boss.x, y: boss.y, width: boss.width, height: boss.height }
+              { x: boss.x - 10, y: boss.y - 10, width: boss.width + 20, height: boss.height + 20 }
             )
           ) {
             hitTarget = true;
@@ -171,7 +215,7 @@ export class CombatSystem {
             if (
               checkAABB(
                 { x: p.x - p.radius, y: p.y - p.radius, width: p.radius * 2, height: p.radius * 2 },
-                { x: e.x, y: e.y, width: e.width, height: e.height }
+                { x: e.x - 10, y: e.y - 10, width: e.width + 20, height: e.height + 20 }
               )
             ) {
               hitTarget = true;
