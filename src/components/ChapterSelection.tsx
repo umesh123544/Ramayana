@@ -149,10 +149,6 @@ export const ChapterSelection: React.FC<ChapterSelectionProps> = ({
     );
   }, []);
 
-  const selectedChapter = chapters.find((c) => c.id === selectedId) || chapters[0];
-  const lore = CHAPTER_EXTENDED_LORE[selectedChapter.id] || CHAPTER_EXTENDED_LORE[1];
-  const isSelectedUnlocked = selectedChapter.isUnlocked || allUnlockedCheat;
-
   const unlockedCount = chapters.filter((c) => c.isUnlocked || allUnlockedCheat).length;
 
   const handleSelectCard = (ch: Chapter) => {
@@ -167,22 +163,6 @@ export const ChapterSelection: React.FC<ChapterSelectionProps> = ({
       setTimeout(() => {
         setLockedNotice(null);
       }, 4000);
-      return;
-    }
-
-    soundManager.play('menuHover');
-    setLockedNotice(null);
-  };
-
-  const handle1ClickPlay = (ch: Chapter, e: React.MouseEvent) => {
-    e.stopPropagation();
-    const isUnlocked = ch.isUnlocked || allUnlockedCheat;
-    if (!isUnlocked) {
-      soundManager.play('uiClick');
-      setLockedNotice(
-        `Chapter ${ch.id} is locked! Defeat Chapter ${ch.id - 1} first.`
-      );
-      setTimeout(() => setLockedNotice(null), 3500);
       return;
     }
 
@@ -205,20 +185,6 @@ export const ChapterSelection: React.FC<ChapterSelectionProps> = ({
       const next = prev.map((c) => (c.id === chId ? { ...c, isUnlocked: !c.isUnlocked } : c));
       return next;
     });
-  };
-
-  const handleEmbark = () => {
-    if (!isSelectedUnlocked) {
-      soundManager.play('uiClick');
-      setLockedNotice(
-        `Chapter ${selectedChapter.id} is locked! Defeat Chapter ${selectedChapter.id - 1} first.`
-      );
-      setTimeout(() => setLockedNotice(null), 3500);
-      return;
-    }
-    soundManager.play('checkpoint');
-    soundManager.play('templeBell');
-    onSelectChapter(selectedChapter);
   };
 
   const filteredChapters = chapters.filter((ch) => {
@@ -425,15 +391,10 @@ export const ChapterSelection: React.FC<ChapterSelectionProps> = ({
                   </div>
 
                   {isUnlocked ? (
-                    <button
-                      id={`play-chapter-1click-${ch.id}`}
-                      onClick={(e) => handle1ClickPlay(ch, e)}
-                      className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-neutral-950 font-black text-[11px] shadow active:scale-95 transition-all cursor-pointer"
-                      title={`Play Chapter ${ch.id}`}
-                    >
-                      <Play className="w-3 h-3 fill-neutral-950 stroke-neutral-950" />
-                      <span>PLAY</span>
-                    </button>
+                    <span className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-500/15 text-amber-300 font-black text-[11px] group-hover:bg-amber-500 group-hover:text-neutral-950 transition-all">
+                      <Play className="w-3 h-3 fill-current" />
+                      <span>TAP TO PLAY</span>
+                    </span>
                   ) : (
                     <div className="flex items-center gap-1 text-[10px] text-amber-500/70 font-sans">
                       <Lock className="w-3 h-3 text-red-400" />
@@ -446,109 +407,6 @@ export const ChapterSelection: React.FC<ChapterSelectionProps> = ({
           })}
         </div>
 
-        {/* Selected Chapter Expanded Overview Banner */}
-        <section
-          id="selected-chapter-overview-panel"
-          className="bg-neutral-900/90 border border-amber-500/40 rounded-2xl p-4 sm:p-5 shadow-2xl backdrop-blur-md flex flex-col lg:flex-row items-start lg:items-center justify-between gap-5"
-        >
-          {/* Left: Lore & Specifications */}
-          <div className="flex items-start gap-4 max-w-3xl">
-            <div
-              className="p-3.5 rounded-2xl border shrink-0 flex items-center justify-center shadow-lg"
-              style={{
-                backgroundColor: `${selectedChapter.accentColor}15`,
-                borderColor: `${selectedChapter.accentColor}50`,
-                color: selectedChapter.accentColor,
-              }}
-            >
-              {(() => {
-                const SelectedIcon = CHAPTER_ICON_MAP[selectedChapter.icon] || Crown;
-                return <SelectedIcon className="w-8 h-8" />;
-              })()}
-            </div>
-
-            <div className="flex flex-col gap-1">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/40 uppercase">
-                  Chapter {selectedChapter.id} of 10
-                </span>
-                <span className="text-sm font-semibold text-neutral-300 font-mono">
-                  {lore.epicKanda}
-                </span>
-                <span className="text-xs text-neutral-400 font-mono">
-                  • {selectedChapter.location}
-                </span>
-              </div>
-
-              <h2 className="text-xl sm:text-2xl font-black text-amber-100 font-['Cinzel'] tracking-wide">
-                {selectedChapter.title}
-              </h2>
-
-              <p className="text-xs sm:text-sm text-neutral-300/90 leading-relaxed max-w-2xl mt-0.5">
-                {selectedChapter.description}
-              </p>
-
-              {/* Extended Mythological Specs */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-2 pt-2 border-t border-neutral-800 text-[11px] font-mono text-neutral-300">
-                <div className="flex items-center gap-1.5">
-                  <Swords className="w-3.5 h-3.5 text-rose-400 shrink-0" />
-                  <span className="text-neutral-400">Chief Nemesis:</span>
-                  <span className="font-semibold text-neutral-200 truncate">{lore.antagonist}</span>
-                </div>
-
-                <div className="flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                  <span className="text-neutral-400">Sacred Astra:</span>
-                  <span className="font-semibold text-amber-300 truncate">{lore.sacredWeapon}</span>
-                </div>
-
-                <div className="flex items-center gap-1.5">
-                  <Shield className="w-3.5 h-3.5 text-blue-400 shrink-0" />
-                  <span className="text-neutral-400">Dharma Creed:</span>
-                  <span className="font-semibold text-neutral-200 truncate">{lore.dharmaLesson}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Right Action CTA */}
-          <div className="flex flex-col sm:flex-row lg:flex-col items-stretch sm:items-center lg:items-end gap-2.5 w-full lg:w-auto shrink-0">
-            {isSelectedUnlocked ? (
-              <button
-                id="embark-selected-chapter-btn"
-                onClick={handleEmbark}
-                className="w-full sm:w-auto lg:w-64 px-6 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 via-amber-600 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-neutral-950 font-black text-sm tracking-widest uppercase font-['Cinzel'] shadow-xl shadow-amber-600/30 hover:shadow-amber-500/50 transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-2.5"
-              >
-                <Play className="w-4 h-4 fill-neutral-950 stroke-neutral-950" />
-                <span>EMBARK ON CHAPTER {selectedChapter.id}</span>
-              </button>
-            ) : (
-              <div className="flex flex-col gap-1.5 w-full sm:w-auto lg:w-64">
-                <button
-                  id="locked-chapter-prompt-btn"
-                  onClick={() => {
-                    soundManager.play('uiClick');
-                    setLockedNotice(
-                      `Chapter ${selectedChapter.id} is locked! Defeat Chapter ${selectedChapter.id - 1} first to unlock.`
-                    );
-                    setTimeout(() => setLockedNotice(null), 3500);
-                  }}
-                  className="w-full px-5 py-3 rounded-xl bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-neutral-300 hover:text-amber-300 font-bold text-xs tracking-wider uppercase font-['Cinzel'] transition-all cursor-pointer flex items-center justify-center gap-2"
-                >
-                  <Lock className="w-4 h-4 text-red-400" />
-                  <span>Sealed Chapter</span>
-                </button>
-                <span className="text-[10px] text-center text-amber-400/90 font-mono">
-                  Requires defeating Chapter {selectedChapter.id - 1} first
-                </span>
-              </div>
-            )}
-
-            <div className="text-[11px] font-mono text-neutral-400 text-center lg:text-right">
-              <span>{selectedChapter.totalLevels} stages • Sequential Progression</span>
-            </div>
-          </div>
-        </section>
       </main>
 
       {/* Footer info bar */}
@@ -558,7 +416,7 @@ export const ChapterSelection: React.FC<ChapterSelectionProps> = ({
           <span>Each chapter unlocks sequentially upon defeating the prior chapter's boss</span>
         </div>
         <div className="flex items-center gap-3 text-neutral-400">
-          <span>Click any card to inspect lore</span>
+          <span>Tap any unlocked chapter to play instantly</span>
           <span>•</span>
           <span className="text-amber-400">Esc to return</span>
         </div>
