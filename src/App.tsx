@@ -11,6 +11,7 @@ import { AdminPanelModal } from './components/AdminPanelModal';
 import { MainMenu } from './components/MainMenu';
 import { DifficultySelector } from './components/DifficultySelector';
 import { ChapterSelection } from './components/ChapterSelection';
+import { OrientationGuard } from './components/OrientationGuard';
 import { Chapter } from './data/gameData';
 import { HeroState } from './types';
 import { PlayerInput } from './systems/characterController';
@@ -166,6 +167,7 @@ export default function App() {
 
   return (
     <div className="relative w-screen h-[100dvh] overflow-hidden bg-neutral-950 font-sans text-neutral-100 flex flex-col select-none">
+      <OrientationGuard />
       {/* HUD System */}
       <HUD
         hero={heroState}

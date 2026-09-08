@@ -202,7 +202,7 @@ export const MainMenu: React.FC<MainMenuProps> = ({
   return (
     <div
       id="main-menu-overlay"
-      className="absolute inset-0 z-30 flex flex-col justify-between p-4 sm:p-8 md:p-12 text-neutral-100 select-none overflow-hidden"
+      className="absolute inset-0 z-30 flex flex-col justify-between p-3 sm:p-8 md:p-12 text-neutral-100 select-none overflow-y-auto"
     >
       {/* Background Canvas */}
       <canvas
@@ -236,12 +236,12 @@ export const MainMenu: React.FC<MainMenuProps> = ({
         <h1 className="text-4xl sm:text-5xl md:text-6xl font-black font-['Cinzel'] tracking-wider text-transparent bg-clip-text bg-gradient-to-b from-amber-100 via-amber-300 to-amber-600 drop-shadow-[0_4px_14px_rgba(245,158,11,0.35)]">
           RAMAYANA
         </h1>
-        <p className="text-xs sm:text-sm md:text-base font-medium tracking-widest text-amber-200/80 uppercase font-['Cinzel'] mt-1 mb-8">
+        <p className="text-xs sm:text-sm md:text-base font-medium tracking-widest text-amber-200/80 uppercase font-['Cinzel'] mt-1 mb-4 sm:mb-8">
           The Epic Journey of Dharma
         </p>
 
         {/* Action Buttons */}
-        <div className="flex flex-col gap-2.5 w-full max-w-xs sm:max-w-sm">
+        <div className="flex flex-col gap-2 sm:gap-2.5 w-full max-w-xs sm:max-w-sm">
           {/* Resume Game (if active) */}
           {isGameActive && onResumeGame && (
             <button
