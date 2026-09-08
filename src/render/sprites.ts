@@ -15,6 +15,24 @@ import { adminConfig } from '../systems/adminConfig';
  * otherwise renders rich procedural 2D mythological character graphics.
  */
 
+/**
+ * Lightens (positive percent) or darkens (negative percent) a hex color.
+ * Used throughout the sprite renderer to add gradient shading/depth to
+ * flat-filled shapes without needing actual sprite art.
+ */
+export function shadeColor(hex: string, percent: number): string {
+  const clean = hex.replace('#', '');
+  if (clean.length !== 6) return hex;
+  const num = parseInt(clean, 16);
+  let r = (num >> 16) + Math.round((percent / 100) * 255);
+  let g = ((num >> 8) & 0x00ff) + Math.round((percent / 100) * 255);
+  let b = (num & 0x0000ff) + Math.round((percent / 100) * 255);
+  r = Math.max(0, Math.min(255, r));
+  g = Math.max(0, Math.min(255, g));
+  b = Math.max(0, Math.min(255, b));
+  return `#${(r << 16 | g << 8 | b).toString(16).padStart(6, '0')}`;
+}
+
 export function renderUmesh(
   ctx: CanvasRenderingContext2D,
   x: number,
@@ -133,6 +151,17 @@ export function renderUmesh(
     ctx.filter = 'drop-shadow(0 0 8px rgba(239, 68, 68, 0.9)) saturate(1.8)';
   }
 
+  // Ground contact shadow for depth
+  if (!isJumping && !isFalling && !isDeath) {
+    ctx.save();
+    ctx.globalAlpha = 0.35;
+    ctx.fillStyle = '#000000';
+    ctx.beginPath();
+    ctx.ellipse(0, 2, 16, 4, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+
   // 1. Quiver on the back
   ctx.save();
   ctx.translate(-12, -height * 0.65);
@@ -169,7 +198,11 @@ export function renderUmesh(
   renderHeroLeg(ctx, 6, -26, legAngle1, true, skinTone, armorColor);
 
   // 3. Dhoti lower garment
-  ctx.fillStyle = dhotiColor;
+  const dhotiGrad = ctx.createLinearGradient(-16, 0, 16, 0);
+  dhotiGrad.addColorStop(0, shadeColor(dhotiColor, -15));
+  dhotiGrad.addColorStop(0.5, dhotiColor);
+  dhotiGrad.addColorStop(1, shadeColor(dhotiColor, 10));
+  ctx.fillStyle = dhotiGrad;
   ctx.beginPath();
   ctx.moveTo(-14, -height * 0.42);
   ctx.lineTo(14, -height * 0.42);
@@ -177,6 +210,16 @@ export function renderUmesh(
   ctx.lineTo(-16 - walkCycle * 3, -height * 0.24);
   ctx.closePath();
   ctx.fill();
+
+  // Fabric fold lines for texture
+  ctx.strokeStyle = shadeColor(dhotiColor, -25);
+  ctx.lineWidth = 0.75;
+  for (const fx of [-7, 0, 7]) {
+    ctx.beginPath();
+    ctx.moveTo(fx * 0.85, -height * 0.41);
+    ctx.lineTo(fx + walkCycle * 1.5, -height * 0.26);
+    ctx.stroke();
+  }
 
   // Gold border of dhoti
   ctx.strokeStyle = armorColor;
@@ -193,13 +236,39 @@ export function renderUmesh(
   ctx.stroke();
 
   // 4. Hero Torso
-  ctx.fillStyle = skinTone;
+  const torsoGrad = ctx.createLinearGradient(-12, 0, 12, 0);
+  torsoGrad.addColorStop(0, shadeColor(skinTone, -18));
+  torsoGrad.addColorStop(0.5, skinTone);
+  torsoGrad.addColorStop(1, shadeColor(skinTone, 14));
+  ctx.fillStyle = torsoGrad;
   ctx.beginPath();
   ctx.roundRect(-12, -height * 0.72, 24, 28, [4, 4, 2, 2]);
   ctx.fill();
 
+  // Subtle ab/muscle definition line
+  ctx.strokeStyle = shadeColor(skinTone, -22);
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(0, -height * 0.68);
+  ctx.lineTo(0, -height * 0.55);
+  ctx.stroke();
+
+  // Shoulder Pauldrons
+  ctx.fillStyle = shadeColor(armorColor, 10);
+  ctx.beginPath();
+  ctx.arc(-11, -height * 0.71, 5, 0, Math.PI * 2);
+  ctx.arc(11, -height * 0.71, 5, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = '#fef08a';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
   // Chest Armor (Kavach)
-  ctx.fillStyle = armorColor;
+  const armorGrad = ctx.createLinearGradient(-10, 0, 10, 0);
+  armorGrad.addColorStop(0, shadeColor(armorColor, -12));
+  armorGrad.addColorStop(0.5, armorColor);
+  armorGrad.addColorStop(1, shadeColor(armorColor, 12));
+  ctx.fillStyle = armorGrad;
   ctx.beginPath();
   ctx.moveTo(-10, -height * 0.7);
   ctx.lineTo(10, -height * 0.7);
@@ -210,6 +279,13 @@ export function renderUmesh(
   ctx.strokeStyle = '#fbbf24';
   ctx.lineWidth = 1.5;
   ctx.stroke();
+
+  // Armor rivets for extra detail
+  ctx.fillStyle = '#fef08a';
+  ctx.beginPath();
+  ctx.arc(-6, -height * 0.65, 1, 0, Math.PI * 2);
+  ctx.arc(6, -height * 0.65, 1, 0, Math.PI * 2);
+  ctx.fill();
 
   // Golden medallion in center of armor
   ctx.fillStyle = '#dc2626';
@@ -226,9 +302,18 @@ export function renderUmesh(
   ctx.stroke();
 
   // 5. Hero Head & Face
-  ctx.fillStyle = skinTone;
+  const faceGrad = ctx.createRadialGradient(-3, -height * 0.84, 2, 0, -height * 0.82, 12);
+  faceGrad.addColorStop(0, shadeColor(skinTone, 16));
+  faceGrad.addColorStop(1, shadeColor(skinTone, -8));
+  ctx.fillStyle = faceGrad;
   ctx.beginPath();
   ctx.arc(0, -height * 0.82, 11, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Ear
+  ctx.fillStyle = shadeColor(skinTone, -6);
+  ctx.beginPath();
+  ctx.ellipse(-9, -height * 0.81, 2, 3, 0, 0, Math.PI * 2);
   ctx.fill();
 
   // Golden warrior Mukut (Crown / Headband)
@@ -243,6 +328,12 @@ export function renderUmesh(
   ctx.lineWidth = 1.5;
   ctx.stroke();
 
+  // Small gem at crown peak
+  ctx.fillStyle = '#f43f5e';
+  ctx.beginPath();
+  ctx.arc(0, -height * 0.96, 1.8, 0, Math.PI * 2);
+  ctx.fill();
+
   // Topknot hair / Sikha
   ctx.fillStyle = '#172554'; // Deep midnight hair
   ctx.beginPath();
@@ -253,11 +344,27 @@ export function renderUmesh(
   ctx.fillStyle = '#dc2626';
   ctx.fillRect(4, -height * 0.86, 2.5, 5);
 
+  // Eyebrow - gives the face expression/focus
+  ctx.strokeStyle = shadeColor(skinTone, -45);
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(4.5, -height * 0.845);
+  ctx.lineTo(8.5, -height * 0.84);
+  ctx.stroke();
+
   // Heroic eye
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(5, -height * 0.82, 4, 3);
   ctx.fillStyle = '#0f172a';
   ctx.fillRect(7, -height * 0.82, 2, 3);
+
+  // Determined mouth line
+  ctx.strokeStyle = shadeColor(skinTone, -40);
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(4, -height * 0.775);
+  ctx.lineTo(8, -height * 0.775);
+  ctx.stroke();
 
   // 6. Arms and Bow
   if (isAttacking) {
@@ -369,16 +476,30 @@ function renderHeroLeg(
   // Thigh
   ctx.strokeStyle = skinColor;
   ctx.lineWidth = 5;
+  ctx.lineCap = 'round';
   ctx.beginPath();
   ctx.moveTo(0, 0);
   ctx.lineTo(0, 14);
   ctx.stroke();
+
+  // Knee joint highlight
+  ctx.fillStyle = shadeColor(skinColor, -10);
+  ctx.beginPath();
+  ctx.arc(0, 14, 2.5, 0, Math.PI * 2);
+  ctx.fill();
 
   // Calf
   ctx.beginPath();
   ctx.moveTo(0, 14);
   ctx.lineTo(isFront ? 2 : -2, 26);
   ctx.stroke();
+  ctx.lineCap = 'butt';
+
+  // Sandal / foot
+  ctx.fillStyle = '#78350f';
+  ctx.beginPath();
+  ctx.ellipse(isFront ? 3 : -1, 27, 5, 2.2, 0, 0, Math.PI * 2);
+  ctx.fill();
 
   // Golden warrior anklet
   ctx.fillStyle = ankletColor;
@@ -441,7 +562,11 @@ export function renderPurneema(
   }
 
   // Silk Saree skirt
-  ctx.fillStyle = companionSari;
+  const sariGrad = ctx.createLinearGradient(-16, 0, 16, 0);
+  sariGrad.addColorStop(0, shadeColor(companionSari, -18));
+  sariGrad.addColorStop(0.5, companionSari);
+  sariGrad.addColorStop(1, shadeColor(companionSari, 12));
+  ctx.fillStyle = sariGrad;
   ctx.beginPath();
   ctx.moveTo(-12, -height * 0.5);
   ctx.lineTo(12, -height * 0.5);
@@ -450,13 +575,26 @@ export function renderPurneema(
   ctx.closePath();
   ctx.fill();
 
+  // Fabric fold lines
+  ctx.strokeStyle = shadeColor(companionSari, -28);
+  ctx.lineWidth = 0.75;
+  for (const fx of [-6, 0, 6]) {
+    ctx.beginPath();
+    ctx.moveTo(fx * 0.8, -height * 0.49);
+    ctx.lineTo(fx + sway * 0.3, -height * 0.02);
+    ctx.stroke();
+  }
+
   // Gold Zari border
   ctx.strokeStyle = '#fbbf24';
   ctx.lineWidth = 3.5;
   ctx.stroke();
 
   // Torso / Blouse
-  ctx.fillStyle = '#047857'; // Emerald green choli
+  const choliGrad = ctx.createLinearGradient(-10, 0, 10, 0);
+  choliGrad.addColorStop(0, shadeColor('#047857', -15));
+  choliGrad.addColorStop(1, shadeColor('#047857', 10));
+  ctx.fillStyle = choliGrad;
   ctx.beginPath();
   ctx.roundRect(-10, -height * 0.72, 20, 22, [4, 4, 0, 0]);
   ctx.fill();
@@ -478,10 +616,20 @@ export function renderPurneema(
   ctx.stroke();
 
   // Head & Hair
-  ctx.fillStyle = '#fed7aa'; // Fair warm skin tone
+  const puFaceGrad = ctx.createRadialGradient(-2, -height * 0.84, 2, 0, -height * 0.82, 11);
+  puFaceGrad.addColorStop(0, shadeColor('#fed7aa', 10));
+  puFaceGrad.addColorStop(1, shadeColor('#fed7aa', -8));
+  ctx.fillStyle = puFaceGrad;
   ctx.beginPath();
   ctx.arc(0, -height * 0.82, 10, 0, Math.PI * 2);
   ctx.fill();
+
+  // Gentle smile
+  ctx.strokeStyle = shadeColor('#fed7aa', -45);
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.arc(3, -height * 0.795, 2, 0.15 * Math.PI, 0.75 * Math.PI);
+  ctx.stroke();
 
   // Traditional Hair braid & Jasmine garland (Gajra)
   ctx.fillStyle = '#1e1b4b'; // Black hair
