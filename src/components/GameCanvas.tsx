@@ -62,7 +62,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     const enemySystem = new EnemySystem(chapterId);
     const combatSystem = new CombatSystem();
     const supportSystem = new SupportingCharacterSystem(chapterId, 1650, 580);
-    const bossSystem = new BossSystem(chapterId, 3750, 560);
+    const bossSystem = new BossSystem(chapterId, 5300, 560);
     const platforms = INITIAL_PLATFORMS;
 
     let animFrameId: number;

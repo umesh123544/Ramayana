@@ -62,6 +62,16 @@ export class CheckpointSystem {
         isActivated: false,
         activationGlow: 0,
       },
+      {
+        id: 'cp_5',
+        name: 'Mountain Outpost Beacon',
+        hindiName: 'Giri Chowki Deep',
+        x: 4550,
+        y: 630,
+        type: 'divine_shrine',
+        isActivated: false,
+        activationGlow: 0,
+      },
     ];
   }
 

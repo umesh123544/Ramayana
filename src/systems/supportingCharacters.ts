@@ -29,8 +29,8 @@ export class SupportingCharacterSystem {
   constructor(chapterId: number = 1, x: number = 1650, y: number = 580) {
     this.chapterId = chapterId;
 
-    // In Chapter 10, Purneema is imprisoned near the arena (x: 3980)
-    const initialX = chapterId === 10 ? 3980 : x;
+    // In Chapter 10, Purneema is imprisoned near the arena (x: 4950)
+    const initialX = chapterId === 10 ? 4950 : x;
     const initialY = chapterId === 10 ? 570 : y;
 
     this.purneema = {

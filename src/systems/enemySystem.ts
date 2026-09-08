@@ -31,6 +31,13 @@ export class EnemySystem {
 
       // Heavy Demon Warrior on main ground
       this.createEnemy('heavy_demon', 'e5', 1850, 672 - 68, 1700, 2050),
+
+      // Tunnel ambush - lurking under the low rocky ceiling
+      this.createEnemy('small_demon', 'e10', 3950, 672 - 48, 3760, 4350),
+
+      // Far Outpost guards, before the boss arena
+      this.createEnemy('archer_demon', 'e11', 4740, 470 - 50, 4700, 4860),
+      this.createEnemy('heavy_demon', 'e12', 4550, 672 - 68, 4470, 4850),
     ];
 
     // Chapters 3+: add flying demons in reachable airspace

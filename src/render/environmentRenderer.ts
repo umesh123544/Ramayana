@@ -413,6 +413,27 @@ export class EnvironmentRenderer {
       return;
     }
 
+    if (type === 'cave_ceiling') {
+      // Rocky tunnel ceiling with hanging stalactites
+      ctx.fillStyle = t.platformColor;
+      ctx.fillRect(x, y, width, height);
+      ctx.fillStyle = '#1c1917';
+      ctx.fillRect(x, y + height - 4, width, 4);
+
+      ctx.fillStyle = t.platformColor;
+      const spikeGap = 34;
+      for (let sx = x + 10; sx < x + width - 10; sx += spikeGap) {
+        const spikeH = 14 + ((sx * 7) % 16);
+        ctx.beginPath();
+        ctx.moveTo(sx, y + height);
+        ctx.lineTo(sx + 12, y + height);
+        ctx.lineTo(sx + 6, y + height + spikeH);
+        ctx.closePath();
+        ctx.fill();
+      }
+      return;
+    }
+
     if (type === 'stone' || type === 'floating_ledge') {
       // Themed stone platform
       ctx.fillStyle = t.platformColor;
@@ -440,7 +461,7 @@ export class EnvironmentRenderer {
 
   private renderVegetationAndRocks(ctx: CanvasRenderingContext2D) {
     const t = this.theme;
-    const treePositions = [200, 650, 1200, 2050, 3100];
+    const treePositions = [200, 650, 1200, 2050, 3100, 4550, 5150, 5750];
     treePositions.forEach((tx) => {
       ctx.fillStyle = t.platformColor;
       ctx.fillRect(tx, 480, 36, 220);
@@ -455,7 +476,7 @@ export class EnvironmentRenderer {
       ctx.fill();
     });
 
-    const bushPositions = [120, 420, 850, 1450, 1850, 2950, 3350];
+    const bushPositions = [120, 420, 850, 1450, 1850, 2950, 3350, 4500, 5050, 5700];
     bushPositions.forEach((bx) => {
       ctx.fillStyle = t.groundGrassColor;
       ctx.beginPath();

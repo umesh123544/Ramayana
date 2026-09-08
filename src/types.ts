@@ -75,7 +75,7 @@ export interface Platform {
   y: number;
   width: number;
   height: number;
-  type: 'ground' | 'stone' | 'wood_bridge' | 'floating_ledge';
+  type: 'ground' | 'stone' | 'wood_bridge' | 'floating_ledge' | 'cave_ceiling';
   isOneWay?: boolean;
 }
 

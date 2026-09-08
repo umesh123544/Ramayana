@@ -10,7 +10,7 @@ export class Camera2D {
   public targetY: number = 0;
   public viewportWidth: number = 1280;
   public viewportHeight: number = 720;
-  public worldWidth: number = 4200;
+  public worldWidth: number = 5950;
   public worldHeight: number = 1000;
   private lerpFactor: number = 0.08;
 

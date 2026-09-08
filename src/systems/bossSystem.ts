@@ -43,7 +43,7 @@ export class BossSystem {
   public theme: ChapterTheme;
   public isEngaged: boolean = false;
 
-  constructor(chapterId: number = 1, arenaX: number = 3750, arenaY: number = 550) {
+  constructor(chapterId: number = 1, arenaX: number = 5300, arenaY: number = 550) {
     this.theme = CHAPTER_THEMES[chapterId] || CHAPTER_THEMES[1];
     const b = this.theme.boss;
     const diff = adminConfig.get().difficulty;
@@ -108,8 +108,8 @@ export class BossSystem {
       isDead: false,
       deathTimer: 0,
       isRaging: false,
-      arenaStartX: 3200,
-      arenaEndX: 4100,
+      arenaStartX: 4900,
+      arenaEndX: 5850,
       specialAttackName: b.specialAttackName,
       phase: 1,
       shieldActive: false,
