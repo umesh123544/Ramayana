@@ -346,8 +346,8 @@ export default function App() {
         }}
       />
 
-      {/* Bottom Floating Hint & Quick Info */}
-      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-10 pointer-events-auto hidden md:flex items-center gap-3 px-4 py-1.5 rounded-full bg-neutral-900/80 backdrop-blur-md border border-amber-500/30 text-[11px] font-mono text-neutral-300 shadow-md">
+      {/* Bottom Floating Hint & Quick Info - desktop mouse/keyboard only, never on touch devices */}
+      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-10 pointer-events-auto hidden [@media(pointer:fine)]:flex items-center gap-3 px-4 py-1.5 rounded-full bg-neutral-900/80 backdrop-blur-md border border-amber-500/30 text-[11px] font-mono text-neutral-300 shadow-md">
         <span className="flex items-center gap-1.5 text-amber-300">
           <Info className="w-3.5 h-3.5" />
           <span>A / D: Move</span>

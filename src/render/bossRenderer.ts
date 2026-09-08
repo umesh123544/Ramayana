@@ -113,53 +113,54 @@ export function renderBoss(
   ctx.restore();
 
   // ==========================================
-  // TOP SCREEN EPIC BOSS HEALTH BAR
+  // BOSS HEALTH BAR - floats directly above the boss's head
   // ==========================================
   if (!isDead || deathTimer < 2.5) {
-    renderBossTopHealthBar(ctx, boss, camera, time);
+    renderBossHeadHealthBar(ctx, boss, camera, time);
   }
 }
 
-function renderBossTopHealthBar(ctx: CanvasRenderingContext2D, boss: BossState, camera: Camera2D, time: number) {
-  const barWidth = Math.min(camera.viewportWidth - 24, 560);
-  const barHeight = 24;
-  const barX = (camera.viewportWidth - barWidth) * 0.5;
-  const barY = 58;
+function renderBossHeadHealthBar(ctx: CanvasRenderingContext2D, boss: BossState, camera: Camera2D, time: number) {
+  const { x, y, width, height } = boss;
   const pulse = 0.5 + Math.sin(time * 4) * 0.5;
+
+  // Position the bar above the boss's head, clamped so it stays on screen
+  // horizontally even when the boss is near the edge of the camera view.
+  const barWidth = Math.min(220, camera.viewportWidth - 24);
+  const idealCenterX = x + width * 0.5 - camera.x;
+  const clampedCenterX = Math.max(barWidth * 0.5 + 8, Math.min(camera.viewportWidth - barWidth * 0.5 - 8, idealCenterX));
+  const barHeight = 14;
+  const barX = clampedCenterX - barWidth * 0.5;
+  const barY = Math.max(8, y - camera.y - height - 46);
 
   ctx.save();
 
-  // Outer glow so the boss bar reads clearly even in a busy fight
+  // Outer glow so the bar reads clearly even in a busy fight
   ctx.shadowColor = boss.isRaging ? 'rgba(239, 68, 68, 0.9)' : 'rgba(245, 158, 11, 0.75)';
-  ctx.shadowBlur = 16 + pulse * 10;
+  ctx.shadowBlur = 10 + pulse * 6;
 
   // Semi-transparent backdrop
-  ctx.fillStyle = 'rgba(5, 5, 5, 0.92)';
+  ctx.fillStyle = 'rgba(5, 5, 5, 0.9)';
   ctx.beginPath();
-  ctx.roundRect(barX - 14, barY - 32, barWidth + 28, barHeight + 50, [10, 10, 10, 10]);
+  ctx.roundRect(barX - 8, barY - 20, barWidth + 16, barHeight + 28, [8, 8, 8, 8]);
   ctx.fill();
   ctx.strokeStyle = boss.isRaging
     ? `rgba(248, 113, 113, ${0.6 + pulse * 0.4})`
     : `rgba(245, 158, 11, ${0.5 + pulse * 0.3})`;
-  ctx.lineWidth = 2;
+  ctx.lineWidth = 1.5;
   ctx.stroke();
   ctx.shadowBlur = 0;
 
-  // Boss Name & Sanskrit Title (larger, bolder for readability at a glance)
+  // Boss Name (compact, centered above the bar)
   ctx.fillStyle = '#fef08a';
-  ctx.font = 'bold 16px "Cinzel", serif';
-  ctx.textAlign = 'left';
-  ctx.fillText(`${boss.name} (${boss.hindiName})`, barX, barY - 10);
-
-  ctx.fillStyle = '#fca5a5';
-  ctx.font = 'italic 12px sans-serif';
-  ctx.textAlign = 'right';
-  ctx.fillText(boss.title, barX + barWidth, barY - 10);
+  ctx.font = 'bold 11px "Cinzel", serif';
+  ctx.textAlign = 'center';
+  ctx.fillText(boss.name, clampedCenterX, barY - 8);
 
   // Health bar background
   ctx.fillStyle = '#262626';
   ctx.beginPath();
-  ctx.roundRect(barX, barY, barWidth, barHeight, [6, 6, 6, 6]);
+  ctx.roundRect(barX, barY, barWidth, barHeight, [5, 5, 5, 5]);
   ctx.fill();
 
   // Health fill
@@ -181,21 +182,23 @@ function renderBossTopHealthBar(ctx: CanvasRenderingContext2D, boss: BossState, 
     ctx.fill();
   }
 
-  // HP text & Phase indicator
+  // HP number, centered on the bar itself
   ctx.fillStyle = '#ffffff';
-  ctx.font = 'bold 12px monospace';
+  ctx.font = 'bold 9px monospace';
   ctx.textAlign = 'center';
+  ctx.fillText(`${boss.hp} / ${boss.maxHp}`, clampedCenterX, barY + barHeight - 3);
 
+  // Phase indicator for Raone, shown as a smaller line below the bar
   if (boss.type === 'raone') {
     const phaseLabel =
       boss.phase === 1
-        ? 'PHASE 1 • Chandrahas Duel'
+        ? 'Chandrahas Duel'
         : boss.phase === 2
-        ? 'PHASE 2 • Ten-Headed Shield Active [Use Charged Arrows!]'
-        : 'PHASE 3 • Cosmic Brahmastra Fury';
-    ctx.fillText(`${boss.hp} / ${boss.maxHp}  |  ${phaseLabel}`, barX + barWidth * 0.5, barY + 16);
-  } else {
-    ctx.fillText(`${boss.hp} / ${boss.maxHp}`, barX + barWidth * 0.5, barY + 16);
+        ? 'Shield Active - Use Charged Arrows!'
+        : 'Cosmic Brahmastra Fury';
+    ctx.fillStyle = '#fca5a5';
+    ctx.font = 'italic 9px sans-serif';
+    ctx.fillText(phaseLabel, clampedCenterX, barY + barHeight + 12);
   }
 
   ctx.restore();
