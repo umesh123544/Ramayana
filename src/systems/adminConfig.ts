@@ -67,7 +67,7 @@ export interface AdminGameConfig {
 export const DEFAULT_ADMIN_CONFIG: AdminGameConfig = {
   gameTitle: 'Ramayana 2D Action Adventure',
   gameSubtitle: 'A Mythological Epic Platformer • The Saga of Archer Umesh',
-  difficulty: 'NORMAL',
+  difficulty: 'HARD',
   divinePowerScaling: 1.0,
   hero: {
     name: 'Umesh',

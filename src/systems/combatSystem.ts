@@ -334,21 +334,64 @@ export class CombatSystem {
   }
 
   public spawnDivineBlessingBurst(x: number, y: number) {
+    // Expanding shockwave ring for impact
+    this.particles.push({
+      x,
+      y,
+      vx: 0,
+      vy: 0,
+      color: '#fde68a',
+      size: 18,
+      alpha: 0.9,
+      life: 0.6,
+      maxLife: 0.6,
+      type: 'shockwave_ring',
+    });
+    this.particles.push({
+      x,
+      y,
+      vx: 0,
+      vy: 0,
+      color: '#f43f5e',
+      size: 10,
+      alpha: 0.7,
+      life: 0.5,
+      maxLife: 0.5,
+      type: 'shockwave_ring',
+    });
+
     // Golden rays and sacred flower burst
-    for (let i = 0; i < 30; i++) {
-      const angle = (i / 30) * Math.PI * 2;
-      const spd = 120 + Math.random() * 100;
+    const palette = ['#fbbf24', '#f43f5e', '#fde68a', '#fb923c'];
+    for (let i = 0; i < 42; i++) {
+      const angle = (i / 42) * Math.PI * 2 + Math.random() * 0.15;
+      const spd = 130 + Math.random() * 130;
       this.particles.push({
         x,
         y,
         vx: Math.cos(angle) * spd,
         vy: Math.sin(angle) * spd - 40,
-        color: i % 2 === 0 ? '#fbbf24' : '#f43f5e',
-        size: 4 + Math.random() * 3,
+        color: palette[i % palette.length],
+        size: 3 + Math.random() * 3.5,
         alpha: 1,
-        life: 1.0,
+        life: 0.8 + Math.random() * 0.5,
         maxLife: 1.0,
         type: 'divine_ray',
+      });
+    }
+
+    // Rising sparkle motes for a lingering sacred feel
+    for (let i = 0; i < 14; i++) {
+      this.particles.push({
+        x: x + (Math.random() - 0.5) * 50,
+        y: y + (Math.random() - 0.5) * 30,
+        vx: (Math.random() - 0.5) * 20,
+        vy: -40 - Math.random() * 60,
+        color: '#fef3c7',
+        size: 2 + Math.random() * 1.5,
+        alpha: 1,
+        life: 1.1 + Math.random() * 0.6,
+        maxLife: 1.4,
+        type: 'spark',
       });
     }
   }
@@ -425,10 +468,43 @@ export class CombatSystem {
     for (const pt of this.particles) {
       ctx.save();
       ctx.globalAlpha = pt.alpha;
-      ctx.fillStyle = pt.color;
-      ctx.beginPath();
-      ctx.arc(pt.x, pt.y, pt.size, 0, Math.PI * 2);
-      ctx.fill();
+
+      if (pt.type === 'divine_ray') {
+        // Glowing golden ray with motion streak instead of a flat dot
+        ctx.shadowColor = pt.color;
+        ctx.shadowBlur = 12;
+        const angle = Math.atan2(pt.vy, pt.vx);
+        ctx.translate(pt.x, pt.y);
+        ctx.rotate(angle);
+        const streakLen = pt.size * 3;
+        const grad = ctx.createLinearGradient(-streakLen, 0, streakLen * 0.4, 0);
+        grad.addColorStop(0, 'rgba(255,255,255,0)');
+        grad.addColorStop(1, pt.color);
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.ellipse(0, 0, streakLen, pt.size * 0.6, 0, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (pt.type === 'shockwave_ring') {
+        // Expanding ring - size grows via vx storing target radius progression
+        const progress = 1 - pt.life / pt.maxLife;
+        const radius = pt.size * (1 + progress * 4);
+        ctx.strokeStyle = pt.color;
+        ctx.lineWidth = Math.max(1, 5 * (1 - progress));
+        ctx.shadowColor = pt.color;
+        ctx.shadowBlur = 14;
+        ctx.beginPath();
+        ctx.arc(pt.x, pt.y, radius, 0, Math.PI * 2);
+        ctx.stroke();
+      } else {
+        // Standard glowing spark
+        ctx.shadowColor = pt.color;
+        ctx.shadowBlur = 6;
+        ctx.fillStyle = pt.color;
+        ctx.beginPath();
+        ctx.arc(pt.x, pt.y, pt.size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
       ctx.restore();
     }
 

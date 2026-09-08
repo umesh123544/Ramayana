@@ -75,10 +75,11 @@ export function renderUmesh(
 
   // Divine Aura Glow if active
   if (isDivine || state === 'Umesh_DivinePower') {
-    const glowRadius = 45 + Math.sin(frame * 0.5) * 8;
+    const glowRadius = 58 + Math.sin(frame * 0.5) * 10;
     const grad = ctx.createRadialGradient(0, -height * 0.55, 10, 0, -height * 0.55, glowRadius);
-    grad.addColorStop(0, 'rgba(255, 230, 120, 0.65)');
-    grad.addColorStop(0.6, 'rgba(245, 158, 11, 0.3)');
+    grad.addColorStop(0, 'rgba(255, 235, 150, 0.75)');
+    grad.addColorStop(0.55, 'rgba(245, 158, 11, 0.35)');
+    grad.addColorStop(0.85, 'rgba(244, 63, 94, 0.15)');
     grad.addColorStop(1, 'rgba(245, 158, 11, 0)');
     ctx.fillStyle = grad;
     ctx.beginPath();
@@ -86,15 +87,26 @@ export function renderUmesh(
     ctx.fill();
 
     // Sacred rays
-    ctx.strokeStyle = 'rgba(255, 245, 180, 0.4)';
+    ctx.strokeStyle = 'rgba(255, 245, 180, 0.45)';
     ctx.lineWidth = 1.5;
-    for (let i = 0; i < 8; i++) {
-      const angle = (i * Math.PI) / 4 + frame * 0.05;
+    for (let i = 0; i < 10; i++) {
+      const angle = (i * Math.PI) / 5 + frame * 0.05;
       ctx.beginPath();
       ctx.moveTo(Math.cos(angle) * 20, -height * 0.55 + Math.sin(angle) * 20);
       ctx.lineTo(Math.cos(angle) * (glowRadius - 2), -height * 0.55 + Math.sin(angle) * (glowRadius - 2));
       ctx.stroke();
     }
+
+    // Rotating outer ring - gives the aura a more dynamic, premium feel
+    ctx.save();
+    ctx.strokeStyle = 'rgba(253, 224, 71, 0.55)';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([6, 10]);
+    ctx.lineDashOffset = -frame * 1.5;
+    ctx.beginPath();
+    ctx.arc(0, -height * 0.55, glowRadius * 0.72, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.restore();
   }
 
   // Charged Bow Attack Glow

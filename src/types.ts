@@ -104,7 +104,7 @@ export interface Particle {
   alpha: number;
   life: number;
   maxLife: number;
-  type?: 'spark' | 'divine_ray' | 'blood' | 'dust' | 'flower';
+  type?: 'spark' | 'divine_ray' | 'blood' | 'dust' | 'flower' | 'shockwave_ring';
 }
 
 export interface FloatingText {

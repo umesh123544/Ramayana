@@ -147,9 +147,7 @@ export const DifficultySelector: React.FC<DifficultySelectorProps> = ({
   onConfirmStart,
   selectedChapter,
 }) => {
-  const visibleOptions = DIFFICULTY_OPTIONS.filter(
-    (opt) => opt.level === 'EASY' || opt.level === 'NORMAL'
-  );
+  const visibleOptions = DIFFICULTY_OPTIONS;
 
   const handlePick = (level: DifficultyLevel) => {
     soundManager.play('checkpoint');
@@ -197,7 +195,7 @@ export const DifficultySelector: React.FC<DifficultySelectorProps> = ({
       </h1>
 
       {/* Two-card grid - tap a card to jump straight into the game */}
-      <main className="relative w-full max-w-2xl z-10 grid grid-cols-1 sm:grid-cols-2 gap-3 tall:gap-4">
+      <main className="relative w-full max-w-4xl z-10 grid grid-cols-2 lg:grid-cols-4 gap-2.5 tall:gap-4">
         {visibleOptions.map((opt) => {
           const cs = opt.colorScheme;
           return (
@@ -205,7 +203,7 @@ export const DifficultySelector: React.FC<DifficultySelectorProps> = ({
               key={opt.level}
               id={`difficulty-card-${opt.level.toLowerCase()}`}
               onClick={() => handlePick(opt.level)}
-              className={`relative flex flex-col items-center justify-center gap-1.5 p-5 tall:p-8 rounded-2xl border transition-all duration-200 cursor-pointer text-center ${cs.border} ${cs.bg} hover:brightness-110 hover:scale-[1.02] shadow-lg hover:shadow-xl ${cs.glow} active:scale-[0.98]`}
+              className={`relative flex flex-col items-center justify-center gap-1 p-3 tall:p-6 rounded-2xl border transition-all duration-200 cursor-pointer text-center ${cs.border} ${cs.bg} hover:brightness-110 hover:scale-[1.02] shadow-lg hover:shadow-xl ${cs.glow} active:scale-[0.98]`}
             >
               {opt.badge && (
                 <span
@@ -214,7 +212,7 @@ export const DifficultySelector: React.FC<DifficultySelectorProps> = ({
                   {opt.badge}
                 </span>
               )}
-              <h2 className={`text-2xl tall:text-3xl font-bold font-['Cinzel'] tracking-wide ${cs.accent}`}>
+              <h2 className={`text-lg tall:text-2xl font-bold font-['Cinzel'] tracking-wide ${cs.accent}`}>
                 {opt.title}
               </h2>
               <span className="text-[10px] tall:text-xs font-mono tracking-wider font-semibold text-neutral-400 uppercase">

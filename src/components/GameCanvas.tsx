@@ -227,6 +227,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
             characterController.hero.x + characterController.hero.width * 0.5,
             characterController.hero.y + characterController.hero.height * 0.5
           );
+          camera.addTrauma(0.35);
           onShowDivineBlessing('DIVINE BLESSING');
         },
         () => {
