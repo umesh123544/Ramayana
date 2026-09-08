@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+/* Grows spacing/text only when there's real vertical room - width-based
+   breakpoints alone misfire on wide-but-short landscape phones. */
+@custom-variant tall (@media (min-height: 620px));
+
 html,
 body,
 #root {
