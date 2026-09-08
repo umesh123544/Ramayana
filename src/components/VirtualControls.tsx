@@ -10,7 +10,6 @@ import {
   ChevronRight,
   Gamepad2,
   MoveHorizontal,
-  MessageCircle,
 } from 'lucide-react';
 
 interface VirtualControlsProps {
@@ -305,17 +304,6 @@ export const VirtualControls: React.FC<VirtualControlsProps> = ({
         transformOrigin: swapSides ? 'bottom left' : 'bottom right',
       }}
     >
-      {/* Interaction Button */}
-      {canInteract && (
-        <button
-          id="interact-purneema-mobile-btn"
-          onClick={onInteract}
-          className="flex items-center gap-2 px-4 py-2 rounded-full bg-rose-600 hover:bg-rose-500 active:scale-95 text-white font-bold text-xs sm:text-sm shadow-xl border-2 border-rose-300 animate-bounce transition-all cursor-pointer touch-none"
-        >
-          <MessageCircle className="w-4 h-4 text-white" />
-          <span>Talk to Purneema</span>
-        </button>
-      )}
 
       <div className="flex items-center gap-2.5 sm:gap-3 p-1.5 rounded-2xl bg-neutral-950/90 backdrop-blur-md border-2 border-amber-500/40 shadow-2xl">
         {/* Divine Power Button */}

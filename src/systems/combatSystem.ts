@@ -271,6 +271,25 @@ export class CombatSystem {
       }
     }
 
+    // 2b. Divine Power Aura - scorches nearby enemies while active
+    if (hero.isDivineActive) {
+      const auraRadius = 130;
+      const auraDamage = 12;
+      const heroCx = hero.x + hero.width * 0.5;
+      const heroCy = hero.y + hero.height * 0.5;
+
+      for (const e of enemies) {
+        if (e.isDead) continue;
+        const eDist = Math.hypot(heroCx - (e.x + e.width * 0.5), heroCy - (e.y + e.height * 0.5));
+        if (eDist < auraRadius && e.hurtTimer <= 0) {
+          const kDir = e.x >= hero.x ? 1 : -1;
+          onEnemyDamaged(e.id, auraDamage, kDir);
+          this.addFloatingText(`-${auraDamage}`, e.x + e.width * 0.5, e.y - 10, '#fbbf24');
+          this.spawnImpactSparks(e.x + e.width * 0.5, e.y + e.height * 0.5, '#fbbf24', 8);
+        }
+      }
+    }
+
     // 3. Update Particles
     for (let i = this.particles.length - 1; i >= 0; i--) {
       const pt = this.particles[i];
