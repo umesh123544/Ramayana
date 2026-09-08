@@ -11,11 +11,9 @@ import {
   Menu,
   BookOpen,
   Gamepad2,
-  MapPin,
   Layers,
 } from 'lucide-react';
 import { adminConfig } from '../systems/adminConfig';
-import { CHAPTER_THEMES } from '../data/chapterThemes';
 import { PWAInstallButton } from './PWAInstallButton';
 
 interface HUDProps {
@@ -49,7 +47,6 @@ export const HUD: React.FC<HUDProps> = ({
   const divinePercent = Math.max(0, Math.min(100, hero.divinePower));
   const canActivateDivine = hero.divinePower >= 40 && hero.divineCooldown <= 0;
   const heroName = adminConfig.get().hero.name || 'Umesh';
-  const currentChapter = CHAPTER_THEMES[currentChapterId] || CHAPTER_THEMES[1];
   const currentDifficulty = adminConfig.getDifficulty();
 
   return (
@@ -58,18 +55,18 @@ export const HUD: React.FC<HUDProps> = ({
         {/* Main Top Navigation Row */}
         <div className="flex items-start justify-between gap-1.5 sm:gap-2">
           {/* ================= TOP LEFT: Lives & HP Bar ================= */}
-          <div className="flex flex-col gap-1 sm:gap-1.5 bg-neutral-900/90 backdrop-blur-md px-2.5 py-1.5 sm:px-3.5 sm:py-2.5 rounded-xl border border-amber-500/30 shadow-lg pointer-events-auto min-w-[130px] sm:min-w-[190px] md:min-w-[220px] shrink-0">
+          <div className="flex flex-col gap-0.5 sm:gap-1 bg-neutral-900/90 backdrop-blur-md px-1.5 py-1 sm:px-2.5 sm:py-1.5 rounded-lg border border-amber-500/30 shadow-lg pointer-events-auto min-w-[95px] sm:min-w-[140px] shrink-0">
             {/* Lives Counter */}
-            <div className="flex items-center justify-between text-[11px] sm:text-xs md:text-sm font-semibold text-neutral-200">
+            <div className="flex items-center justify-between text-[9px] sm:text-[11px] font-semibold text-neutral-200">
               <span className="flex items-center gap-1 text-red-400">
-                <Heart className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-red-500 text-red-500 animate-pulse" />
+                <Heart className="w-2.5 h-2.5 sm:w-3 sm:h-3 fill-red-500 text-red-500 animate-pulse" />
                 <span className="hidden sm:inline">Lives:</span>
               </span>
-              <div className="flex items-center gap-0.5 sm:gap-1">
+              <div className="flex items-center gap-0.5">
                 {Array.from({ length: hero.maxLives }).map((_, i) => (
                   <Heart
                     key={i}
-                    className={`w-3 h-3 sm:w-4 sm:h-4 transition-all duration-300 ${
+                    className={`w-2 h-2 sm:w-3 sm:h-3 transition-all duration-300 ${
                       i < hero.lives
                         ? 'fill-red-500 text-red-500 scale-105'
                         : 'fill-neutral-700 text-neutral-600'
@@ -81,13 +78,13 @@ export const HUD: React.FC<HUDProps> = ({
 
             {/* Health Bar */}
             <div className="w-full">
-              <div className="flex items-center justify-between text-[10px] sm:text-xs font-mono text-neutral-300 mb-0.5 sm:mb-1">
+              <div className="flex items-center justify-between text-[8px] sm:text-[10px] font-mono text-neutral-300 mb-0.5">
                 <span className="text-emerald-400 font-semibold">HP</span>
                 <span className="font-bold text-neutral-100">
                   {Math.round(hero.hp)} / {hero.maxHp}
                 </span>
               </div>
-              <div className="w-full h-2 sm:h-3 bg-neutral-950 rounded-full overflow-hidden border border-neutral-700/60 p-0.5 shadow-inner">
+              <div className="w-full h-1.5 sm:h-2 bg-neutral-950 rounded-full overflow-hidden border border-neutral-700/60 p-0.5 shadow-inner">
                 <div
                   className={`h-full rounded-full transition-all duration-200 ${
                     hpPercent > 50
@@ -102,15 +99,8 @@ export const HUD: React.FC<HUDProps> = ({
             </div>
           </div>
 
-          {/* ================= TOP CENTER: Chapter Badge & 1-Click Access ================= */}
+          {/* ================= TOP CENTER: 1-Click Access (chapter name text removed) ================= */}
           <div className="flex flex-col items-center gap-1.5 bg-neutral-900/90 backdrop-blur-md px-2.5 py-1.5 sm:px-4 sm:py-2 rounded-xl border border-amber-500/40 shadow-lg pointer-events-auto shrink min-w-0">
-            {/* Chapter Location & Name */}
-            <div className="flex items-center gap-1.5 text-amber-400 font-bold text-xs sm:text-sm tracking-wide">
-              <MapPin className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-500 shrink-0" />
-              <span className="truncate">
-                Ch {currentChapter.id}: {currentChapter.name} ({currentChapter.hindiName})
-              </span>
-            </div>
 
             {/* 1-Click Quick Selectors: CHAPTERS & LEVEL MODE & INSTALL */}
             <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap justify-center">

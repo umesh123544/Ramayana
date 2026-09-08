@@ -211,12 +211,7 @@ export const MainMenu: React.FC<MainMenuProps> = ({
       />
 
       {/* Clean Top Header Bar */}
-      <header className="relative w-full max-w-5xl mx-auto flex items-center justify-between z-10 pt-1 tall:pt-2 shrink-0">
-        <div className="flex items-center gap-2 px-3 py-1 tall:px-3.5 tall:py-1.5 rounded-full bg-neutral-900/75 backdrop-blur-md border border-amber-500/30 text-amber-300 text-[11px] tall:text-xs font-semibold font-mono tracking-wide">
-          <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-          <span>The Epic Archer Saga</span>
-        </div>
-
+      <header className="relative w-full max-w-5xl mx-auto flex items-center justify-end z-10 pt-1 tall:pt-2 shrink-0">
         <div className="flex items-center gap-2.5">
           <PWAInstallButton />
           <button
