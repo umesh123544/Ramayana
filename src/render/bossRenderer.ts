@@ -116,41 +116,50 @@ export function renderBoss(
   // TOP SCREEN EPIC BOSS HEALTH BAR
   // ==========================================
   if (!isDead || deathTimer < 2.5) {
-    renderBossTopHealthBar(ctx, boss, camera);
+    renderBossTopHealthBar(ctx, boss, camera, time);
   }
 }
 
-function renderBossTopHealthBar(ctx: CanvasRenderingContext2D, boss: BossState, camera: Camera2D) {
-  const barWidth = Math.min(camera.viewportWidth - 40, 480);
-  const barHeight = 16;
+function renderBossTopHealthBar(ctx: CanvasRenderingContext2D, boss: BossState, camera: Camera2D, time: number) {
+  const barWidth = Math.min(camera.viewportWidth - 24, 560);
+  const barHeight = 24;
   const barX = (camera.viewportWidth - barWidth) * 0.5;
-  const barY = 62;
+  const barY = 58;
+  const pulse = 0.5 + Math.sin(time * 4) * 0.5;
 
   ctx.save();
+
+  // Outer glow so the boss bar reads clearly even in a busy fight
+  ctx.shadowColor = boss.isRaging ? 'rgba(239, 68, 68, 0.9)' : 'rgba(245, 158, 11, 0.75)';
+  ctx.shadowBlur = 16 + pulse * 10;
+
   // Semi-transparent backdrop
-  ctx.fillStyle = 'rgba(10, 10, 10, 0.85)';
+  ctx.fillStyle = 'rgba(5, 5, 5, 0.92)';
   ctx.beginPath();
-  ctx.roundRect(barX - 12, barY - 26, barWidth + 24, barHeight + 42, [8, 8, 8, 8]);
+  ctx.roundRect(barX - 14, barY - 32, barWidth + 28, barHeight + 50, [10, 10, 10, 10]);
   ctx.fill();
-  ctx.strokeStyle = 'rgba(245, 158, 11, 0.4)';
-  ctx.lineWidth = 1;
+  ctx.strokeStyle = boss.isRaging
+    ? `rgba(248, 113, 113, ${0.6 + pulse * 0.4})`
+    : `rgba(245, 158, 11, ${0.5 + pulse * 0.3})`;
+  ctx.lineWidth = 2;
   ctx.stroke();
+  ctx.shadowBlur = 0;
 
-  // Boss Name & Sanskrit Title
+  // Boss Name & Sanskrit Title (larger, bolder for readability at a glance)
   ctx.fillStyle = '#fef08a';
-  ctx.font = 'bold 12px "Cinzel", serif';
+  ctx.font = 'bold 16px "Cinzel", serif';
   ctx.textAlign = 'left';
-  ctx.fillText(`${boss.name} (${boss.hindiName})`, barX, barY - 8);
+  ctx.fillText(`${boss.name} (${boss.hindiName})`, barX, barY - 10);
 
-  ctx.fillStyle = '#f87171';
-  ctx.font = 'italic 10px sans-serif';
+  ctx.fillStyle = '#fca5a5';
+  ctx.font = 'italic 12px sans-serif';
   ctx.textAlign = 'right';
-  ctx.fillText(boss.title, barX + barWidth, barY - 8);
+  ctx.fillText(boss.title, barX + barWidth, barY - 10);
 
   // Health bar background
   ctx.fillStyle = '#262626';
   ctx.beginPath();
-  ctx.roundRect(barX, barY, barWidth, barHeight, [4, 4, 4, 4]);
+  ctx.roundRect(barX, barY, barWidth, barHeight, [6, 6, 6, 6]);
   ctx.fill();
 
   // Health fill
@@ -174,7 +183,7 @@ function renderBossTopHealthBar(ctx: CanvasRenderingContext2D, boss: BossState, 
 
   // HP text & Phase indicator
   ctx.fillStyle = '#ffffff';
-  ctx.font = 'bold 10px monospace';
+  ctx.font = 'bold 12px monospace';
   ctx.textAlign = 'center';
 
   if (boss.type === 'raone') {
@@ -184,9 +193,9 @@ function renderBossTopHealthBar(ctx: CanvasRenderingContext2D, boss: BossState, 
         : boss.phase === 2
         ? 'PHASE 2 • Ten-Headed Shield Active [Use Charged Arrows!]'
         : 'PHASE 3 • Cosmic Brahmastra Fury';
-    ctx.fillText(`${boss.hp} / ${boss.maxHp}  |  ${phaseLabel}`, barX + barWidth * 0.5, barY + 12);
+    ctx.fillText(`${boss.hp} / ${boss.maxHp}  |  ${phaseLabel}`, barX + barWidth * 0.5, barY + 16);
   } else {
-    ctx.fillText(`${boss.hp} / ${boss.maxHp}`, barX + barWidth * 0.5, barY + 12);
+    ctx.fillText(`${boss.hp} / ${boss.maxHp}`, barX + barWidth * 0.5, barY + 16);
   }
 
   ctx.restore();

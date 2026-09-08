@@ -231,10 +231,11 @@ export const ChapterSelection: React.FC<ChapterSelectionProps> = ({
   return (
     <div
       id="chapter-selection-screen"
-      className="absolute inset-0 z-40 flex flex-col justify-between p-3 sm:p-5 md:p-7 bg-neutral-950/95 backdrop-blur-xl text-neutral-100 overflow-y-auto animate-fadeIn select-none"
+      className="fixed inset-0 z-40 flex items-center justify-center p-2 sm:p-4 bg-neutral-950/85 backdrop-blur-md text-neutral-100 animate-fadeIn select-none"
     >
+      <div className="relative w-full max-w-6xl max-h-[94vh] sm:max-h-[90vh] bg-neutral-950/95 border border-amber-500/30 rounded-2xl shadow-2xl overflow-y-auto flex flex-col justify-between p-3 sm:p-5 md:p-7">
       {/* Background Mythological Ambience */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-20 -z-10">
+      <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-20 -z-10 rounded-2xl">
         <div className="absolute -top-48 -left-48 w-[500px] h-[500px] rounded-full bg-amber-600/30 blur-[120px]" />
         <div className="absolute top-1/2 -right-48 w-[600px] h-[600px] rounded-full bg-rose-600/25 blur-[140px]" />
         <div className="absolute -bottom-48 left-1/3 w-[500px] h-[500px] rounded-full bg-orange-600/20 blur-[130px]" />
@@ -562,6 +563,7 @@ export const ChapterSelection: React.FC<ChapterSelectionProps> = ({
           <span className="text-amber-400">Esc to return</span>
         </div>
       </footer>
+      </div>
     </div>
   );
 };

@@ -345,7 +345,7 @@ export const MainMenu: React.FC<MainMenuProps> = ({
       {/* Clean Minimalist Footer */}
       <footer className="relative w-full max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between z-10 text-[11px] text-neutral-400 font-mono gap-2 pt-2">
         <span>© Ramayana 2D Action Platformer</span>
-        <div className="flex items-center gap-4 text-amber-400/80">
+        <div className="hidden sm:flex items-center gap-4 text-amber-400/80">
           <span>A / D: Move</span>
           <span>Space: Jump</span>
           <span>Click: Shoot Bow</span>

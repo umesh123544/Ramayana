@@ -165,7 +165,7 @@ export default function App() {
   };
 
   return (
-    <div className="relative w-screen h-screen overflow-hidden bg-neutral-950 font-sans text-neutral-100 flex flex-col select-none">
+    <div className="relative w-screen h-[100dvh] overflow-hidden bg-neutral-950 font-sans text-neutral-100 flex flex-col select-none">
       {/* HUD System */}
       <HUD
         hero={heroState}
