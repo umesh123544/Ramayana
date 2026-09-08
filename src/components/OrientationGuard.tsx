@@ -14,6 +14,23 @@ export const OrientationGuard: React.FC = () => {
       typeof window !== 'undefined' &&
       ('ontouchstart' in window || navigator.maxTouchPoints > 0);
 
+    // Best-effort auto-rotate: works for installed/standalone PWAs on Android
+    // Chrome without needing a fullscreen gesture first. Browsers that block
+    // this (regular mobile tabs, iOS Safari) just reject the promise, and the
+    // rotate-prompt overlay below covers that case instead.
+    const tryLockLandscape = () => {
+      const orientation = (screen as any).orientation;
+      if (orientation && typeof orientation.lock === 'function') {
+        orientation.lock('landscape').catch(() => {
+          /* not allowed in this context - the manual rotate prompt handles it */
+        });
+      }
+    };
+
+    if (isTouchDevice) {
+      tryLockLandscape();
+    }
+
     const check = () => {
       const isPortrait = window.matchMedia('(orientation: portrait)').matches && window.innerWidth < 900;
       setShouldPrompt(isTouchDevice && isPortrait);
@@ -22,7 +39,10 @@ export const OrientationGuard: React.FC = () => {
     check();
 
     const mq = window.matchMedia('(orientation: portrait)');
-    const onChange = () => check();
+    const onChange = () => {
+      check();
+      if (isTouchDevice) tryLockLandscape();
+    };
 
     if (mq.addEventListener) mq.addEventListener('change', onChange);
     else mq.addListener(onChange);

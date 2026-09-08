@@ -202,7 +202,7 @@ export const MainMenu: React.FC<MainMenuProps> = ({
   return (
     <div
       id="main-menu-overlay"
-      className="absolute inset-0 z-30 flex flex-col justify-between p-3 sm:p-8 md:p-12 text-neutral-100 select-none overflow-y-auto"
+      className="absolute inset-0 z-30 flex flex-col justify-between p-2 tall:p-8 md:p-12 text-neutral-100 select-none overflow-y-auto"
     >
       {/* Background Canvas */}
       <canvas
@@ -211,8 +211,8 @@ export const MainMenu: React.FC<MainMenuProps> = ({
       />
 
       {/* Clean Top Header Bar */}
-      <header className="relative w-full max-w-5xl mx-auto flex items-center justify-between z-10 pt-2">
-        <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-neutral-900/75 backdrop-blur-md border border-amber-500/30 text-amber-300 text-xs font-semibold font-mono tracking-wide">
+      <header className="relative w-full max-w-5xl mx-auto flex items-center justify-between z-10 pt-1 tall:pt-2 shrink-0">
+        <div className="flex items-center gap-2 px-3 py-1 tall:px-3.5 tall:py-1.5 rounded-full bg-neutral-900/75 backdrop-blur-md border border-amber-500/30 text-amber-300 text-[11px] tall:text-xs font-semibold font-mono tracking-wide">
           <Sparkles className="w-3.5 h-3.5 text-amber-400" />
           <span>The Epic Archer Saga</span>
         </div>
@@ -222,7 +222,7 @@ export const MainMenu: React.FC<MainMenuProps> = ({
           <button
             id="main-menu-sound-toggle"
             onClick={handleToggleMute}
-            className="p-2 rounded-xl bg-neutral-900/75 hover:bg-neutral-800 text-amber-300 border border-amber-500/30 backdrop-blur-md transition-all cursor-pointer active:scale-95"
+            className="p-1.5 tall:p-2 rounded-xl bg-neutral-900/75 hover:bg-neutral-800 text-amber-300 border border-amber-500/30 backdrop-blur-md transition-all cursor-pointer active:scale-95"
             title={isMuted ? 'Unmute Audio' : 'Mute Audio'}
           >
             {isMuted ? <VolumeX className="w-4 h-4 text-neutral-400" /> : <Volume2 className="w-4 h-4" />}
@@ -233,22 +233,22 @@ export const MainMenu: React.FC<MainMenuProps> = ({
       {/* Clean Centered Hero & Navigation Menu */}
       <div className="relative w-full max-w-md mx-auto my-auto z-10 flex flex-col items-center text-center">
         {/* Title */}
-        <h1 className="text-4xl sm:text-5xl md:text-6xl font-black font-['Cinzel'] tracking-wider text-transparent bg-clip-text bg-gradient-to-b from-amber-100 via-amber-300 to-amber-600 drop-shadow-[0_4px_14px_rgba(245,158,11,0.35)]">
+        <h1 className="text-2xl tall:text-4xl sm:tall:text-5xl md:tall:text-6xl font-black font-['Cinzel'] tracking-wider text-transparent bg-clip-text bg-gradient-to-b from-amber-100 via-amber-300 to-amber-600 drop-shadow-[0_4px_14px_rgba(245,158,11,0.35)]">
           RAMAYANA
         </h1>
-        <p className="text-xs sm:text-sm md:text-base font-medium tracking-widest text-amber-200/80 uppercase font-['Cinzel'] mt-1 mb-4 sm:mb-8">
+        <p className="text-[10px] tall:text-sm md:tall:text-base font-medium tracking-widest text-amber-200/80 uppercase font-['Cinzel'] mt-0.5 tall:mt-1 mb-1.5 tall:mb-8">
           The Epic Journey of Dharma
         </p>
 
         {/* Action Buttons */}
-        <div className="flex flex-col gap-2 sm:gap-2.5 w-full max-w-xs sm:max-w-sm">
+        <div className="flex flex-col gap-1.5 tall:gap-2.5 w-full max-w-xs sm:max-w-sm">
           {/* Resume Game (if active) */}
           {isGameActive && onResumeGame && (
             <button
               id="menu-resume-game-btn"
               onClick={() => handleMenuClick(onResumeGame)}
               onMouseEnter={handleMenuHover}
-              className="group relative flex items-center justify-between px-5 py-3 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400 text-amber-200 font-bold text-sm tracking-wider uppercase font-['Cinzel'] backdrop-blur-md transition-all shadow-lg shadow-amber-500/20 active:scale-95 cursor-pointer"
+              className="group relative flex items-center justify-between px-4 py-2 tall:px-5 tall:py-3 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400 text-amber-200 font-bold text-xs tall:text-sm tracking-wider uppercase font-['Cinzel'] backdrop-blur-md transition-all shadow-lg shadow-amber-500/20 active:scale-95 cursor-pointer"
             >
               <div className="flex items-center gap-3">
                 <RotateCcw className="w-4 h-4 text-amber-400 group-hover:rotate-180 transition-transform duration-500" />
@@ -263,7 +263,7 @@ export const MainMenu: React.FC<MainMenuProps> = ({
             id="menu-new-game-btn"
             onClick={() => handleMenuClick(onNewGame)}
             onMouseEnter={handleMenuHover}
-            className="group relative flex items-center justify-between px-5 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 via-amber-600 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-neutral-950 font-black text-sm tracking-widest uppercase font-['Cinzel'] shadow-xl shadow-amber-600/30 hover:shadow-amber-500/50 transition-all active:scale-95 cursor-pointer"
+            className="group relative flex items-center justify-between px-4 py-2.5 tall:px-5 tall:py-3.5 rounded-xl bg-gradient-to-r from-amber-500 via-amber-600 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-neutral-950 font-black text-xs tall:text-sm tracking-widest uppercase font-['Cinzel'] shadow-xl shadow-amber-600/30 hover:shadow-amber-500/50 transition-all active:scale-95 cursor-pointer"
           >
             <div className="flex items-center gap-3">
               <Play className="w-4 h-4 fill-neutral-950 stroke-neutral-950" />
@@ -287,7 +287,7 @@ export const MainMenu: React.FC<MainMenuProps> = ({
               })
             }
             onMouseEnter={handleMenuHover}
-            className="group relative flex items-center justify-between px-5 py-3 rounded-xl bg-neutral-900/80 hover:bg-neutral-800 border border-amber-500/30 hover:border-amber-500/60 text-neutral-200 hover:text-amber-200 font-bold text-sm tracking-wider uppercase font-['Cinzel'] backdrop-blur-md transition-all shadow-md active:scale-95 cursor-pointer"
+            className="group relative flex items-center justify-between px-4 py-2 tall:px-5 tall:py-3 rounded-xl bg-neutral-900/80 hover:bg-neutral-800 border border-amber-500/30 hover:border-amber-500/60 text-neutral-200 hover:text-amber-200 font-bold text-xs tall:text-sm tracking-wider uppercase font-['Cinzel'] backdrop-blur-md transition-all shadow-md active:scale-95 cursor-pointer"
           >
             <div className="flex items-center gap-3">
               <BookOpen className="w-4 h-4 text-amber-400" />
@@ -302,7 +302,7 @@ export const MainMenu: React.FC<MainMenuProps> = ({
               id="menu-level-mode-btn"
               onClick={() => handleMenuClick(onOpenDifficulty)}
               onMouseEnter={handleMenuHover}
-              className="group relative flex items-center justify-between px-5 py-3 rounded-xl bg-neutral-900/80 hover:bg-neutral-800 border border-amber-500/30 hover:border-amber-500/60 text-neutral-200 hover:text-amber-200 font-bold text-sm tracking-wider uppercase font-['Cinzel'] backdrop-blur-md transition-all shadow-md active:scale-95 cursor-pointer"
+              className="group relative flex items-center justify-between px-4 py-2 tall:px-5 tall:py-3 rounded-xl bg-neutral-900/80 hover:bg-neutral-800 border border-amber-500/30 hover:border-amber-500/60 text-neutral-200 hover:text-amber-200 font-bold text-xs tall:text-sm tracking-wider uppercase font-['Cinzel'] backdrop-blur-md transition-all shadow-md active:scale-95 cursor-pointer"
             >
               <div className="flex items-center gap-3">
                 <Sliders className="w-4 h-4 text-amber-400" />
@@ -317,7 +317,7 @@ export const MainMenu: React.FC<MainMenuProps> = ({
             id="menu-how-to-play-btn"
             onClick={() => handleMenuClick(() => setActiveSubModal('howToPlay'))}
             onMouseEnter={handleMenuHover}
-            className="group relative flex items-center justify-between px-5 py-3 rounded-xl bg-neutral-900/80 hover:bg-neutral-800 border border-amber-500/30 hover:border-amber-500/60 text-neutral-200 hover:text-amber-200 font-bold text-sm tracking-wider uppercase font-['Cinzel'] backdrop-blur-md transition-all shadow-md active:scale-95 cursor-pointer"
+            className="group relative flex items-center justify-between px-4 py-2 tall:px-5 tall:py-3 rounded-xl bg-neutral-900/80 hover:bg-neutral-800 border border-amber-500/30 hover:border-amber-500/60 text-neutral-200 hover:text-amber-200 font-bold text-xs tall:text-sm tracking-wider uppercase font-['Cinzel'] backdrop-blur-md transition-all shadow-md active:scale-95 cursor-pointer"
           >
             <div className="flex items-center gap-3">
               <HelpCircle className="w-4 h-4 text-amber-400" />
@@ -331,7 +331,7 @@ export const MainMenu: React.FC<MainMenuProps> = ({
             id="menu-settings-btn"
             onClick={() => handleMenuClick(onOpenSettings)}
             onMouseEnter={handleMenuHover}
-            className="group relative flex items-center justify-between px-5 py-3 rounded-xl bg-neutral-900/80 hover:bg-neutral-800 border border-amber-500/30 hover:border-amber-500/60 text-neutral-200 hover:text-amber-200 font-bold text-sm tracking-wider uppercase font-['Cinzel'] backdrop-blur-md transition-all shadow-md active:scale-95 cursor-pointer"
+            className="group relative flex items-center justify-between px-4 py-2 tall:px-5 tall:py-3 rounded-xl bg-neutral-900/80 hover:bg-neutral-800 border border-amber-500/30 hover:border-amber-500/60 text-neutral-200 hover:text-amber-200 font-bold text-xs tall:text-sm tracking-wider uppercase font-['Cinzel'] backdrop-blur-md transition-all shadow-md active:scale-95 cursor-pointer"
           >
             <div className="flex items-center gap-3">
               <Settings className="w-4 h-4 text-amber-400" />

@@ -117,16 +117,21 @@ export class SupportingCharacterSystem {
     soundManager.play('divinePower');
     onConferBlessing();
 
-    // Sinister thunder sound
+    // Sinister thunder sound - stands in for Raone's taunt instead of a text popup
     setTimeout(() => {
       soundManager.play('enemyAttack');
     }, 400);
+    setTimeout(() => {
+      soundManager.play('templeBell');
+    }, 900);
 
-    // Show narrative kidnapping dialogue
-    const abductionText =
-      this.chapterId < 10
-        ? `Raone: 'Hahaha! Foolish Umesh! Your beloved Purneema is now captive in my golden citadel of Lanka! Prove your courage by defeating my demon commanders first!'\n\nPurneema: 'Umesh! Save me! End the darkness and march upon Lanka!'`
-        : `Purneema: 'Umesh! Demon King Raone is immensely formidable! Strike at his heart with the sacred Brahmastra!'`;
+    if (this.chapterId < 10) {
+      // No dialogue popup for the abduction taunt - the sound cues above carry the moment
+      return;
+    }
+
+    // Chapter 10: Purneema's own strategic advice still shows as a dialogue
+    const abductionText = `Purneema: 'Umesh! Demon King Raone is immensely formidable! Strike at his heart with the sacred Brahmastra!'`;
 
     this.activeDialogue = abductionText;
     onShowDialogue(abductionText);
