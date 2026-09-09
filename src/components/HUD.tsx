@@ -14,7 +14,6 @@ import {
   Layers,
 } from 'lucide-react';
 import { adminConfig } from '../systems/adminConfig';
-import { PWAInstallButton } from './PWAInstallButton';
 
 interface HUDProps {
   hero: HeroState;
@@ -99,42 +98,6 @@ export const HUD: React.FC<HUDProps> = ({
             </div>
           </div>
 
-          {/* ================= TOP CENTER: 1-Click Access (chapter name text removed) ================= */}
-          <div className="flex flex-col items-center gap-1.5 bg-neutral-900/90 backdrop-blur-md px-2.5 py-1.5 sm:px-4 sm:py-2 rounded-xl border border-amber-500/40 shadow-lg pointer-events-auto shrink min-w-0">
-
-            {/* 1-Click Quick Selectors: CHAPTERS & LEVEL MODE & INSTALL */}
-            <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap justify-center">
-              {/* 1-Click Chapter Selection */}
-              {onOpenChapters && (
-                <button
-                  id="hud-one-click-chapters-btn"
-                  onClick={onOpenChapters}
-                  className="flex items-center gap-1 px-2 py-1 sm:px-2.5 sm:py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/50 text-[10px] sm:text-xs font-bold font-mono tracking-wider cursor-pointer active:scale-95 transition-all shadow-sm"
-                  title="Open Chapter Selection"
-                >
-                  <BookOpen className="w-3 h-3 text-amber-400" />
-                  <span>CHAPTERS</span>
-                </button>
-              )}
-
-              {/* 1-Click Level Mode (Difficulty) */}
-              {onOpenDifficulty && (
-                <button
-                  id="hud-one-click-level-mode-btn"
-                  onClick={onOpenDifficulty}
-                  className="flex items-center gap-1 px-2 py-1 sm:px-2.5 sm:py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/50 text-[10px] sm:text-xs font-bold font-mono tracking-wider cursor-pointer active:scale-95 transition-all shadow-sm"
-                  title="Open Level Mode / Difficulty"
-                >
-                  <Sliders className="w-3 h-3 text-amber-400" />
-                  <span>LEVEL: {currentDifficulty}</span>
-                </button>
-              )}
-
-              {/* PWA Install Button */}
-              <PWAInstallButton />
-            </div>
-          </div>
-
           {/* ================= TOP RIGHT: Divine Meter & Menu Controls ================= */}
           <div className="flex items-center gap-1.5 sm:gap-2 pointer-events-auto shrink-0">
             {/* Divine Power Meter */}
@@ -167,8 +130,32 @@ export const HUD: React.FC<HUDProps> = ({
               </div>
             </div>
 
-            {/* Action Buttons: Menu, Mobile Controls, Settings, Sound */}
+            {/* Action Buttons: Chapters, Level, Menu, Mobile Controls, Settings, Sound */}
             <div className="flex sm:flex-col gap-1 sm:gap-1.5">
+              {/* Chapters (small side icon) */}
+              {onOpenChapters && (
+                <button
+                  id="hud-one-click-chapters-btn"
+                  onClick={onOpenChapters}
+                  title="Open Chapter Selection"
+                  className="p-1.5 sm:p-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/50 shadow transition-all cursor-pointer flex items-center justify-center active:scale-95"
+                >
+                  <BookOpen className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400" />
+                </button>
+              )}
+
+              {/* Level / Difficulty (small side icon) */}
+              {onOpenDifficulty && (
+                <button
+                  id="hud-one-click-level-mode-btn"
+                  onClick={onOpenDifficulty}
+                  title={`Level Mode: ${currentDifficulty}`}
+                  className="p-1.5 sm:p-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/50 shadow transition-all cursor-pointer flex items-center justify-center active:scale-95"
+                >
+                  <Sliders className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400" />
+                </button>
+              )}
+
               {/* Main Menu Button */}
               {onOpenMainMenu && (
                 <button

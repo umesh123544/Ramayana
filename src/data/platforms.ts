@@ -35,7 +35,7 @@ export const INITIAL_PLATFORMS: Platform[] = [
   // (x: 3700 to 4450). Ground continues below a jagged rock ceiling,
   // forcing careful jump timing under the stalactites.
   // ==========================================
-  { id: 'g3', x: 3700, y: 672, width: 750, height: 200, type: 'ground' },
+  { id: 'g3', x: 3700, y: 672, width: 770, height: 200, type: 'ground' },
   { id: 'cc1', x: 3760, y: 470, width: 620, height: 90, type: 'cave_ceiling' },
 
   // 6. Tunnel Exit Ledges climbing back into daylight
