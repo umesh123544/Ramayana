@@ -157,19 +157,19 @@ export class CombatSystem {
       p.x += p.vx * dt;
       p.y += p.vy * dt;
 
-      // Trail particles
-      if (Math.random() > 0.4) {
+      // Trail particles - glowing motion streak instead of a flat fading dot
+      if (Math.random() > 0.3) {
         this.particles.push({
           x: p.x,
           y: p.y,
-          vx: -p.vx * 0.05,
-          vy: (Math.random() - 0.5) * 20,
-          color: p.owner === 'hero' ? (p.isCharged ? '#f59e0b' : '#38bdf8') : '#ef4444',
-          size: p.isCharged ? 3.5 : 2,
-          alpha: 0.8,
-          life: 0.2,
-          maxLife: 0.2,
-          type: 'spark',
+          vx: p.vx * 0.15,
+          vy: p.vy * 0.15 + (Math.random() - 0.5) * 10,
+          color: p.owner === 'hero' ? (p.isCharged ? '#f59e0b' : '#7dd3fc') : '#f87171',
+          size: p.isCharged ? 4 : 2.2,
+          alpha: 0.85,
+          life: 0.22,
+          maxLife: 0.22,
+          type: 'divine_ray',
         });
       }
 

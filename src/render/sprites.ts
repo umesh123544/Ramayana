@@ -33,6 +33,28 @@ export function shadeColor(hex: string, percent: number): string {
   return `#${(r << 16 | g << 8 | b).toString(16).padStart(6, '0')}`;
 }
 
+/**
+ * Draws a thin bright rim-light arc along one edge of a circular shape,
+ * simulating a backlight/edge highlight for a more premium, 3D look.
+ */
+export function drawRimLight(
+  ctx: CanvasRenderingContext2D,
+  cx: number,
+  cy: number,
+  radius: number,
+  color: string = 'rgba(255,255,255,0.55)',
+  startAngle: number = -Math.PI * 0.75,
+  endAngle: number = -Math.PI * 0.15
+) {
+  ctx.save();
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 1.4;
+  ctx.beginPath();
+  ctx.arc(cx, cy, radius - 0.5, startAngle, endAngle);
+  ctx.stroke();
+  ctx.restore();
+}
+
 export function renderUmesh(
   ctx: CanvasRenderingContext2D,
   x: number,
@@ -950,6 +972,7 @@ export function renderEnemy(
       ctx.beginPath();
       ctx.arc(0, -height * 0.75, 10, 0, Math.PI * 2);
       ctx.fill();
+      drawRimLight(ctx, 0, -height * 0.75, 10, 'rgba(248,113,113,0.6)');
 
       // Horns
       ctx.strokeStyle = '#e2e8f0';
@@ -1016,6 +1039,7 @@ export function renderEnemy(
       ctx.beginPath();
       ctx.arc(0, -height * 0.75, 10, 0, Math.PI * 2);
       ctx.fill();
+      drawRimLight(ctx, 0, -height * 0.75, 10, 'rgba(129,140,248,0.6)');
 
       // Quiver on back
       ctx.fillStyle = '#431407';
@@ -1077,6 +1101,7 @@ export function renderEnemy(
       ctx.beginPath();
       ctx.arc(0, -height * 0.8, 14, 0, Math.PI * 2);
       ctx.fill();
+      drawRimLight(ctx, 0, -height * 0.8, 14, 'rgba(148,163,184,0.55)');
 
       // Massive Heavy Horns
       ctx.strokeStyle = '#e2e8f0';
@@ -1174,6 +1199,7 @@ export function renderEnemy(
       ctx.beginPath();
       ctx.arc(0, -height * 0.8, 9, 0, Math.PI * 2);
       ctx.fill();
+      drawRimLight(ctx, 0, -height * 0.8, 9, 'rgba(244,63,94,0.6)');
 
       // Glowing predator eyes
       ctx.save();
@@ -1198,13 +1224,16 @@ export function renderEnemy(
 
     case 'elite_demon': {
       // Type 5: Elite demon warrior (Golden Armor Rakshasa Commander)
-      // Flowing commander's cape
+      // Flowing commander's cape with cloth-like wave motion
+      const capeSway1 = Math.sin(frame * 0.18) * 5;
+      const capeSway2 = Math.sin(frame * 0.18 + 1.1) * 7;
       ctx.fillStyle = shadeColor('#3b0764', -10);
       ctx.beginPath();
       ctx.moveTo(-13, -height * 0.72);
       ctx.lineTo(13, -height * 0.72);
-      ctx.lineTo(16 + animCycle * 4, -height * 0.15);
-      ctx.lineTo(-16 + animCycle * 4, -height * 0.15);
+      ctx.quadraticCurveTo(18 + capeSway2, -height * 0.45, 16 + animCycle * 4 + capeSway2, -height * 0.15);
+      ctx.lineTo(-16 + animCycle * 4 + capeSway1, -height * 0.15);
+      ctx.quadraticCurveTo(-18 + capeSway1, -height * 0.45, -13, -height * 0.72);
       ctx.closePath();
       ctx.fill();
 
@@ -1231,6 +1260,7 @@ export function renderEnemy(
       ctx.beginPath();
       ctx.arc(0, -height * 0.82, 11, 0, Math.PI * 2);
       ctx.fill();
+      drawRimLight(ctx, 0, -height * 0.82, 11, 'rgba(250,204,21,0.5)');
 
       // Fierce golden eyes with glow
       ctx.save();
