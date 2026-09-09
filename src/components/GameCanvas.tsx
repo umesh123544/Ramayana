@@ -473,17 +473,6 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
             ctx.restore();
           }
 
-          // Purneema overhead interaction prompt if nearby
-          if (supportSystem.isNearHero) {
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.75)';
-            ctx.fillRect(supportSystem.purneema.x - 55, supportSystem.purneema.y - 95, 110, 22);
-            ctx.strokeStyle = '#f43f5e';
-            ctx.lineWidth = 1.5;
-            ctx.strokeRect(supportSystem.purneema.x - 55, supportSystem.purneema.y - 95, 110, 22);
-            ctx.fillStyle = '#fbcfe8';
-            ctx.font = 'bold 10px "Cinzel", sans-serif';
-            ctx.fillText('Press E to Talk', supportSystem.purneema.x - 38, supportSystem.purneema.y - 80);
-          }
         }
         ctx.restore();
 

@@ -206,6 +206,7 @@ export class CombatSystem {
             if (onBossDamaged) onBossDamaged(p.damage, kDir, p.isCharged);
             this.addFloatingText(`-${p.damage}`, boss.x + boss.width * 0.5, boss.y - 10, p.isCharged ? '#fbbf24' : '#ffffff');
             this.spawnImpactSparks(p.x, p.y, p.isCharged ? '#f59e0b' : '#dc2626', 12);
+            this.spawnImpactFlash(p.x, p.y, p.isCharged ? '#fde68a' : '#f87171', p.isCharged ? 26 : 16);
           }
         }
 
@@ -226,6 +227,7 @@ export class CombatSystem {
               // Spawn damage number
               this.addFloatingText(`-${p.damage}`, e.x + e.width * 0.5, e.y - 10, p.isCharged ? '#fbbf24' : '#ffffff');
               this.spawnImpactSparks(p.x, p.y, p.isCharged ? '#f59e0b' : '#dc2626', 10);
+              this.spawnImpactFlash(p.x, p.y, p.isCharged ? '#fde68a' : '#fca5a5', p.isCharged ? 22 : 14);
               break;
             }
           }
@@ -312,6 +314,21 @@ export class CombatSystem {
         this.floatingTexts.splice(i, 1);
       }
     }
+  }
+
+  public spawnImpactFlash(x: number, y: number, color: string, size: number = 16) {
+    this.particles.push({
+      x,
+      y,
+      vx: 0,
+      vy: 0,
+      color,
+      size: size * 0.35,
+      alpha: 0.95,
+      life: 0.22,
+      maxLife: 0.22,
+      type: 'shockwave_ring',
+    });
   }
 
   public spawnImpactSparks(x: number, y: number, color: string, count: number = 6) {

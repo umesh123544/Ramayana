@@ -287,6 +287,17 @@ export function renderUmesh(
   ctx.arc(6, -height * 0.65, 1, 0, Math.PI * 2);
   ctx.fill();
 
+  // Polished-metal specular highlight streak
+  ctx.save();
+  ctx.globalAlpha = 0.5;
+  ctx.strokeStyle = '#ffffff';
+  ctx.lineWidth = 1.2;
+  ctx.beginPath();
+  ctx.moveTo(-6, -height * 0.685);
+  ctx.lineTo(-3, -height * 0.545);
+  ctx.stroke();
+  ctx.restore();
+
   // Golden medallion in center of armor
   ctx.fillStyle = '#dc2626';
   ctx.beginPath();
