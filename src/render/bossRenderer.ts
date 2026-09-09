@@ -1,5 +1,6 @@
 import { BossState } from '../systems/bossSystem';
 import { Camera2D } from '../engine/camera';
+import { shadeColor } from './sprites';
 
 export function renderBoss(
   ctx: CanvasRenderingContext2D,
@@ -206,8 +207,13 @@ function renderBossHeadHealthBar(ctx: CanvasRenderingContext2D, boss: BossState,
 
 // 1. Subahu (Ayodhya Boss)
 function renderSubahu(ctx: CanvasRenderingContext2D, h: number, w: number, time: number) {
+  const eyeGlow = 0.6 + Math.abs(Math.sin(time * 3)) * 0.4;
+
   // Cape
-  ctx.fillStyle = '#991b1b';
+  const capeGrad = ctx.createLinearGradient(-22, 0, 22, 0);
+  capeGrad.addColorStop(0, shadeColor('#991b1b', -18));
+  capeGrad.addColorStop(1, shadeColor('#991b1b', 10));
+  ctx.fillStyle = capeGrad;
   ctx.beginPath();
   ctx.moveTo(-16, -h * 0.7);
   ctx.lineTo(16, -h * 0.7);
@@ -222,17 +228,32 @@ function renderSubahu(ctx: CanvasRenderingContext2D, h: number, w: number, time:
   ctx.fillRect(4, -h * 0.35, 10, h * 0.35);
 
   // Chestplate
-  ctx.fillStyle = '#7f1d1d';
+  const chestGrad = ctx.createLinearGradient(-16, 0, 16, 0);
+  chestGrad.addColorStop(0, shadeColor('#7f1d1d', -12));
+  chestGrad.addColorStop(1, shadeColor('#7f1d1d', 14));
+  ctx.fillStyle = chestGrad;
   ctx.fillRect(-16, -h * 0.72, 32, 34);
   ctx.strokeStyle = '#f59e0b';
   ctx.lineWidth = 2;
   ctx.strokeRect(-16, -h * 0.72, 32, 34);
 
   // Head & Horns
-  ctx.fillStyle = '#991b1b';
+  const headGrad = ctx.createRadialGradient(-3, -h * 0.84, 2, 0, -h * 0.82, 11);
+  headGrad.addColorStop(0, shadeColor('#991b1b', 18));
+  headGrad.addColorStop(1, shadeColor('#991b1b', -15));
+  ctx.fillStyle = headGrad;
   ctx.beginPath();
   ctx.arc(0, -h * 0.82, 11, 0, Math.PI * 2);
   ctx.fill();
+
+  // Glowing menacing eyes
+  ctx.save();
+  ctx.shadowColor = '#facc15';
+  ctx.shadowBlur = 6 * eyeGlow;
+  ctx.fillStyle = '#facc15';
+  ctx.fillRect(-4, -h * 0.84, 3, 2.5);
+  ctx.fillRect(2, -h * 0.84, 3, 2.5);
+  ctx.restore();
 
   // Curved demon horns
   ctx.strokeStyle = '#f59e0b';
@@ -263,8 +284,13 @@ function renderSubahu(ctx: CanvasRenderingContext2D, h: number, w: number, time:
 
 // 2. Viradha (Vanvas Boss)
 function renderViradha(ctx: CanvasRenderingContext2D, h: number, w: number, time: number) {
+  const eyeGlow = 0.6 + Math.abs(Math.sin(time * 3)) * 0.4;
+
   // Massive wild beast frame
-  ctx.fillStyle = '#14532d';
+  const bodyGrad = ctx.createLinearGradient(-22, 0, 22, 0);
+  bodyGrad.addColorStop(0, shadeColor('#14532d', -14));
+  bodyGrad.addColorStop(1, shadeColor('#14532d', 14));
+  ctx.fillStyle = bodyGrad;
   ctx.beginPath();
   ctx.roundRect(-22, -h * 0.8, 44, h * 0.5, [10, 10, 4, 4]);
   ctx.fill();
@@ -275,10 +301,22 @@ function renderViradha(ctx: CanvasRenderingContext2D, h: number, w: number, time
   ctx.fillRect(4, -h * 0.35, 16, h * 0.35);
 
   // Head & Tusks
-  ctx.fillStyle = '#166534';
+  const headGrad = ctx.createRadialGradient(-4, -h * 0.87, 3, 0, -h * 0.85, 14);
+  headGrad.addColorStop(0, shadeColor('#166534', 16));
+  headGrad.addColorStop(1, shadeColor('#166534', -16));
+  ctx.fillStyle = headGrad;
   ctx.beginPath();
   ctx.arc(0, -h * 0.85, 14, 0, Math.PI * 2);
   ctx.fill();
+
+  // Glowing feral eyes
+  ctx.save();
+  ctx.shadowColor = '#f97316';
+  ctx.shadowBlur = 6 * eyeGlow;
+  ctx.fillStyle = '#f97316';
+  ctx.fillRect(-5, -h * 0.87, 3.5, 3);
+  ctx.fillRect(2, -h * 0.87, 3.5, 3);
+  ctx.restore();
 
   // Curved Tusks
   ctx.strokeStyle = '#fef08a';
@@ -291,7 +329,10 @@ function renderViradha(ctx: CanvasRenderingContext2D, h: number, w: number, time
   ctx.stroke();
 
   // Massive Spiked Club
-  ctx.fillStyle = '#78350f';
+  const clubGrad = ctx.createLinearGradient(16, 0, 28, 0);
+  clubGrad.addColorStop(0, shadeColor('#78350f', -15));
+  clubGrad.addColorStop(1, shadeColor('#78350f', 10));
+  ctx.fillStyle = clubGrad;
   ctx.beginPath();
   ctx.roundRect(16, -h * 0.88, 12, h * 0.7, [5, 5, 2, 2]);
   ctx.fill();
@@ -299,8 +340,13 @@ function renderViradha(ctx: CanvasRenderingContext2D, h: number, w: number, time
 
 // 3. Khara (Dandakaranya Boss)
 function renderKhara(ctx: CanvasRenderingContext2D, h: number, w: number, time: number) {
+  const eyeGlow = 0.6 + Math.abs(Math.sin(time * 3)) * 0.4;
+
   // Dark purple warlord
-  ctx.fillStyle = '#3b0764';
+  const bodyGrad = ctx.createLinearGradient(-16, 0, 16, 0);
+  bodyGrad.addColorStop(0, shadeColor('#3b0764', -14));
+  bodyGrad.addColorStop(1, shadeColor('#3b0764', 14));
+  ctx.fillStyle = bodyGrad;
   ctx.fillRect(-16, -h * 0.75, 32, h * 0.45);
 
   ctx.fillStyle = '#1e1b4b';
@@ -308,14 +354,29 @@ function renderKhara(ctx: CanvasRenderingContext2D, h: number, w: number, time: 
   ctx.fillRect(3, -h * 0.35, 11, h * 0.35);
 
   // Crimson armor plates
-  ctx.fillStyle = '#dc2626';
+  const plateGrad = ctx.createLinearGradient(-14, 0, 14, 0);
+  plateGrad.addColorStop(0, shadeColor('#dc2626', -12));
+  plateGrad.addColorStop(1, shadeColor('#dc2626', 14));
+  ctx.fillStyle = plateGrad;
   ctx.fillRect(-14, -h * 0.7, 28, 18);
 
   // Helmet with twin blades
-  ctx.fillStyle = '#581c87';
+  const headGrad = ctx.createRadialGradient(-3, -h * 0.86, 2, 0, -h * 0.84, 12);
+  headGrad.addColorStop(0, shadeColor('#581c87', 16));
+  headGrad.addColorStop(1, shadeColor('#581c87', -14));
+  ctx.fillStyle = headGrad;
   ctx.beginPath();
   ctx.arc(0, -h * 0.84, 12, 0, Math.PI * 2);
   ctx.fill();
+
+  // Glowing crimson eyes
+  ctx.save();
+  ctx.shadowColor = '#f43f5e';
+  ctx.shadowBlur = 6 * eyeGlow;
+  ctx.fillStyle = '#f43f5e';
+  ctx.fillRect(-4, -h * 0.86, 3, 2.5);
+  ctx.fillRect(2, -h * 0.86, 3, 2.5);
+  ctx.restore();
 
   // Twin Dark Swords
   ctx.strokeStyle = '#f43f5e';
@@ -330,8 +391,13 @@ function renderKhara(ctx: CanvasRenderingContext2D, h: number, w: number, time: 
 
 // 4. Maricha (Panchavati Boss - Golden Deer Demon)
 function renderMaricha(ctx: CanvasRenderingContext2D, h: number, w: number, time: number) {
+  const eyeGlow = 0.6 + Math.abs(Math.sin(time * 3)) * 0.4;
+
   // Golden horned illusionist
-  ctx.fillStyle = '#854d0e';
+  const bodyGrad = ctx.createLinearGradient(-14, 0, 14, 0);
+  bodyGrad.addColorStop(0, shadeColor('#854d0e', -12));
+  bodyGrad.addColorStop(1, shadeColor('#854d0e', 14));
+  ctx.fillStyle = bodyGrad;
   ctx.beginPath();
   ctx.roundRect(-14, -h * 0.72, 28, h * 0.42, [6, 6, 4, 4]);
   ctx.fill();
@@ -341,10 +407,22 @@ function renderMaricha(ctx: CanvasRenderingContext2D, h: number, w: number, time
   ctx.fillRect(3, -h * 0.35, 9, h * 0.35);
 
   // Golden head
-  ctx.fillStyle = '#eab308';
+  const headGrad = ctx.createRadialGradient(-3, -h * 0.84, 2, 0, -h * 0.82, 11);
+  headGrad.addColorStop(0, shadeColor('#eab308', 20));
+  headGrad.addColorStop(1, shadeColor('#eab308', -14));
+  ctx.fillStyle = headGrad;
   ctx.beginPath();
   ctx.arc(0, -h * 0.82, 11, 0, Math.PI * 2);
   ctx.fill();
+
+  // Glowing illusion eyes
+  ctx.save();
+  ctx.shadowColor = '#f8fafc';
+  ctx.shadowBlur = 6 * eyeGlow;
+  ctx.fillStyle = '#f8fafc';
+  ctx.fillRect(-4, -h * 0.84, 3, 2.5);
+  ctx.fillRect(2, -h * 0.84, 3, 2.5);
+  ctx.restore();
 
   // Golden Antlers
   ctx.strokeStyle = '#fde047';
@@ -361,8 +439,13 @@ function renderMaricha(ctx: CanvasRenderingContext2D, h: number, w: number, time
 
 // 5. Dushana (Sita Haran Boss)
 function renderDushana(ctx: CanvasRenderingContext2D, h: number, w: number, time: number) {
+  const eyeGlow = 0.6 + Math.abs(Math.sin(time * 3)) * 0.4;
+
   // Dark shadow commander
-  ctx.fillStyle = '#0f172a';
+  const bodyGrad = ctx.createLinearGradient(-17, 0, 17, 0);
+  bodyGrad.addColorStop(0, shadeColor('#0f172a', -10));
+  bodyGrad.addColorStop(1, shadeColor('#0f172a', 16));
+  ctx.fillStyle = bodyGrad;
   ctx.fillRect(-17, -h * 0.75, 34, h * 0.44);
 
   ctx.fillStyle = '#1e293b';
@@ -370,13 +453,28 @@ function renderDushana(ctx: CanvasRenderingContext2D, h: number, w: number, time
   ctx.fillRect(3, -h * 0.35, 12, h * 0.35);
 
   // Orange flame crest
-  ctx.fillStyle = '#ea580c';
+  const crestGrad = ctx.createLinearGradient(-15, 0, 15, 0);
+  crestGrad.addColorStop(0, shadeColor('#ea580c', -12));
+  crestGrad.addColorStop(1, shadeColor('#ea580c', 14));
+  ctx.fillStyle = crestGrad;
   ctx.fillRect(-15, -h * 0.68, 30, 16);
 
-  ctx.fillStyle = '#1e293b';
+  const headGrad = ctx.createRadialGradient(-3, -h * 0.86, 2, 0, -h * 0.84, 12);
+  headGrad.addColorStop(0, shadeColor('#1e293b', 22));
+  headGrad.addColorStop(1, shadeColor('#1e293b', -12));
+  ctx.fillStyle = headGrad;
   ctx.beginPath();
   ctx.arc(0, -h * 0.84, 12, 0, Math.PI * 2);
   ctx.fill();
+
+  // Glowing shadow eyes
+  ctx.save();
+  ctx.shadowColor = '#f97316';
+  ctx.shadowBlur = 6 * eyeGlow;
+  ctx.fillStyle = '#f97316';
+  ctx.fillRect(-4, -h * 0.86, 3, 2.5);
+  ctx.fillRect(2, -h * 0.86, 3, 2.5);
+  ctx.restore();
 
   // Dark scythe / astra
   ctx.strokeStyle = '#f97316';
@@ -390,7 +488,10 @@ function renderDushana(ctx: CanvasRenderingContext2D, h: number, w: number, time
 // 6. Vali (Kishkindha Boss)
 function renderVali(ctx: CanvasRenderingContext2D, h: number, w: number, time: number) {
   // Powerful golden-furred ape sovereign
-  ctx.fillStyle = '#78350f';
+  const bodyGrad = ctx.createLinearGradient(-19, 0, 19, 0);
+  bodyGrad.addColorStop(0, shadeColor('#78350f', -14));
+  bodyGrad.addColorStop(1, shadeColor('#78350f', 14));
+  ctx.fillStyle = bodyGrad;
   ctx.beginPath();
   ctx.roundRect(-19, -h * 0.78, 38, h * 0.48, [8, 8, 4, 4]);
   ctx.fill();
@@ -400,13 +501,19 @@ function renderVali(ctx: CanvasRenderingContext2D, h: number, w: number, time: n
   ctx.fillRect(4, -h * 0.35, 13, h * 0.35);
 
   // Royal Golden Mukut (Crown) & Head
-  ctx.fillStyle = '#b45309';
+  const headGrad = ctx.createRadialGradient(-4, -h * 0.86, 3, 0, -h * 0.84, 13);
+  headGrad.addColorStop(0, shadeColor('#b45309', 18));
+  headGrad.addColorStop(1, shadeColor('#b45309', -14));
+  ctx.fillStyle = headGrad;
   ctx.beginPath();
   ctx.arc(0, -h * 0.84, 13, 0, Math.PI * 2);
   ctx.fill();
 
   // Gold Crown
-  ctx.fillStyle = '#f59e0b';
+  const crownGrad = ctx.createLinearGradient(-10, 0, 10, 0);
+  crownGrad.addColorStop(0, shadeColor('#f59e0b', -10));
+  crownGrad.addColorStop(1, shadeColor('#f59e0b', 16));
+  ctx.fillStyle = crownGrad;
   ctx.beginPath();
   ctx.moveTo(-10, -h * 0.9);
   ctx.lineTo(0, -h * 1.05);
@@ -415,7 +522,10 @@ function renderVali(ctx: CanvasRenderingContext2D, h: number, w: number, time: n
   ctx.fill();
 
   // Golden Mace (Gada)
-  ctx.fillStyle = '#eab308';
+  const maceGrad = ctx.createRadialGradient(16, -h * 0.63, 2, 20, -h * 0.6, 12);
+  maceGrad.addColorStop(0, shadeColor('#eab308', 20));
+  maceGrad.addColorStop(1, shadeColor('#eab308', -10));
+  ctx.fillStyle = maceGrad;
   ctx.beginPath();
   ctx.arc(20, -h * 0.6, 12, 0, Math.PI * 2);
   ctx.fill();
@@ -426,8 +536,13 @@ function renderVali(ctx: CanvasRenderingContext2D, h: number, w: number, time: n
 
 // 7. Surasa (Setu Nirman Boss)
 function renderSurasa(ctx: CanvasRenderingContext2D, h: number, w: number, time: number) {
+  const eyeGlow = 0.6 + Math.abs(Math.sin(time * 3)) * 0.4;
+
   // Oceanic leviathan asura
-  ctx.fillStyle = '#0f172a';
+  const bodyGrad = ctx.createLinearGradient(-20, 0, 20, 0);
+  bodyGrad.addColorStop(0, shadeColor('#0f172a', -10));
+  bodyGrad.addColorStop(1, shadeColor('#0f172a', 16));
+  ctx.fillStyle = bodyGrad;
   ctx.beginPath();
   ctx.roundRect(-20, -h * 0.76, 40, h * 0.46, [8, 8, 4, 4]);
   ctx.fill();
@@ -435,6 +550,15 @@ function renderSurasa(ctx: CanvasRenderingContext2D, h: number, w: number, time:
   ctx.fillStyle = '#0369a1';
   ctx.fillRect(-17, -h * 0.35, 13, h * 0.35);
   ctx.fillRect(4, -h * 0.35, 13, h * 0.35);
+
+  // Glowing aquatic eyes
+  ctx.save();
+  ctx.shadowColor = '#38bdf8';
+  ctx.shadowBlur = 6 * eyeGlow;
+  ctx.fillStyle = '#38bdf8';
+  ctx.fillRect(-8, -h * 0.66, 3, 2.5);
+  ctx.fillRect(2, -h * 0.66, 3, 2.5);
+  ctx.restore();
 
   // Aquatic fin spines
   ctx.strokeStyle = '#38bdf8';
@@ -457,8 +581,13 @@ function renderSurasa(ctx: CanvasRenderingContext2D, h: number, w: number, time:
 
 // 8. Indrajit (Lanka Boss)
 function renderIndrajit(ctx: CanvasRenderingContext2D, h: number, w: number, time: number) {
+  const eyeGlow = 0.6 + Math.abs(Math.sin(time * 3)) * 0.4;
+
   // Master of celestial lightning
-  ctx.fillStyle = '#1c1917';
+  const bodyGrad = ctx.createLinearGradient(-17, 0, 17, 0);
+  bodyGrad.addColorStop(0, shadeColor('#1c1917', -8));
+  bodyGrad.addColorStop(1, shadeColor('#1c1917', 18));
+  ctx.fillStyle = bodyGrad;
   ctx.fillRect(-17, -h * 0.76, 34, h * 0.46);
 
   ctx.fillStyle = '#292524';
@@ -470,10 +599,22 @@ function renderIndrajit(ctx: CanvasRenderingContext2D, h: number, w: number, tim
   ctx.lineWidth = 2.5;
   ctx.strokeRect(-15, -h * 0.72, 30, 24);
 
-  ctx.fillStyle = '#44403c';
+  const headGrad = ctx.createRadialGradient(-3, -h * 0.86, 2, 0, -h * 0.84, 12);
+  headGrad.addColorStop(0, shadeColor('#44403c', 22));
+  headGrad.addColorStop(1, shadeColor('#44403c', -14));
+  ctx.fillStyle = headGrad;
   ctx.beginPath();
   ctx.arc(0, -h * 0.84, 12, 0, Math.PI * 2);
   ctx.fill();
+
+  // Glowing electric eyes
+  ctx.save();
+  ctx.shadowColor = '#facc15';
+  ctx.shadowBlur = 6 * eyeGlow;
+  ctx.fillStyle = '#facc15';
+  ctx.fillRect(-4, -h * 0.86, 3, 2.5);
+  ctx.fillRect(2, -h * 0.86, 3, 2.5);
+  ctx.restore();
 
   // Lightning Staff
   ctx.strokeStyle = '#facc15';
@@ -483,16 +624,26 @@ function renderIndrajit(ctx: CanvasRenderingContext2D, h: number, w: number, tim
   ctx.lineTo(16, 0);
   ctx.stroke();
   // Lightning sparks
+  ctx.save();
+  ctx.shadowColor = '#fef08a';
+  ctx.shadowBlur = 10;
   ctx.fillStyle = '#fef08a';
   ctx.beginPath();
   ctx.arc(16, -h * 1.04, 6, 0, Math.PI * 2);
   ctx.fill();
+  ctx.restore();
 }
 
 // 9. Kumbhakarna (Yuddha Boss)
 function renderKumbhakarna(ctx: CanvasRenderingContext2D, h: number, w: number, time: number) {
+  const eyeGlow = 0.6 + Math.abs(Math.sin(time * 3)) * 0.4;
+
   // Titan colossus
-  ctx.fillStyle = '#450a0a';
+  const bodyGrad = ctx.createLinearGradient(-28, 0, 28, 0);
+  bodyGrad.addColorStop(0, shadeColor('#450a0a', -12));
+  bodyGrad.addColorStop(0.5, '#450a0a');
+  bodyGrad.addColorStop(1, shadeColor('#450a0a', 16));
+  ctx.fillStyle = bodyGrad;
   ctx.beginPath();
   ctx.roundRect(-28, -h * 0.82, 56, h * 0.52, [12, 12, 6, 6]);
   ctx.fill();
@@ -502,13 +653,28 @@ function renderKumbhakarna(ctx: CanvasRenderingContext2D, h: number, w: number, 
   ctx.fillRect(6, -h * 0.35, 18, h * 0.35);
 
   // Giant head
-  ctx.fillStyle = '#7f1d1d';
+  const headGrad = ctx.createRadialGradient(-5, -h * 0.91, 4, 0, -h * 0.88, 17);
+  headGrad.addColorStop(0, shadeColor('#7f1d1d', 18));
+  headGrad.addColorStop(1, shadeColor('#7f1d1d', -16));
+  ctx.fillStyle = headGrad;
   ctx.beginPath();
   ctx.arc(0, -h * 0.88, 17, 0, Math.PI * 2);
   ctx.fill();
 
+  // Glowing sleepy-rage eyes
+  ctx.save();
+  ctx.shadowColor = '#ef4444';
+  ctx.shadowBlur = 7 * eyeGlow;
+  ctx.fillStyle = '#ef4444';
+  ctx.fillRect(-6, -h * 0.9, 4, 3);
+  ctx.fillRect(3, -h * 0.9, 4, 3);
+  ctx.restore();
+
   // Colossal iron mace
-  ctx.fillStyle = '#171717';
+  const maceGrad = ctx.createLinearGradient(22, 0, 40, 0);
+  maceGrad.addColorStop(0, shadeColor('#171717', -6));
+  maceGrad.addColorStop(1, shadeColor('#171717', 20));
+  ctx.fillStyle = maceGrad;
   ctx.beginPath();
   ctx.roundRect(22, -h * 0.95, 18, h * 0.75, [6, 6, 3, 3]);
   ctx.fill();
@@ -519,8 +685,14 @@ function renderKumbhakarna(ctx: CanvasRenderingContext2D, h: number, w: number, 
 
 // 10. Mahabali Raone (Final Battle Boss)
 function renderRaoneBoss(ctx: CanvasRenderingContext2D, h: number, w: number, time: number) {
+  const eyeGlow = 0.6 + Math.abs(Math.sin(time * 4)) * 0.4;
+
   // Supreme Ten-Headed Emperor
-  ctx.fillStyle = '#991b1b';
+  const capeGrad = ctx.createLinearGradient(-30, 0, 30, 0);
+  capeGrad.addColorStop(0, shadeColor('#991b1b', -18));
+  capeGrad.addColorStop(0.5, '#991b1b');
+  capeGrad.addColorStop(1, shadeColor('#991b1b', 14));
+  ctx.fillStyle = capeGrad;
   ctx.beginPath();
   ctx.moveTo(-24, -h * 0.8);
   ctx.lineTo(24, -h * 0.8);
@@ -530,7 +702,10 @@ function renderRaoneBoss(ctx: CanvasRenderingContext2D, h: number, w: number, ti
   ctx.fill();
 
   // Golden Demon Chestplate
-  ctx.fillStyle = '#1c1917';
+  const chestGrad = ctx.createLinearGradient(-22, 0, 22, 0);
+  chestGrad.addColorStop(0, shadeColor('#1c1917', -6));
+  chestGrad.addColorStop(1, shadeColor('#1c1917', 20));
+  ctx.fillStyle = chestGrad;
   ctx.beginPath();
   ctx.roundRect(-22, -h * 0.76, 44, h * 0.44, [8, 8, 4, 4]);
   ctx.fill();
@@ -539,22 +714,48 @@ function renderRaoneBoss(ctx: CanvasRenderingContext2D, h: number, w: number, ti
   ctx.stroke();
 
   // Center Head
-  ctx.fillStyle = '#78350f';
+  const centerHeadGrad = ctx.createRadialGradient(-4, -h * 0.87, 3, 0, -h * 0.85, 14);
+  centerHeadGrad.addColorStop(0, shadeColor('#78350f', 18));
+  centerHeadGrad.addColorStop(1, shadeColor('#78350f', -16));
+  ctx.fillStyle = centerHeadGrad;
   ctx.beginPath();
   ctx.arc(0, -h * 0.85, 14, 0, Math.PI * 2);
   ctx.fill();
 
-  // Multiple surrounding heads (Ten-Headed Ravana silhouette)
+  // Glowing center eyes
+  ctx.save();
+  ctx.shadowColor = '#facc15';
+  ctx.shadowBlur = 8 * eyeGlow;
+  ctx.fillStyle = '#facc15';
+  ctx.fillRect(-6, -h * 0.87, 4, 3.5);
+  ctx.fillRect(3, -h * 0.87, 4, 3.5);
+  ctx.restore();
+
+  // Multiple surrounding heads (Ten-Headed Ravana silhouette) with glowing eyes
   const headOffsets = [-24, -16, -8, 8, 16, 24];
-  ctx.fillStyle = '#92400e';
   headOffsets.forEach((offset, idx) => {
+    const hy = -h * 0.83 - (idx % 2) * 3;
+    const hGrad = ctx.createRadialGradient(offset - 2, hy - 2, 1, offset, hy, 6);
+    hGrad.addColorStop(0, shadeColor('#92400e', 16));
+    hGrad.addColorStop(1, shadeColor('#92400e', -14));
+    ctx.fillStyle = hGrad;
     ctx.beginPath();
-    ctx.arc(offset, -h * 0.83 - (idx % 2) * 3, 6, 0, Math.PI * 2);
+    ctx.arc(offset, hy, 6, 0, Math.PI * 2);
     ctx.fill();
+
+    ctx.save();
+    ctx.shadowColor = '#facc15';
+    ctx.shadowBlur = 4 * eyeGlow;
+    ctx.fillStyle = '#facc15';
+    ctx.fillRect(offset - 1.5, hy - 1, 2.5, 2);
+    ctx.restore();
   });
 
   // Center Golden Fanged Crown (Mukut)
-  ctx.fillStyle = '#f59e0b';
+  const crownGrad = ctx.createLinearGradient(-10, 0, 10, 0);
+  crownGrad.addColorStop(0, shadeColor('#f59e0b', -12));
+  crownGrad.addColorStop(1, shadeColor('#f59e0b', 20));
+  ctx.fillStyle = crownGrad;
   ctx.beginPath();
   ctx.moveTo(-10, -h * 0.95);
   ctx.lineTo(0, -h * 1.12);
@@ -571,6 +772,9 @@ function renderRaoneBoss(ctx: CanvasRenderingContext2D, h: number, w: number, ti
   ctx.stroke();
 
   // Trident Prongs
+  ctx.save();
+  ctx.shadowColor = '#fbbf24';
+  ctx.shadowBlur = 6;
   ctx.fillStyle = '#f59e0b';
   ctx.beginPath();
   ctx.moveTo(14, -h * 1.0);
@@ -585,4 +789,5 @@ function renderRaoneBoss(ctx: CanvasRenderingContext2D, h: number, w: number, ti
   ctx.lineTo(18, -h * 1.0);
   ctx.closePath();
   ctx.fill();
+  ctx.restore();
 }

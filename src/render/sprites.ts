@@ -916,11 +916,26 @@ export function renderEnemy(
   }
 
   const animCycle = Math.sin(frame * 0.25);
+  const eyeGlow = 0.6 + Math.abs(Math.sin(frame * 0.15)) * 0.4;
+
+  // Ground contact shadow shared by all enemy types
+  if (state !== 'Enemy_Death') {
+    ctx.save();
+    ctx.globalAlpha = 0.35;
+    ctx.fillStyle = '#000000';
+    ctx.beginPath();
+    ctx.ellipse(0, 2, width * 0.32, 4, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
 
   switch (type) {
     case 'small_demon': {
       // Type 1: Small demon warrior (horned melee Rakshasa)
-      ctx.fillStyle = '#7f1d1d'; // Crimson dark skin
+      const sdGrad = ctx.createRadialGradient(-3, -height * 0.78, 2, 0, -height * 0.75, 11);
+      sdGrad.addColorStop(0, shadeColor('#7f1d1d', 20));
+      sdGrad.addColorStop(1, shadeColor('#7f1d1d', -15));
+      ctx.fillStyle = sdGrad;
       ctx.beginPath();
       ctx.arc(0, -height * 0.75, 10, 0, Math.PI * 2);
       ctx.fill();
@@ -935,18 +950,33 @@ export function renderEnemy(
       ctx.lineTo(12, -height * 0.94);
       ctx.stroke();
 
-      // Glowing yellow eye
+      // Glowing yellow eye with halo
+      ctx.save();
+      ctx.shadowColor = '#facc15';
+      ctx.shadowBlur = 5 * eyeGlow;
       ctx.fillStyle = '#facc15';
       ctx.fillRect(4, -height * 0.76, 3, 2.5);
+      ctx.restore();
+
+      // Fangs
+      ctx.fillStyle = '#f8fafc';
+      ctx.beginPath();
+      ctx.moveTo(2, -height * 0.7);
+      ctx.lineTo(3, -height * 0.67);
+      ctx.lineTo(4, -height * 0.7);
+      ctx.fill();
 
       // Torso & red loincloth
-      ctx.fillStyle = '#450a0a';
+      const sdTorsoGrad = ctx.createLinearGradient(-10, 0, 10, 0);
+      sdTorsoGrad.addColorStop(0, shadeColor('#450a0a', -10));
+      sdTorsoGrad.addColorStop(1, shadeColor('#450a0a', 15));
+      ctx.fillStyle = sdTorsoGrad;
       ctx.fillRect(-10, -height * 0.6, 20, 22);
       ctx.fillStyle = '#dc2626';
       ctx.fillRect(-11, -height * 0.32, 22, 10);
 
       // Legs
-      ctx.fillStyle = '#7f1d1d';
+      ctx.fillStyle = shadeColor('#7f1d1d', -8);
       ctx.fillRect(-8, -height * 0.2, 6, height * 0.2);
       ctx.fillRect(2, -height * 0.2, 6, height * 0.2);
 
@@ -968,7 +998,10 @@ export function renderEnemy(
 
     case 'archer_demon': {
       // Type 2: Archer demon (ranged Rakshasa)
-      ctx.fillStyle = '#312e81'; // Midnight indigo skin
+      const adGrad = ctx.createRadialGradient(-3, -height * 0.78, 2, 0, -height * 0.75, 10);
+      adGrad.addColorStop(0, shadeColor('#312e81', 18));
+      adGrad.addColorStop(1, shadeColor('#312e81', -15));
+      ctx.fillStyle = adGrad; // Midnight indigo skin
       ctx.beginPath();
       ctx.arc(0, -height * 0.75, 10, 0, Math.PI * 2);
       ctx.fill();
@@ -976,6 +1009,9 @@ export function renderEnemy(
       // Quiver on back
       ctx.fillStyle = '#431407';
       ctx.fillRect(-12, -height * 0.65, 6, 20);
+      ctx.strokeStyle = '#7c2d12';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(-12, -height * 0.65, 6, 20);
 
       // Horned crest
       ctx.strokeStyle = '#f59e0b';
@@ -985,13 +1021,23 @@ export function renderEnemy(
       ctx.lineTo(4, -height * 0.96);
       ctx.stroke();
 
-      // Eye
+      // Glowing eye with halo
+      ctx.save();
+      ctx.shadowColor = '#38bdf8';
+      ctx.shadowBlur = 5 * eyeGlow;
       ctx.fillStyle = '#38bdf8';
       ctx.fillRect(4, -height * 0.76, 3, 2.5);
+      ctx.restore();
 
-      // Tunic
-      ctx.fillStyle = '#1e1b4b';
+      // Tunic with gradient
+      const adTunicGrad = ctx.createLinearGradient(-9, 0, 9, 0);
+      adTunicGrad.addColorStop(0, shadeColor('#1e1b4b', -10));
+      adTunicGrad.addColorStop(1, shadeColor('#1e1b4b', 14));
+      ctx.fillStyle = adTunicGrad;
       ctx.fillRect(-9, -height * 0.6, 18, 24);
+      ctx.strokeStyle = '#4338ca';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(-9, -height * 0.6, 18, 24);
 
       // Dark Bow
       ctx.save();
@@ -1013,7 +1059,10 @@ export function renderEnemy(
 
     case 'heavy_demon': {
       // Type 3: Heavy demon warrior (Kumbha Brute)
-      ctx.fillStyle = '#1f2937'; // Ash-stone demon hide
+      const hdGrad = ctx.createRadialGradient(-4, -height * 0.83, 3, 0, -height * 0.8, 14);
+      hdGrad.addColorStop(0, shadeColor('#1f2937', 18));
+      hdGrad.addColorStop(1, shadeColor('#1f2937', -18));
+      ctx.fillStyle = hdGrad; // Ash-stone demon hide
       ctx.beginPath();
       ctx.arc(0, -height * 0.8, 14, 0, Math.PI * 2);
       ctx.fill();
@@ -1028,15 +1077,31 @@ export function renderEnemy(
       ctx.lineTo(22, -height * 1.02);
       ctx.stroke();
 
-      // Burning orange eye
+      // Burning orange eye with glow
+      ctx.save();
+      ctx.shadowColor = '#f97316';
+      ctx.shadowBlur = 6 * eyeGlow;
       ctx.fillStyle = '#f97316';
       ctx.fillRect(4, -height * 0.82, 4, 3);
+      ctx.restore();
 
-      // Heavy Body & Spiked Shoulder Armor
-      ctx.fillStyle = '#111827';
+      // Heavy Body with gradient & Spiked Shoulder Armor
+      const hdBodyGrad = ctx.createLinearGradient(-22, 0, 22, 0);
+      hdBodyGrad.addColorStop(0, shadeColor('#111827', -8));
+      hdBodyGrad.addColorStop(0.5, '#111827');
+      hdBodyGrad.addColorStop(1, shadeColor('#111827', 18));
+      ctx.fillStyle = hdBodyGrad;
       ctx.beginPath();
       ctx.roundRect(-22, -height * 0.68, 44, 44, [8, 8, 4, 4]);
       ctx.fill();
+
+      // Armor plate rivets
+      ctx.fillStyle = '#6b7280';
+      for (const rx of [-14, 0, 14]) {
+        ctx.beginPath();
+        ctx.arc(rx, -height * 0.5, 1.6, 0, Math.PI * 2);
+        ctx.fill();
+      }
 
       // Iron spiked mace
       ctx.save();
@@ -1057,26 +1122,38 @@ export function renderEnemy(
       // Type 4: Flying demon (winged aerial Rakshasa)
       const wingFlap = Math.sin(frame * 0.6) * 14;
 
-      // Bat-like wings
-      ctx.fillStyle = '#4c0519';
-      // Left wing
+      // Bat-like wings with membrane gradient
+      const wingGradL = ctx.createLinearGradient(-8, 0, -36, 0);
+      wingGradL.addColorStop(0, '#4c0519');
+      wingGradL.addColorStop(1, shadeColor('#4c0519', -20));
+      ctx.fillStyle = wingGradL;
       ctx.beginPath();
       ctx.moveTo(-8, -height * 0.6);
       ctx.lineTo(-36, -height * 0.75 + wingFlap);
       ctx.lineTo(-24, -height * 0.35 + wingFlap * 0.5);
       ctx.closePath();
       ctx.fill();
+      ctx.strokeStyle = shadeColor('#4c0519', -35);
+      ctx.lineWidth = 0.75;
+      ctx.stroke();
 
-      // Right wing
+      const wingGradR = ctx.createLinearGradient(8, 0, 36, 0);
+      wingGradR.addColorStop(0, '#4c0519');
+      wingGradR.addColorStop(1, shadeColor('#4c0519', -20));
+      ctx.fillStyle = wingGradR;
       ctx.beginPath();
       ctx.moveTo(8, -height * 0.6);
       ctx.lineTo(36, -height * 0.75 - wingFlap);
       ctx.lineTo(24, -height * 0.35 - wingFlap * 0.5);
       ctx.closePath();
       ctx.fill();
+      ctx.stroke();
 
-      // Body
-      ctx.fillStyle = '#831843';
+      // Body with shading
+      const fdBodyGrad = ctx.createRadialGradient(-2, -height * 0.53, 2, 0, -height * 0.5, 16);
+      fdBodyGrad.addColorStop(0, shadeColor('#831843', 12));
+      fdBodyGrad.addColorStop(1, shadeColor('#831843', -15));
+      ctx.fillStyle = fdBodyGrad;
       ctx.beginPath();
       ctx.ellipse(0, -height * 0.5, 12, 16, 0, 0, Math.PI * 2);
       ctx.fill();
@@ -1086,6 +1163,15 @@ export function renderEnemy(
       ctx.beginPath();
       ctx.arc(0, -height * 0.8, 9, 0, Math.PI * 2);
       ctx.fill();
+
+      // Glowing predator eyes
+      ctx.save();
+      ctx.shadowColor = '#facc15';
+      ctx.shadowBlur = 5 * eyeGlow;
+      ctx.fillStyle = '#facc15';
+      ctx.fillRect(-4, -height * 0.81, 2.5, 2);
+      ctx.fillRect(2, -height * 0.81, 2.5, 2);
+      ctx.restore();
 
       // Sharp talons
       ctx.strokeStyle = '#fbbf24';
@@ -1101,32 +1187,67 @@ export function renderEnemy(
 
     case 'elite_demon': {
       // Type 5: Elite demon warrior (Golden Armor Rakshasa Commander)
+      // Flowing commander's cape
+      ctx.fillStyle = shadeColor('#3b0764', -10);
+      ctx.beginPath();
+      ctx.moveTo(-13, -height * 0.72);
+      ctx.lineTo(13, -height * 0.72);
+      ctx.lineTo(16 + animCycle * 4, -height * 0.15);
+      ctx.lineTo(-16 + animCycle * 4, -height * 0.15);
+      ctx.closePath();
+      ctx.fill();
+
       // Golden Crown / Helm
-      ctx.fillStyle = '#d97706';
+      const crownGrad = ctx.createLinearGradient(-12, 0, 12, 0);
+      crownGrad.addColorStop(0, shadeColor('#d97706', -14));
+      crownGrad.addColorStop(1, shadeColor('#d97706', 16));
+      ctx.fillStyle = crownGrad;
       ctx.beginPath();
       ctx.moveTo(-12, -height * 0.88);
       ctx.lineTo(12, -height * 0.88);
       ctx.lineTo(0, -height * 1.05);
       ctx.closePath();
       ctx.fill();
+      ctx.strokeStyle = '#fef08a';
+      ctx.lineWidth = 1;
+      ctx.stroke();
 
-      // Dark face
-      ctx.fillStyle = '#3b0764'; // Imperial demon purple
+      // Dark face with shading
+      const edFaceGrad = ctx.createRadialGradient(-3, -height * 0.84, 2, 0, -height * 0.82, 11);
+      edFaceGrad.addColorStop(0, shadeColor('#3b0764', 15));
+      edFaceGrad.addColorStop(1, shadeColor('#3b0764', -15));
+      ctx.fillStyle = edFaceGrad; // Imperial demon purple
       ctx.beginPath();
       ctx.arc(0, -height * 0.82, 11, 0, Math.PI * 2);
       ctx.fill();
 
-      // Fierce golden eyes
+      // Fierce golden eyes with glow
+      ctx.save();
+      ctx.shadowColor = '#facc15';
+      ctx.shadowBlur = 6 * eyeGlow;
       ctx.fillStyle = '#facc15';
       ctx.fillRect(4, -height * 0.83, 4, 3);
+      ctx.restore();
 
-      // Golden Carved Armor
-      ctx.fillStyle = '#b45309';
+      // Golden Carved Armor with gradient
+      const edArmorGrad = ctx.createLinearGradient(-15, 0, 15, 0);
+      edArmorGrad.addColorStop(0, shadeColor('#b45309', -12));
+      edArmorGrad.addColorStop(0.5, '#b45309');
+      edArmorGrad.addColorStop(1, shadeColor('#b45309', 16));
+      ctx.fillStyle = edArmorGrad;
       ctx.beginPath();
       ctx.roundRect(-15, -height * 0.7, 30, 32, [4, 4, 2, 2]);
       ctx.fill();
       ctx.strokeStyle = '#f59e0b';
       ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Carved armor emblem
+      ctx.strokeStyle = '#fef08a';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(0, -height * 0.66);
+      ctx.lineTo(0, -height * 0.44);
       ctx.stroke();
 
       // Dual Katar Blades
