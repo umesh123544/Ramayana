@@ -266,7 +266,7 @@ export class CharacterController {
     }
 
     // Map horizontal & floor boundary clamping (prevent falling or walking outside the world)
-    h.x = Math.max(30, Math.min(4180, h.x));
+    h.x = Math.max(30, Math.min(5870, h.x));
     if (h.y > 672 && h.y < 850) {
       const neededLanding = !wasGrounded && !h.isGrounded;
       h.y = 672;

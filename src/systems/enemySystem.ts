@@ -301,7 +301,7 @@ export class EnemySystem {
 
       // Strict Map Boundary Enforcement (prevent enemies from leaving the map world)
       const MIN_MAP_X = 80;
-      const MAX_MAP_X = 4100 - enemy.width;
+      const MAX_MAP_X = 5870 - enemy.width;
 
       if (enemy.x < MIN_MAP_X) {
         enemy.x = MIN_MAP_X;
